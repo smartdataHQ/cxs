@@ -1,0 +1,3 @@
+resources:
+  - gpt-chat-deployment.yaml
+  - gpt-chat-service.yaml

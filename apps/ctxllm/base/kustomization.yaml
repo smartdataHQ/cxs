@@ -1,0 +1,3 @@
+resources:
+  - ctxllm-deployment.yaml
+  - ctxllm-service.yaml

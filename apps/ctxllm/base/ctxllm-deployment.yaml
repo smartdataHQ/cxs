@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ctxllm
+spec:
+  selector:
+    matchLabels:
+      app: ctxllm
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: ctxllm
+        tier: api
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/ctxllm:8a5f5cf
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          ports:
+            - containerPort: 8088
+          livenessProbe:
+            httpGet:
+              port: 8088
+              path: /api/status/alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 8088
+              path: /api/status/ready
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+          env:
+          - name: AZURE_OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: AZURE_OPENAI_API_KEY_gpt_3_5_turbo
+          - name: AZURE_OPENAI_API_KEY_gpt_4
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: AZURE_OPENAI_API_KEY_gpt_4
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: OPENAI_API_KEY
+          - name: BOKUN_PROD_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: BOKUN_PROD_API_KEY
+          - name: GOOGLE_MAPS_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: GOOGLE_MAPS_API_KEY
+          envFrom:
+            - configMapRef:
+                name: ctxllm-config
+      imagePullSecrets:
+        - name: dockerlock
+
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ctxllm
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ctxllm
+  maxReplicas: 4
+  minReplicas: 2
+  targetCPUUtilizationPercentage: 60

@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ctxllm
+spec:
+  rules:
+    - host: llm.contextsuite.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: ctxllm
+                port:
+                  number: 8088
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - llm.contextsuite.com
+      secretName: star-contextsuite-com
