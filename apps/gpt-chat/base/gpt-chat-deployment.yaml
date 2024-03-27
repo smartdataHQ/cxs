@@ -37,7 +37,7 @@ spec:
             timeoutSeconds: 2
           envFrom:
             - configMapRef:
-                name: gpt-chat-web-config
+                name: gpt-chat-config
       imagePullSecrets:
         - name: dockerlock
 ---
