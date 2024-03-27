@@ -60,7 +60,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: llm
-                  key: FRESHDESK_API_KEY
+                  key: CHAT_FRESHDESK_API_KEY
             - name: CHAT_FRESHDESK_API_KEY
               valueFrom:
                 secretKeyRef:
