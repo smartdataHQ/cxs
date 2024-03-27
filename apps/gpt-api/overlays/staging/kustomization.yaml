@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+
+resources:
+  - gpt-api-config.yaml
+  - gpt-api-ingress.yml

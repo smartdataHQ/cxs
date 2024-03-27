@@ -1,0 +1,3 @@
+resources:
+  - gpt-api-deployment.yaml
+  - gpt-api-service.yaml
