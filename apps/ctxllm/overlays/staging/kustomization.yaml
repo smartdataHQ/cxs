@@ -3,3 +3,4 @@ bases:
 
 resources:
   - ctxllm-config.yaml
+  - ctxllm-ingress.yaml
