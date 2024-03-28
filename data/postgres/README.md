@@ -13,3 +13,5 @@ add external IP to pgbouncer services
 cxs-pg-pguser-cxs-pg
 
 PGBOUNCER_URI=$(kubectl get secret cxs-pg-pguser-cxs-pg --namespace data -o jsonpath='{.data.pgbouncer-uri}' | base64 --decode)
+
+kubectl run -i --rm --tty pg-client --image=perconalab/percona-distribution-postgresql:16 --restart=Never -- psql $PGBOUNCER_URI
