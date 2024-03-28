@@ -21,6 +21,8 @@ spec:
 
   #  openshift: true
 
+  users:
+    - name: postgres
   #  users:
   #    - name: rhino
   #      databases:
