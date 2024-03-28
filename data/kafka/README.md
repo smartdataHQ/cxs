@@ -22,13 +22,14 @@ Prod:
 - `heapOpts: -Xmx16048m -Xms2024m` # Increase the max heap size to 8GB
 - `deleteTopicEnable: true` # Allow topics to be deleted
 - `servers: [zookeeper.data.svc.cluster.local]` # Use the default zookeeper
+- `kraft.enabled: false` # Use the default zookeeper
 
 ## Setup
 1. open a kubectl shell
 2. copy the right (dev,staging,prod) file to zookeeper.values.yaml (uses authentication)
     - The 'kafka.yaml' file can be created manually or using the following github way
     - Remember to replace the 'YOUR-ACCESS-TOKEN-HERE' text with your access token
-    - `wget https://raw.githubusercontent.com/smartdataHQ/ops/main/config/ingress/kafka/kafka.prod.yaml?token=YOUR-ACCESS-TOKEN-HERE -O kafka.values.yaml`
+    - `wget https://raw.githubusercontent.com/smartdataHQ/cxs/main/data/kafka/kafka.prod.yaml -O kafka.yaml`
     - *may require editing create+copy+save it in place, to create the file*
 
 ## Manual Installation Steps
