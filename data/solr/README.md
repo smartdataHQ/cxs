@@ -1,5 +1,6 @@
 https://artifacthub.io/packages/helm/apache-solr/solr?modal=install
 https://apache.github.io/solr-operator/docs/running-the-operator
+https://apache.github.io/solr-operator/docs/solr-cloud/solr-cloud-crd.html#override-built-in-solr-configuration-files
 
 helm repo add apache-solr https://solr.apache.org/charts
 helm repo update
