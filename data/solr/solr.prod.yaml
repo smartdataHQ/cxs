@@ -6,3 +6,19 @@ spec:
   replicas: 3
   solrImage:
     tag: 9.5.0
+  zookeeperRef:
+    externalConnectionString: zookeeper.data.svc.cluster.local
+  scaling:
+    vacatePodsOnScaleDown: true
+    populatePodsOnScaleUp: true
+  podOptions:
+    livenessProbe:
+      httpGet:
+        scheme: HTTP
+        path: /solr/admin/customliveness
+        port: 8983
+    readinessProbe:
+      httpGet:
+        scheme: HTTP
+        path: /solr/admin/customreadiness
+        port: 8983
