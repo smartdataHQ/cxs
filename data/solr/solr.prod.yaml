@@ -12,8 +12,15 @@ spec:
   scaling:
     vacatePodsOnScaleDown: true
     populatePodsOnScaleUp: true
+  solrJavaMem: -Xms2048M -Xmx8192M
   customSolrKubeOptions:
     podOptions:
+      resources:
+        requests:
+          cpu: 700m
+          memory: 4Gi
+        limits:
+          memory: 16Gi
       livenessProbe:
         httpGet:
           scheme: HTTP
