@@ -15,12 +15,12 @@ spec:
   solrJavaMem: -Xms2048M -Xmx8192M
   dataStorage:
     persistent:
+      reclaimPolicy: Retain
       pvcTemplate:
         spec:
           resources:
             requests:
               storage: 20Gi
-      reclaimPolicy: Delete
   updateStrategy:
     method: StatefulSet
   customSolrKubeOptions:

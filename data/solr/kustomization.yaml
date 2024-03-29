@@ -1,2 +1,2 @@
-resources:
-  - solr.prod.yaml
+# resources:
+#  - solr.prod.yaml
