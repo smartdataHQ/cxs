@@ -23,6 +23,12 @@ spec:
 
   users:
     - name: postgres
+    - name: cxs-pg
+      options: "SUPERUSER"
+      databases:
+        - ssp
+        - convoy
+        - n8n
   #  users:
   #    - name: rhino
   #      databases:
@@ -133,9 +139,9 @@ spec:
 
   proxy:
     pgBouncer:
-      exposeSuperusers: true
       replicas: 3
       image: percona/percona-postgresql-operator:2.3.1-ppg16-pgbouncer
+      exposeSuperusers: true
       #      exposeSuperusers: true
       #      resources:
       #        limits:
