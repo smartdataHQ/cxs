@@ -137,7 +137,7 @@ spec:
     pgBouncer:
       replicas: 3
       image: percona/percona-postgresql-operator:2.3.1-ppg16-pgbouncer
-      #      exposeSuperusers: true
+      exposeSuperusers: true
       #      resources:
       #        limits:
       #          cpu: 200m
