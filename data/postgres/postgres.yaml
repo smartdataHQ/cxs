@@ -70,10 +70,6 @@ spec:
   imagePullPolicy: Always
   postgresVersion: 16
   #  port: 5432
-  expose:
-    proxy:
-      pgBouncer:
-        exposeSuperusers: true
   #  expose:
   #    annotations:
   #      my-annotation: value1
