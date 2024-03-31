@@ -46,6 +46,9 @@ spec:
         - name: clickhouse-data
           hostPath:
             path: /data/local/clickhouse
+        - name: clickhouse-elastic
+          hostPath:
+            path: /data/elastic/clickhouse
       containers:
       - name: clickhouse
         image: clickhouse/clickhouse-server:24.2-alpine
