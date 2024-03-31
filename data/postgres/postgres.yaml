@@ -27,8 +27,15 @@ spec:
       options: "SUPERUSER"
       databases:
         - ssp
-        - convoy
+    - name: aiflow-db
+      databases:
+        - airflow
+    - name: n8n-db
+      databases:
         - n8n
+    - name: convoy-db
+      databases:
+        - convoy
   #  users:
   #    - name: rhino
   #      databases:
