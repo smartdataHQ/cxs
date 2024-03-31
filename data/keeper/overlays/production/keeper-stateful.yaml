@@ -27,9 +27,7 @@ spec:
             nodeSelectorTerms:
               - matchExpressions:
                   - key: "localdata"
-                    operator: In
-                    values:
-                      - "true"
+                    operator: Exists
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
