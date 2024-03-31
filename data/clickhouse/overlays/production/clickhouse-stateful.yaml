@@ -71,6 +71,9 @@ spec:
           - mountPath: /etc/clickhouse-server/config.d/storage_config.xml
             subPath: storage_config.xml
             name: config-volume
+          - mountPath: /etc/clickhouse-server/users.xml
+            subPath: users.xml
+            name: config-volume
           - mountPath: /etc/clickhouse-server/config.xml
             subPath: config.xml
             name: config-volume
