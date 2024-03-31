@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse
+  labels:
+    app: clickhouse
+
+spec:
+  serviceName: clickhouse
+  selector:
+    matchLabels:
+      app: clickhouse
+      tier: data
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+        tier: data
+    spec:
+      affinity:
+        nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: "localdata"
+                    operator: In
+                    values:
+                      - "true"
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - clickhouse
+              topologyKey: "kubernetes.io/hostname"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: clickhouse-config
+        - name: clickhouse-data
+          hostPath:
+            path: /data/local/clickhouse
+      containers:
+      - name: clickhouse
+        image: clickhouse/clickhouse-server:24.2-alpine
+        ports:
+        - containerPort: 9000
+        - containerPort: 8123
+        restartPolicy: Never
+        env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse
+                  key: access_key_id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse
+                  key: secret_access_key
+        volumeMounts:
+          - mountPath: /etc/clickhouse-server/config.d/storage_config.xml
+            subPath: storage_config.xml
+            name: config-volume
+          - mountPath: /etc/clickhouse-server/config.xml
+            subPath: config.xml
+            name: config-volume
+          - name: clickhouse-data
+            mountPath: /var/lib/clickhouse
+      dnsPolicy: ClusterFirstWithHostNet
+      dnsConfig:
+        searches:
+          - clickhouse.data.svc.cluster.local
+      imagePullSecrets:
+        - name: dockerlock
