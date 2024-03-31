@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keeper
+  labels:
+    app: keeper
+    tier: data
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9234
+      name: raft
+    - port: 9181
+      name: zookeeper
+  selector:
+    app: keeper
+    tier: data

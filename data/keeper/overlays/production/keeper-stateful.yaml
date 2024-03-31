@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keeper
+  labels:
+    app: keeper
+
+spec:
+  serviceName: keeper
+  selector:
+    matchLabels:
+      app: keeper
+      tier: data
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: keeper
+        tier: data
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "data"
+                    operator: In
+                    values:
+                      - "cxs"
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - keeper
+              topologyKey: "kubernetes.io/hostname"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: keeper-config
+        - name: keeper-data
+          hostPath:
+            path: /data/local/keeper
+        - name: keeper-logs
+          hostPath:
+            path: /data/logs/keeper
+      containers:
+      - name: keeper
+        image: clickhouse/clickhouse-keeper:23.12.2.59-alpine
+        ports:
+        - containerPort: 9181
+          hostPort: 9181
+        - containerPort: 9234
+          hostPort: 9234
+        restartPolicy: Never
+        command: [ "/bin/bash", "-c"]
+        args: [ "IFS=- read -r var1 var2 <<< $HOSTNAME ; echo 'Custom Entrypoint' ; echo $var2 ; declare -x PODNR=$var2 ; /entrypoint.sh" ]
+        volumeMounts:
+          - mountPath: /etc/clickhouse-keeper/keeper_config.xml
+            name: config-volume
+            subPath: keeper_config.xml
+          - name: keeper-data
+            mountPath: /var/lib/clickhouse-keeper
+          - name: keeper-logs
+            mountPath: /var/log

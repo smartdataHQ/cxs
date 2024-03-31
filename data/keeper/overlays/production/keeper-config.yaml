@@ -1,0 +1,53 @@
+# Setup ClickHouse Keeper settings
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keeper-config
+data:
+  keeper_config.xml: |
+    <clickhouse>
+      <logger>
+          <level>warning</level>
+          <console>1</console>
+      </logger>        
+      <listen_host>::</listen_host>
+      <path>/var/lib/clickhouse-keeper/</path>
+      <core_path>/var/lib/clickhouse-keeper/cores</core_path>        
+      <keeper_server>
+        <tcp_port>9181</tcp_port>
+        <server_id from_env="PODNR"></server_id>
+        <snapshot_storage_path>/var/lib/clickhouse-keeper/coordination/snapshots</snapshot_storage_path>    
+        <coordination_settings>
+          <operation_timeout_ms>10000</operation_timeout_ms>
+          <session_timeout_ms>30000</session_timeout_ms>
+          <raft_logs_level>warning</raft_logs_level>
+          <rotate_log_storage_interval>10000</rotate_log_storage_interval>
+        </coordination_settings>        
+        <raft_configuration>
+          <server>
+            <id>0</id>
+            <hostname>keeper-0.keeper.data.svc.cluster.local</hostname>
+            <port>9234</port>
+            <can_become_leader>true</can_become_leader>
+            <start_as_follower>true</start_as_follower>
+            <priority>1</priority>
+          </server>
+          <server>
+            <id>1</id>
+            <hostname>keeper-1.keeper.data.svc.cluster.local</hostname>
+            <port>9234</port>
+            <can_become_leader>true</can_become_leader>
+            <start_as_follower>true</start_as_follower>
+            <priority>2</priority>
+          </server>
+          <server>
+            <id>2</id>
+            <hostname>keeper-2.keeper.data.svc.cluster.local</hostname>
+            <port>9234</port>
+            <can_become_leader>true</can_become_leader>
+            <start_as_follower>false</start_as_follower>
+            <priority>3</priority>
+          </server>
+        </raft_configuration>
+      </keeper_server>
+    </clickhouse>    
