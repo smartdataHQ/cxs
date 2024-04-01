@@ -58,6 +58,11 @@ spec:
               secretKeyRef:
                 name: ingress-secrets
                 key: NEO4J_PASSWORD
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ingress-secrets
+                key: REDIS_PASSWORD
           - name: S3_ACCESS_KEY
             valueFrom:
               secretKeyRef:
