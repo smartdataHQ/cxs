@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress
+  labels:
+    app: ingress
+    tier: api
+spec:
+  type: LoadBalancer
+  sessionAffinity: ClientIP
+  ports:
+    - port: 8080
+      name: http
+    - port: 2222
+      name: sftp
+  selector:
+    app: ingress
+    tier: api

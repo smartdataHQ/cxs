@@ -1,0 +1,11 @@
+defaultNamespace: ingress
+namespace: ingress
+
+targetCustomizations:
+
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: overlays/production
