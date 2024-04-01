@@ -76,11 +76,14 @@ spec:
             name: sftp
           - mountPath: /tmp/hostkey.ser
             subPath: hostkey.ser
-            name: ingress-config
+            name: config-volume
 
       imagePullSecrets:
         - name: dockerlock
       volumes:
+        - name: config-volume
+          configMap:
+            name: ingress-config
         - hostPath:
             path: /data/s3/ingress
           name: sftp
