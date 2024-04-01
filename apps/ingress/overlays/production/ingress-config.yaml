@@ -4,18 +4,7 @@ metadata:
   name: ingress-config
 data:
   hostkey.ser: |-    
-    -----BEGIN OPENSSH PRIVATE KEY-----
-    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAArAAAABNlY2RzYS
-    1zaGEyLW5pc3RwNTIxAAAACG5pc3RwNTIxAAAAhQQAWWuz6yOoCeG94KrAAO6uGIYHgmV+
-    0hSGsTWZDZ8PonfV13y2IrMskt0apwVpkZVC9t8HKk82258Phv4Z59Uv9XUAwOc34ITqOH
-    blB9uq8GpaxcywRNTsH1KL9/BJMoaRjwmXskfLj2FaiYfoFKQkzgE9udpZ8OQucacVH1Jv
-    Lz0gQlsAAAEIabPKZmmzymYAAAATZWNkc2Etc2hhMi1uaXN0cDUyMQAAAAhuaXN0cDUyMQ
-    AAAIUEAFlrs+sjqAnhveCqwADurhiGB4JlftIUhrE1mQ2fD6J31dd8tiKzLJLdGqcFaZGV
-    QvbfBypPNtufD4b+GefVL/V1AMDnN+CE6jh25QfbqvBqWsXMsETU7B9Si/fwSTKGkY8Jl7
-    JHy49hWomH6BSkJM4BPbnaWfDkLnGnFR9Sby89IEJbAAAAQgDFKauQVBln7ABQRD0jM0cd
-    xWKcohHCvDLh5dn8Gb0Lj2PPOzIrcUm/3P4hcJU388oKjuXXo0DxnK95CGX90hztPwAAAA
-    hob3N0IGtleQEC
-    -----END OPENSSH PRIVATE KEY-----
+    ${PKEY_SFTP}
 
   ## Kafka
   KAFKA_URI: 'kafka.data.svc:9092'
