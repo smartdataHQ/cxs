@@ -33,7 +33,7 @@ data:
   POSTGRES_URI: 'jdbc:postgresql://cxs-pg-pgbouncer.data.svc:5432/ssp'
   POSTGRES_PORT: '5432'
   POSTGRES_DB: 'ssp'
-  POSTGRES_USER: 'postgres'
+  POSTGRES_USER: 'cxs'
 
   # Neo4j
   NEO4J_URI: 'neo4j://neo4j.data.svc:7687'
