@@ -58,6 +58,24 @@ We can have Github Actions updated these tags automatically when code is pushed 
 
 [Our DocerHub Repo](https://hub.docker.com/repository/docker/quicklookup/)
 
+# S3 mount S3 point for customer documents
+
+ - sudo apt install s3fs
+ - echo ACCESS_KEY_ID:SECRET_ACCESS_KEY > ${HOME}/.passwd-s3fs
+ - chmod 600 ${HOME}/.passwd-s3fs
+ - s3fs mybucket /path/to/mountpoint -o passwd_file=${HOME}/.passwd-s3fs -o url=https://url.to.s3/ -o use_path_request_style
+ - mybucket /path/to/mountpoint fuse.s3fs _netdev,allow_other,use_path_request_style,url=https://url.to.s3/ 0 0
+
+# VPN Access to the Cluster
+
+ - See [kubevpn](https://github.com/kubenetworks/kubevpn)
+ - [Install client](https://github.com/kubenetworks/kubevpn/releases)
+ - make the script executable: `chmod +x Download/kubevpn.sh`
+ - Login and download KubeConfig from the [CxS Rancher](https://ops.quicklookup.com/)
+ - connect: `kubevpn/bin/kubevpn connect -n data --kubeconfig Downloads/cxs-eu1.yaml`
+ - disconnect: `kubevpn/bin/kubevpn disconnect`
+
+
 # Applications included in repo
 
 ## Context Suite
