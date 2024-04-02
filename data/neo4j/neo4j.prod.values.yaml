@@ -15,10 +15,10 @@ neo4j:
   name: "neo4j"
   # If password is not set or empty a random password will be generated during installation.
   # Ignored if `neo4j.passwordFromSecret` is provided
-  password: "qldevpass"
+  # password: ""
 
   # Existing secret to use for initial database password
-  passwordFromSecret: ""
+  passwordFromSecret: "neo4j_password"
 
   # Neo4j Edition to use (community|enterprise)
   edition: "enterprise"
@@ -43,9 +43,6 @@ neo4j:
   #
   # set resources for the Neo4j Container. The values set will be used for both "requests" and "limit".
   resources:
-    limits:
-      cpu: 5000m
-      memory: 8Gi
     requests:
       cpu: 1000m
       memory: 2Gi
@@ -212,27 +209,31 @@ services:
       http:
         enabled: true # Set this to false to remove HTTP from this service (this does not affect whether http is enabled for the neo4j process)
         # uncomment to publish http on port 80 (neo4j default is 7474)
-        # port: 80
-        # targetPort: 7474
-        # name: http
+        #port: 80
+        #targetPort: 7474
+        #name: http
+        #nodePort: <your-nodeport>, enabled only when type set to NodePort
       https:
         enabled: true # Set this to false to remove HTTPS from this service (this does not affect whether https is enabled for the neo4j process)
         # uncomment to publish http on port 443 (neo4j default is 7473)
-        # port: 443
-        # targetPort: 7473
-        # name: https
+        #port: 443
+        #targetPort: 7473
+        #name: https
+        #nodePort: <your-nodeport>, enabled only when type set to NodePort
       bolt:
         enabled: true # Set this to false to remove BOLT from this service (this does not affect whether https is enabled for the neo4j process)
         # Uncomment to explicitly specify the port to publish Neo4j Bolt (7687 is the default)
-        # port: 7687
-        # targetPort: 7687
-        # name: tcp-bolt
+        #port: 7687
+        #targetPort: 7687
+        #name: tcp-bolt
+        #nodePort: <your-nodeport>, enabled only when type set to NodePort
       backup:
         enabled: false # Set this to true to expose backup port externally (n.b. this could have security implications. Backup is not authenticated by default)
         # Uncomment to explicitly specify the port to publish Neo4j Backup (6362 is the default)
-        # port: 6362
-        # targetPort: 6362
-        # name: tcp-backup
+        #port: 6362
+        #targetPort: 6362
+        #name: tcp-backup
+        #nodePort: <your-nodeport>, enabled only when type set to NodePort
 
     selector:
       "helm.neo4j.com/neo4j.loadbalancer": "include"
@@ -388,7 +389,6 @@ image:
   imagePullPolicy: IfNotPresent
   # set a customImage if you want to use your own docker image
   #  customImage: eu.gcr.io/neo4j-helm/neo4j:v5
-  # customImage: neo4j:5.9.0
 
   #imagePullSecrets list
   #  imagePullSecrets:
@@ -417,7 +417,7 @@ statefulset:
 # additional environment variables for the Neo4j Container
 env: {}
 
-  # Other K8s configuration to apply to the Neo4j pod
+# Other K8s configuration to apply to the Neo4j pod
 podSpec:
 
   #Annotations for Neo4j pod
@@ -448,6 +448,12 @@ podSpec:
   # If set to false then no anti-affinity rules are applied
   # If set to an object then that object is used for the Neo4j podAntiAffinity
   podAntiAffinity: true
+  #    requiredDuringSchedulingIgnoredDuringExecution:
+  #      - labelSelector:
+  #          matchLabels:
+  #            app: "demo"
+  #            helm.neo4j.com/pod_category: "neo4j-instance"
+  #        topologyKey: kubernetes.io/hostname
 
   #Add tolerations to the Neo4j pod
   tolerations: []
@@ -460,6 +466,18 @@ podSpec:
   #      value: "value2"
   #      effect: "NoSchedule"
 
+  # topologySpreadConstraints fields for Neo4j Pod
+  # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: []
+  #    - maxSkew: 1
+  #      topologyKey: kubernetes.io/hostname
+  #      whenUnsatisfiable: DoNotSchedule
+  #      labelSelector:
+  #        matchLabels:
+  #          app: foo
+  #      matchLabelKeys:
+  #        - pod-template-hash
+
   #Priority indicates the importance of a Pod relative to other Pods.
   # More Information : https://kubernetes.io/docs/concepts/scheduling-eviction/pod-priority-preemption/
   priorityClassName: ""
@@ -467,8 +485,13 @@ podSpec:
   #This indicates that the neo4j instance be included to the loadbalancer. Can be set to exclude to not add the stateful set to loadbalancer
   loadbalancer: "include"
 
+  # set pod's dns policy. ClusterFirst by default
+  # https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+  dnsPolicy: "ClusterFirst"
+
   # Name of service account to use for the Neo4j Pod (optional)
   # this is useful if you want to use Workload Identity to grant permissions to access cloud resources e.g. cloud object storage (AWS S3 etc.)
+  # For clusters, please ensure that it has the appropriate roles and role-bindings to be able to query kubernetes services
   serviceAccountName: ""
 
   # How long the Neo4j pod is permitted to keep running after it has been signalled by Kubernetes to stop. Once this timeout elapses the Neo4j process is forcibly terminated.
@@ -588,3 +611,48 @@ logging:
 #    </Loggers>
 #    </Configuration>
 
+# define your podDisruptionBudget details here
+podDisruptionBudget:
+  enabled: false
+  matchLabels: {}
+  #    "demo": "neo4j"
+  matchExpressions: []
+  #    - key: "demo"
+  #      operator: "Equals"
+  #      value: "neo4j"
+  labels: {}
+  #    "name": "neo4j"
+  minAvailable: ""
+  maxUnavailable: ""
+
+# Service Monitor for prometheus
+# Please ensure prometheus operator or the service monitor CRD is present in your cluster before using service monitor config
+serviceMonitor:
+  enabled: false
+  labels: {}
+  #    "demo": "value"
+  jobLabel: ""
+  interval: ""
+  port: ""
+  path: ""
+  namespaceSelector: {}
+  #    any: false
+  #    matchNames:
+  #      - default
+  targetLabels: []
+  #    - "demo"
+  #    - "value"
+  selector: {}
+#    matchLabels:
+#      helm.neo4j.com/service: "admin"
+
+
+# this section is to be used only when setting up (1 primary + n secondary neo4j instances scenario)
+# Disabled by default.
+analytics:
+  # This flag will enable the internal ports and certain configs necessary to allow 1 primary + n secondary neo4j instances scenario
+  enabled: false
+  type:
+    # values can be primary or secondary
+    # this field denotes the neo4j instance type either primary or secondary
+    name: primary
