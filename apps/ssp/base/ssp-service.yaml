@@ -4,11 +4,12 @@ metadata:
   name: ssp
   labels:
     app: ssp
-    tier: app
+    tier: api
 spec:
-  type: NodePort
+  type: LoadBalancer
+  sessionAffinity: ClientIP
   ports:
     - port: 8080
   selector:
     app: ssp
-    tier: app
+    tier: api

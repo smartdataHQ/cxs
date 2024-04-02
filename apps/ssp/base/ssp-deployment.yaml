@@ -6,12 +6,12 @@ spec:
   selector:
     matchLabels:
       app: ssp
-      tier: app
+      tier: api
   template:
     metadata:
       labels:
         app: ssp
-        tier: app
+        tier: api
     spec:
       containers:
         - name: node
@@ -147,5 +147,5 @@ spec:
     kind: Deployment
     name: ssp
   maxReplicas: 3
-  minReplicas: 1
+  minReplicas: 2
   targetCPUUtilizationPercentage: 60

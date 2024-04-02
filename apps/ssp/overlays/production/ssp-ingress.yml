@@ -1,25 +1,25 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-    name: ssp
-    annotations:
-        ingress.kubernetes.io/ssl-redirect: "true"
-        external-dns.alpha.kubernetes.io/hostname: admin.contextsuite.com
-        nginx.ingress.kubernetes.io/enable-cors: "true"
+  name: ssp
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+    external-dns.alpha.kubernetes.io/hostname: admin.contextsuite.com
+    nginx.ingress.kubernetes.io/enable-cors: "true"
 
 spec:
-    rules:
-        - host: admin.contextsuite.com
-          http:
-              paths:
-                  - backend:
-                        service:
-                            name: ssp
-                            port:
-                                number: 8080
-                    path: /
-                    pathType: Prefix
-    tls:
-        - hosts:
-              - admin.contextsuite.com
-          secretName: star-contextsuite-com
+  rules:
+    - host: admin.contextsuite.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: ssp
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - admin.contextsuite.com
+      secretName: star-contextsuite-com
