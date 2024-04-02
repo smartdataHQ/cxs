@@ -5,6 +5,29 @@
 # are configured with a namespace so this default will apply
 namespace: data
 
-kustomize:
-  # To use a kustomization.yaml different from the one in the root folder
-  dir: ""
+helm:
+  chart: apache-solr/solr-operator
+  repo: https://solr.apache.org/charts
+
+targetCustomizations:
+
+  - name: development
+    clusterSelector:
+      matchLabels:
+        role: development
+    kustomize:
+      dir: overlays/development
+
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: overlays/production
+
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: overlays/production

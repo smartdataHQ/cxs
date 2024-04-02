@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: playground
+spec:
+  selector:
+    matchLabels:
+      app: playground
+      tier: gui
+  template:
+    metadata:
+      labels:
+        app: playground
+        tier: gui
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/playground:52d5d90
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          ports:
+            - containerPort: 80
+          livenessProbe:
+            httpGet:
+              port: 80
+              path: /
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+          envFrom:
+            - configMapRef:
+                name: playground-config
+      imagePullSecrets:
+        - name: dockerlock
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: playground
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: playground
+  maxReplicas: 2
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60

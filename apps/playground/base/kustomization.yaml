@@ -1,0 +1,3 @@
+resources:
+  - playground-deployment.yaml
+  - playground-service.yaml

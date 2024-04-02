@@ -1,0 +1,7 @@
+bases:
+  - ../../base
+
+resources:
+  - playground-config.yaml
+  - playground-ingress.yml
+
