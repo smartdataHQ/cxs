@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ssp-config
+data:
+  ASPNETCORE_ENVIRONMENT: 'Production'
+  ENVIRONMENT: 'production'
+  DOMAIN: 'contextsuite.com'
+  BACKEND_URL: 'https://api.contextsuite.com'
+  FRONTEND_URL: 'https://app.contextsuite.com'
+  CLIENT_URL: 'https://admin.contextsuite.com'
+  PRODUCTION_DOMAIN: 'https://admin.contextsuite.com'
+  SUPPORT_EMAIL: 'support@snjallgogn.is'
+  INLINE_RUNTIME_CHUNK: 'true'
+
+  S3_BUCKET: 'files.contextsuite.com'
+  S3_REGION: ''
+
+  ## Postgres
+  DB_CLIENT: 'pg'
+  DB_NAME: 'ssp'
+  DB_PORT: '5432'
+  DB_HOST: 'cxs-pg-pgbouncer.data'
+  DB_USER: 'cxs-pg'
+
+  ENABLE_API_LOGS: 'true'
+  STORE_EVENT_LOGS: 'true'
+  APP_NAME: 'Context Suite Admin'
+  REACT_APP_JITSU_DEPLOY_DOMAIN: 'events.contextsuite.com'
+  HASH_SECRET: 'context-suite'

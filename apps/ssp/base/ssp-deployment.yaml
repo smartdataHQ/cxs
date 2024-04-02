@@ -1,0 +1,151 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssp
+spec:
+  selector:
+    matchLabels:
+      app: ssp
+      tier: app
+  template:
+    metadata:
+      labels:
+        app: ssp
+        tier: app
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/ssp:a9c49e2
+          resources:
+            requests:
+              cpu: 200m
+              memory: 600Mi
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /api/status/alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /api/status/ready
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+          env:
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: DB_PASSWORD
+          - name: AZUREAD_AUTH_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: AZUREAD_AUTH_CLIENT_ID
+          - name: AZUREAD_AUTH_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: AZUREAD_AUTH_CLIENT_SECRET
+          - name: CRYPTO_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: CRYPTO_SECRET
+          - name: FACEBOOK_APP_ID
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: FACEBOOK_APP_ID
+          - name: FACEBOOK_APP_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: FACEBOOK_APP_SECRET
+          - name: GITHUB_KEY
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: GITHUB_KEY
+          - name: GITHUB_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: GITHUB_SECRET
+          - name: GOOGLE_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: GOOGLE_CLIENT_ID
+          - name: GOOGLE_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: GOOGLE_CLIENT_SECRET
+          - name: LINKEDIN_KEY
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: LINKEDIN_KEY
+          - name: LINKEDIN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: LINKEDIN_SECRET
+          - name: MAILGUN_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: MAILGUN_API_KEY
+          - name: SESSION_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: SESSION_SECRET
+          - name: STRIPE_SECRET_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: STRIPE_SECRET_API_KEY
+          - name: TOKEN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: TOKEN_SECRET
+          - name: TWITTER_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: TWITTER_API_KEY
+          - name: REACT_APP_JITSU_WRITE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: REACT_APP_JITSU_WRITE_KEY
+          - name: TWITTER_API_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: TWITTER_API_SECRET
+          envFrom:
+            - configMapRef:
+                name: ssp-config
+      imagePullSecrets:
+        - name: dockerlock
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ssp
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ssp
+  maxReplicas: 3
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60

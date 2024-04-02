@@ -1,0 +1,3 @@
+resources:
+  - ssp-deployment.yaml
+  - ssp-service.yaml
