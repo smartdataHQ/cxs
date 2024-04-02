@@ -17,9 +17,7 @@ data:
 
   ## Postgres
   POSTGRES_HOST: 'cxs-pg-pgbouncer.data'
-  POSTGRES_URI: 'jdbc:postgresql://cxs-pg-pgbouncer.data'
-  POSTGRES_PORT: '5432'
-  POSTGRES_DB: 'ssp'
+  POSTGRES_URI: 'jdbc:postgresql://cxs-pg-pgbouncer.data:5432/ssp'
   POSTGRES_USER: 'cxs-pg'
 
   # Neo4j
