@@ -73,6 +73,11 @@ spec:
               secretKeyRef:
                 name: ingress-secrets
                 key: S3_SECRET_KEY
+          - name: PKEY_SFTP
+            valueFrom:
+              secretKeyRef:
+                name: ingress-secrets
+                key: PKEY_SFTP
         envFrom:
           - configMapRef:
               name: ingress-config
