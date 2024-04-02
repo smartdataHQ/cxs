@@ -17,4 +17,5 @@ spec:
   tls:
     - hosts:
         - in.contextsuite.com
+        - ingress.contextsuite.com
       secretName: star-contextsuite-com
