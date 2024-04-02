@@ -60,7 +60,7 @@ Handy:
 1. `helm repo add neo4j https://helm.neo4j.com/neo4j`
 2. `helm repo update`
 3. `helm search repo neo4j/`
-4. `helm install neo4j neo4j/neo4j --namespace default -f neo4j.values.yaml`
+4. `helm install neo4j neo4j/neo4j --namespace data -f neo4j.values.yaml`
 5. `kubectl get pods -l app.kubernetes.io/instance=neo4j`
 
 To upgrade everything:
@@ -70,24 +70,19 @@ To upgrade everything:
 - `helm uninstall neo4j`
 
 ## Configure Access
-To use the Neo4j Browser, you need to expose the service to the internet. This is done by creating an ingress rule. The ingress rule is created by the helm chart, but you need to configure your DNS to point to the ingress IP address.
+Thank you for installing neo4j.
 
-## Further Reading
-- [Documentation](https://neo4j.com/docs/operations-manual/current/kubernetes/quickstart-cluster/)
-- [Helm Chart](https://neo4j.com/docs/operations-manual/current/kubernetes/quickstart-cluster/)
+Your release "neo4j" has been installed  in namespace "data".
 
-## Exemple Output
+The neo4j user's password has been set to "rMUo39i9bymvxp".To view the progress of the rollout try:
 
-*The following info can also be found in Rancher* [Exmaple URL](https://ops.quicklookup.com/dashboard/c/c-m-vf2ghkxg/apps/catalog.cattle.io.app/default/neo4j#notes)
+$ kubectl --namespace "data" rollout status --watch --timeout=600s statefulset/neo4j
 
-To view the status of changes to your release "neo4j" , try:
+Once rollout is complete you can log in to Neo4j at "neo4j://neo4j.data.svc.cluster.local:7687". Try:
 
-$ kubectl rollout status --watch --timeout=600s statefulset/neo4j
+$ kubectl run --rm -it --namespace "data" --image "neo4j:5.18.0-enterprise" cypher-shell -- cypher-shell -a "neo4j://neo4j.data.svc.cluster.local:7687" -u neo4j -p "rMUo39i9bymvxp"
 
-Once rollout is complete you can log in to Neo4j at "neo4j://neo4j.default.svc.cluster.local". Try:
-
-$ kubectl run --rm -it --image "neo4j:5.9.0-enterprise" cypher-shell
--- cypher-shell -a "neo4j://neo4j.default.svc.cluster.local:7687"
+Graphs are everywhere!
 
 WARNING: Passwords set using 'neo4j.password' will be stored in plain text in the Helm release ConfigMap.
 Please consider using 'neo4j.passwordFromSecret' for improved security.

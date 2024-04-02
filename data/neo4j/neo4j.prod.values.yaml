@@ -18,7 +18,7 @@ neo4j:
   # password: ""
 
   # Existing secret to use for initial database password
-  passwordFromSecret: "neo4j_password"
+  passwordFromSecret: ""
 
   # Neo4j Edition to use (community|enterprise)
   edition: "enterprise"

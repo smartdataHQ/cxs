@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: neo4j
+  labels:
+    app: neo4j
+
+spec:
+  serviceName: neo4j
+  selector:
+    matchLabels:
+      app: neo4j
+      tier: data
+  replicas: 1
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: neo4j
+        tier: data
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "localdata"
+                    operator: In
+                    values:
+                      - "true"
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - neo4j
+              topologyKey: "kubernetes.io/hostname"
+      volumes:
+        - name: neo4j
+          hostPath:
+            path: /data/local/neo4j
+        - name: neo4j-config
+          hostPath:
+            path: /data/local/neo4j-config
+        - name: neo4j-plugins
+          hostPath:
+            path: /data/local/neo4j-plugins
+        - name: neo4j-backup
+          hostPath:
+            path: /data/local/neo4j-backup
+      containers:
+        - name: neo4j
+          image: neo4j:latest
+          ports:
+            - containerPort: 7474
+              hostPort: 7474
+            - containerPort: 7687
+              hostPort: 7687
+          restartPolicy: Never
+          volumeMounts:
+            - name: neo4j
+              mountPath: /data
+            - name: neo4j-config
+              mountPath: /conf/
+            - name: neo4j-backup
+              mountPath: /tmp/backup/
+            - name: neo4j-plugins
+              mountPath: /tmp/plugins/
