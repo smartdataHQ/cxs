@@ -33,6 +33,4 @@ data:
   S3_REGION: 'ams3'
   S3_ENDPOINT: 'https://cxs.ingression.ams3.digitaloceanspaces.com'
 
-  SPRING_PROFILES_ACTIVE: 'prod'
-  ORG_XERIAL_SNAPPY.SNAPPY_TMPDIR: '/tmp'
-  ORG_XERIAL_SNAPPY.SNAPPY.TMPDIR: '/tmp'
+  SPRING_PROFILES_ACTIVE: 'dev'

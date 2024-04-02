@@ -26,6 +26,26 @@ spec:
           name: http
         - containerPort: 2222
           name: sftp
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 8080
+            scheme: HTTP
+            httpHeaders:
+              - name: writekey
+                value: xZN8!E6d4aXns2ty
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /liveness
+            port: 8080
+            scheme: HTTP
+            httpHeaders:
+              - name: writekey
+                value: xZN8!E6d4aXns2ty
+          initialDelaySeconds: 7
+          periodSeconds: 3
         restartPolicy: Never
         env:
           - name: POSTGRES_PASSWORD
