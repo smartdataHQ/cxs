@@ -4,7 +4,6 @@ metadata:
     name: ssp
     annotations:
         ingress.kubernetes.io/ssl-redirect: "true"
-        kubernetes.io/ingress.class: nginx
         external-dns.alpha.kubernetes.io/hostname: admin.contextsuite.com
         nginx.ingress.kubernetes.io/enable-cors: "true"
 
@@ -20,7 +19,6 @@ spec:
                                 number: 8080
                     path: /
                     pathType: Prefix
-
     tls:
         - hosts:
               - admin.contextsuite.com
