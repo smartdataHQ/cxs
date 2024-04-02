@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ingress
-        image: quicklookup/ingress:v1.0.57
+        image: quicklookup/ingress:v1.0.58
         resources:
           requests:
             cpu: 100m
@@ -53,6 +53,11 @@ spec:
               secretKeyRef:
                 name: ingress-secrets
                 key: S3_SECRET_KEY
+          - name: KAFKA_USER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: ingress-secrets
+                key: KAFKA_USER_PASSWORD
         envFrom:
           - configMapRef:
               name: ingress-config
