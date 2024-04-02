@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: ingress
-        image: quicklookup/ingress:v1.0.53
+        image: quicklookup/ingress:v1.0.55
         resources:
           requests:
             cpu: 100m
@@ -84,7 +84,7 @@ spec:
         volumeMounts:
           - mountPath: /tmp
             name: sftp
-          - mountPath: /tmp/hostkey.ser
+          - mountPath: /etc/hostkey.ser
             subPath: hostkey.ser
             name: config-volume
 
