@@ -73,27 +73,15 @@ spec:
               secretKeyRef:
                 name: ingress-secrets
                 key: S3_SECRET_KEY
-          - name: PKEY_SFTP
-            valueFrom:
-              secretKeyRef:
-                name: ingress-secrets
-                key: PKEY_SFTP
         envFrom:
           - configMapRef:
               name: ingress-config
         volumeMounts:
           - mountPath: /tmp
             name: sftp
-          - mountPath: /etc/hostkey.ser
-            subPath: hostkey.ser
-            name: config-volume
-
       imagePullSecrets:
         - name: dockerlock
       volumes:
-        - name: config-volume
-          configMap:
-            name: ingress-config
-        - hostPath:
-            path: /data/s3/ingress
-          name: sftp
+        - name: sftp
+          hostPath:
+            path: /data/local/sftp

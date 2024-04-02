@@ -3,8 +3,6 @@ kind: ConfigMap
 metadata:
   name: ingress-config
 data:
-  hostkey.ser: |-    
-    $(PKEY_SFTP)
 
   ## Kafka
   KAFKA_URI: 'kafka.data:9092'
