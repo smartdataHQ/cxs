@@ -28,7 +28,7 @@ Prod:
 1. open a kubectl shell
 2. copy the right (dev,staging,prod) file to zookeeper.values.yaml (uses authentication)
    - Remember to replace the 'YOUR-ACCESS-TOKEN-HERE' text with your access token
-   - `wget https://raw.githubusercontent.com/smartdataHQ/ops/main/config/databases/neo4j/neo4j.prod.values.yaml?token=YOUR-ACCESS-TOKEN-HERE -O neo4j.values.yaml`
+   - `wget https://raw.githubusercontent.com/smartdataHQ/cxs/main/data/neo4j/neo4j.prod.values.yaml -O neo4j.values.yaml`
    - *may require editing create+copy+save it in place, to create the file*
 
 
