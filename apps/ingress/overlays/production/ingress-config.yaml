@@ -17,7 +17,7 @@ data:
 
   ## Postgres
   POSTGRES_HOST: 'cxs-pg-pgbouncer.data'
-  POSTGRES_URI: 'jdbc:postgresql://cxs-pg-pgbouncer.data:5432/ssp'
+  POSTGRES_URI: 'jdbc:postgresql://cxs-pg-pgbouncer.data'
   POSTGRES_PORT: '5432'
   POSTGRES_DB: 'ssp'
   POSTGRES_USER: 'cxs-pg'
@@ -31,4 +31,4 @@ data:
   S3_REGION: 'ams3'
   S3_ENDPOINT: 'https://cxs.ingression.ams3.digitaloceanspaces.com'
 
-  SPRING_PROFILES_ACTIVE: 'dev'
+  SPRING_PROFILES_ACTIVE: 'prod'
