@@ -65,7 +65,7 @@ spec:
             - name: neo4j
               mountPath: /data
             - name: neo4j-config
-              mountPath: /conf/
+              mountPath: /var/lib/neo4j/conf/
             - name: neo4j-backup
               mountPath: /tmp/backup/
             - name: neo4j-plugins
