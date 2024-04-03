@@ -8,7 +8,8 @@ data:
 
   # Redis
   REDIS_URL: 'redis-master.data'
-  LOCAL_REDIS: 'true'
+  REDIS_USER: ''
+  LOCAL_REDIS: 'false'
 
   # Postgres
   LIST_DB_NAME: 'list_db'
