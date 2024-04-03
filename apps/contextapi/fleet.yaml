@@ -1,5 +1,5 @@
-defaultNamespace: solutions
-namespace: solutions
+defaultNamespace: api
+namespace: api
 
 targetCustomizations:
 
