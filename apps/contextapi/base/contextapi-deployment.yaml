@@ -44,6 +44,11 @@ spec:
               secretKeyRef:
                 name: contextsuite
                 key: DB_PASSWORD
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: REDIS_PASSWORD
           - name: NEO4J_PASSWORD
             valueFrom:
               secretKeyRef:
