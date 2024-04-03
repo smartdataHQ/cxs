@@ -48,7 +48,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: contextsuite
-                key: NEO4J_AUTH
+                key: NEO4J_PASSWORD
           - name: CLICKHOUSE_PASSWORD
             valueFrom:
               secretKeyRef:
