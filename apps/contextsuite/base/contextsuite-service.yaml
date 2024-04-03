@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: contextsuite
+  labels:
+    app: contextsuite
+    tier: app
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+  selector:
+    app: contextsuite
+    tier: app

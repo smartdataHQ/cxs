@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+
+resources:
+  - contextsuite-config.yaml
+  - contextsuite-ingress.yml

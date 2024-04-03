@@ -1,0 +1,3 @@
+resources:
+  - contextsuite-deployment.yaml
+  - contextsuite-service.yaml

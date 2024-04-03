@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: contextsuite
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+spec:
+  defaultBackend:
+    service:
+      name: contextsuite
+      port:
+        number: 3000
+  rules:
+    - host: app.contextsuite.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: contextsuite
+                port:
+                  number: 3000
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - app.contextsuite.com
+      secretName: star-contextsuite-com

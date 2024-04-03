@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contextsuite
+spec:
+  selector:
+    matchLabels:
+      app: contextsuite
+      tier: app
+  template:
+    metadata:
+      labels:
+        app: contextsuite
+        tier: app
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/contextsuite:2105a9a
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          volumeMounts:
+            - mountPath: /cdn
+              name: cdn
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /api/status/alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /api/status/ready
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+          env:
+            - name: FACEBOOK_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: FACEBOOK_APP_ID
+            - name: FACEBOOK_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: FACEBOOK_APP_SECRET
+            - name: GITHUB_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GITHUB_KEY
+            - name: GITHUB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GITHUB_SECRET
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GOOGLE_CLIENT_SECRET
+            - name: LINKEDIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: LINKEDIN_KEY
+            - name: LINKEDIN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: LINKEDIN_SECRET
+            - name: NEXT_PUBLIC_GRAPH_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: NEXT_PUBLIC_GRAPH_API_KEY
+            - name: REACT_APP_MAPBOX_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: REACT_APP_MAPBOX_API_TOKEN
+            - name: NEXTAUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: NEXTAUTH_SECRET
+            - name: SEGMENT_WRITE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: SEGMENT_WRITE_KEY
+            - name: SENTRY_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: SENTRY_AUTH_TOKEN
+            - name: TWITTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: TWITTER_API_KEY
+            - name: TWITTER_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: TWITTER_API_SECRET
+          envFrom:
+            - configMapRef:
+                name: contextsuite-config
+      imagePullSecrets:
+        - name: dockerlock
+      volumes:
+        - name: cdn
+          hostPath:
+            path: /data/cdn
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: contextsuite
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: contextsuite
+  maxReplicas: 4
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60
