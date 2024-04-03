@@ -1,0 +1,3 @@
+resources:
+  - contextapi-deployment.yaml
+  - contextapi-service.yaml

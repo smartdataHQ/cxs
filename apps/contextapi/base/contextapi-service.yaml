@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: contextapi
+  labels:
+    app: contextapi
+    tier: api
+spec:
+  type: NodePort
+  ports:
+    - port: 4001
+  selector:
+    app: contextapi
+    tier: api

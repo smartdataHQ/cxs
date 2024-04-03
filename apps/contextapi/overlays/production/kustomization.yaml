@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+
+resources:
+  - contextapi-config.yaml
+  - contextapi-ingress.yml
