@@ -70,3 +70,6 @@ spec:
               mountPath: /tmp/backup/
             - name: neo4j-plugins
               mountPath: /tmp/plugins/
+          envFrom:
+            - configMapRef:
+                name: neo4j-config
