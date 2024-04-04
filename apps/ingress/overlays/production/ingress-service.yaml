@@ -6,7 +6,7 @@ metadata:
     app: ingress
     tier: api
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   sessionAffinity: ClientIP
   ports:
     - port: 8080
