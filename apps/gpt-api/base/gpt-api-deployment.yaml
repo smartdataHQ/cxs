@@ -86,6 +86,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: GOOGLE_MAPS_API_KEY
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: REDIS_PASSWORD
           envFrom:
             - configMapRef:
                 name: gpt-api-config
