@@ -2,11 +2,18 @@ namespace: pipelines
 
 helm:
   repo: "https://airflow-helm.github.io/charts"
-  chart: "airflow"
+  chart: "airflow-stable"
   releaseName: "airflow"
   version: "8.8.0"
   force: false
   timeoutSeconds: 0
   valuesFiles:
     - overlays/production/airflow-values.yaml
-    
+
+targetCustomizations:
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: overlays/production

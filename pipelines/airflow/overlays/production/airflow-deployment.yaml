@@ -1,0 +1,8 @@
+kind: GitRepo
+apiVersion: fleet.cattle.io/v1alpha1
+metadata:
+  name: airflow
+  namespace: fleet-local
+spec:
+  repo: https://github.com/akshaykumar2505/airflow-helm-fleet
+  branch: main

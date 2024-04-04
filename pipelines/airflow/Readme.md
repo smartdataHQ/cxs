@@ -13,7 +13,7 @@
 ## Add the public key to repository settings deploy keys
 
 ## Create private key as a secret
-`kubectl create secret generic airflow-ssh-git-secret --from-file=id_rsa=~/.ssh/airflow_ssh_key --namespace airflow-k8s`
+`kubectl create secret generic airflow-ssh-git-secret --from-file=id_rsa=~/.ssh/airflow_ssh_key --namespace pipelines`
 
 ## Build custom docker image with bytewax dependencies in pipelines repository
 `docker build -f .\Airflow -t airflow:bytewax-2.7.3 .`
@@ -46,15 +46,15 @@ GRANT ALL ON SCHEMA public TO airflow_postgres_user;
 
 ## Create Secrets
 ```
-kubectl create secret generic airflow-core-fernet-key --from-literal="value=uuid" --namespace pipelines
-kubectl create secret generic airflow-webserver-secret-key --from-literal="value=uuid" --namespace pipelines
-kubectl create secret generic airflow-smtp-smtp-mail-from --from-literal="value=example@gmail.com" --namespace pipelines
-kubectl create secret generic airflow-smtp-smtp-user --from-literal="value=apikey" --namespace pipelines
-kubectl create secret generic airflow-smtp-smtp-password --from-literal="value=password" --namespace pipelines
-kubectl create secret generic redis-password --from-literal="value=" --namespace pipelines
-kubectl create secret generic postgres-password --from-literal="value=password" --namespace pipelines
-kubectl create secret generic clickhouse-password --from-literal="value=password" --namespace pipelines
-kubectl create secret generic wod-auth --from-literal="value=password" --namespace pipelines
+kubectl create secret generic airflow --from-literal="airflow-core-fernet-key=uuid" --namespace pipelines
+kubectl create secret generic airflow --from-literal="airflow-webserver-secret-key=uuid" --namespace pipelines
+kubectl create secret generic airflow --from-literal="airflow-smtp-smtp-mail-from=example@gmail.com" --namespace pipelines
+kubectl create secret generic airflow --from-literal="airflow-smtp-smtp-user=apikey" --namespace pipelines
+kubectl create secret generic airflow --from-literal="airflow-smtp-smtp-password=password" --namespace pipelines
+kubectl create secret generic airflow --from-literal="redis-password=" --namespace pipelines
+kubectl create secret generic airflow --from-literal="postgres-password=password" --namespace pipelines
+kubectl create secret generic airflow --from-literal="clickhouse-password=password" --namespace pipelines
+kubectl create secret generic airflow --from-literal="wod-auth=password" --namespace pipelines
 ```
 s
 ## Deploy using fleet
