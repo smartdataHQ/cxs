@@ -1,3 +1,4 @@
 resources:
   - neo4j-stateful.yaml
   - neo4j-service.yaml
+  - neo4j-config.yaml
