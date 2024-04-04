@@ -1,0 +1,204 @@
+airflow:
+  legacyCommands: false
+  image:
+    repository: airflow
+    tag: bytewax-2.7.3
+  executor: KubernetesExecutor
+  fernetKey: ""  
+  webserverSecretKey: ""
+  config:
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "False"    
+    AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
+    AIRFLOW__EMAIL__EMAIL_CONN_ID: "smtp_default"        
+    AIRFLOW__SMTP__SMTP_HOST: "smtp.sendgrid.net"
+    AIRFLOW__SMTP__SMTP_STARTTLS: "True"
+    AIRFLOW__SMTP__SMTP_SSL: "False"    
+    AIRFLOW__SMTP__SMTP_PORT: "587"    
+  users:
+    - username: admin
+      password: admin
+      role: Admin
+      email: airflow@snjallgogn.is
+      firstName: Airflow
+      lastName: CXS
+  connections: []
+  variables: []
+  pools: [] 
+  extraPipPackages: []
+  extraEnv:    
+    - name: AIRFLOW__CORE__FERNET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: AIRFLOW__CORE__FERNET_KEY
+    - name: AIRFLOW__WEBSERVER__SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: AIRFLOW__WEBSERVER__SECRET_KEY
+    - name: KAFKA_HOST
+      value: "kafka.data"
+    - name: KAFKA_PORT
+      value: "9092"
+    - name: KAFKA_USER
+      value: "9092"
+    - name: KAFKA_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: KAFKA_PASSWORD
+    - name: REDIS_HOST
+      value: "redis-master.data"
+    - name: REDIS_PORT
+      value: "6379"
+    - name: REDIS_DB
+      value: "1"
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: REDIS_PASSWORD
+    - name: POSTGRES_HOST
+      value: "cxs-pg-pgbouncer.data"
+    - name: POSTGRES_PORT
+      value: "5432"
+    - name: POSTGRES_DB
+      value: "ssp"
+    - name: POSTGRES_USER
+      value: "ssp-ro"
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: POSTGRES_RO_PASSWORD
+    - name: CLICKHOUSE_PORT
+      value: "8123"
+    - name: CLICKHOUSE_DB
+      value: "cst"
+    - name: CLICKHOUSE_HOST
+      value: "clickhouse.data"
+    - name: CLICKHOUSE_USER
+      value: "airflow"
+    - name: CLICKHOUSE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: CLICKHOUSE_PASSWORD
+    - name: DB_PATH
+      value: "/pipedrive/databases" 
+    - name: RAW_PATH
+      value: "/pipedrive/raw"
+    - name: RUST_BACKTRACE
+      value: "full"
+    - name: GID_ROOT
+      value: "https://the.gid.is"  
+    - name: AIRFLOW__SMTP__SMTP_MAIL_FROM
+      value: "airflow@snjallgogn.is"
+    - name: AIRFLOW__SMTP__SMTP_USER
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: AIRFLOW__SMTP__SMTP_USER
+    - name: AIRFLOW__SMTP__SMTP_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: AIRFLOW__SMTP__SMTP_PASSWORD
+    - name: WOD_AUTH
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: WOD_AUTH
+  extraVolumeMounts: []
+  extraVolumes: []
+  kubernetesPodTemplate:
+    stringOverride: ""
+    resources: {}
+    extraPipPackages: []
+    extraVolumeMounts: []   
+    extraVolumes: []
+scheduler:
+  replicas: 1
+  resources: {}
+  logCleanup:
+    enabled: true
+    retentionMinutes: 21600
+  livenessProbe:
+    enabled: true
+    taskCreationCheck:
+      enabled: true
+      thresholdSeconds: 300
+      schedulerAgeBeforeCheck: 180
+web: 
+  replicas: 1
+  resources: {}
+  service:
+    type: ClusterIP
+    externalPort: 8080
+  webserverConfig:
+    stringOverride: |
+      from airflow import configuration as conf
+      from flask_appbuilder.security.manager import AUTH_DB      
+      # the SQLAlchemy connection string
+      SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")      
+      # use embedded DB for auth
+      AUTH_TYPE = AUTH_DB
+    existingSecret: ""
+workers:
+  enabled: false
+triggerer:
+  enabled: true
+  replicas: 1
+  resources: {}
+  capacity: 1000
+flower:
+  enabled: false
+logs:  
+  path: /opt/airflow/logs
+  persistence:
+    enabled: false
+dags:
+  path: /opt/airflow/dags
+  persistence:
+    enabled: false
+  gitSync:
+    enabled: true
+    repo: "git@github.com:smartdataHQ/pipelines.git"
+    branch: "main"
+    revision: "HEAD"
+    syncWait: 60    
+    sshSecret: "airflow-ssh-git-secret"
+    sshSecretKey: "id_rsa"
+    sshKnownHosts: |-
+      github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+ingress:
+  enabled: false
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+extraManifests: []
+pgbouncer:
+  enabled: false
+  resources: {}
+  authType: md5
+postgresql:
+  enabled: false
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 8Gi
+externalDatabase:
+  type: postgres  
+  host: cxs-pg-pgbouncer.data
+  port: 5432
+  database: airflow
+  user: airflow-db
+  passwordSecret: "airflow"
+  passwordSecretKey: "AIRFLOW_PG_PASSWORD"
+  properties: ""
+redis:  
+  enabled: false
+externalRedis:
+  host: localhost

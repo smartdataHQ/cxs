@@ -1,0 +1,12 @@
+namespace: pipelines
+
+helm:
+  repo: "https://airflow-helm.github.io/charts"
+  chart: "airflow"
+  releaseName: "airflow"
+  version: "8.8.0"
+  force: false
+  timeoutSeconds: 0
+  valuesFiles:
+    - overlays/production/airflow-values.yaml
+    
