@@ -6,7 +6,7 @@ metadata:
     app: ssp
     tier: api
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   sessionAffinity: ClientIP
   ports:
     - port: 8080
