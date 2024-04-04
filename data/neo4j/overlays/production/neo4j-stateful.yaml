@@ -54,7 +54,7 @@ spec:
             path: /data/local/neo4j-backup
       containers:
         - name: neo4j
-          image: neo4j:latest
+          image: neo4j:enterprise
           ports:
             - containerPort: 7474
               hostPort: 7474
