@@ -166,7 +166,7 @@ dags:
   persistence:
     enabled: false
   gitSync:
-    enabled: true
+    enabled: false
     repo: "git@github.com:smartdataHQ/pipelines.git"
     branch: "main"
     revision: "HEAD"
