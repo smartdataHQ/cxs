@@ -53,7 +53,7 @@ airflow:
           name: airflow
           key: redis-password
     - name: POSTGRES_HOST
-      value: "cxs-pg-pgbouncer.data"
+      value: "cxs-pg-primary.data.svc"
     - name: POSTGRES_PORT
       value: "5432"
     - name: POSTGRES_DB
@@ -194,7 +194,7 @@ postgresql:
     size: 8Gi
 externalDatabase:
   type: postgres  
-  host: cxs-pg-pgbouncer.data
+  host: cxs-pg-primary.data.svc
   port: 5432
   database: airflow
   user: airflow-db
