@@ -181,7 +181,7 @@ serviceAccount:
   create: true
   name: ""
   annotations: {}
-extraManifests:
+extraManifests: []
 pgbouncer:
   enabled: false
   resources: {}
