@@ -59,7 +59,7 @@ airflow:
     - name: POSTGRES_DB
       value: "airflow"
     - name: POSTGRES_USER
-      value: "aiflow-db"
+      value: "aiflow"
     - name: POSTGRES_PASSWORD
       valueFrom:
         secretKeyRef:
@@ -197,7 +197,7 @@ externalDatabase:
   host: cxs-pg-primary.data.svc
   port: 5432
   database: airflow
-  user: aiflow-db
+  user: aiflow
   passwordSecret: "airflow"
   passwordSecretKey: "postgres-password"
   properties: ""
