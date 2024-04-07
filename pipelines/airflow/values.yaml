@@ -166,7 +166,7 @@ dags:
   persistence:
     enabled: false
   gitSync:
-    enabled: false
+    enabled: enabled
     repo: "git@github.com:smartdataHQ/pipelines.git"
     branch: "main"
     revision: "HEAD"
@@ -197,7 +197,7 @@ externalDatabase:
   host: cxs-pg-primary.data.svc
   port: 5432
   database: airflow
-  user: airflow-db
+  user: aiflow-db
   passwordSecret: "airflow"
   passwordSecretKey: "postgres-password"
   properties: ""
