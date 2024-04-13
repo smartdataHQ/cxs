@@ -10,7 +10,7 @@
 
     
 1. `helm repo add airflow https://airflow-helm.github.io/charts`
-2. `helm repo update`
+   2. `helm repo update`
 3. `helm search repo airflow/`
 4. `helm install airflow airflow/airflow --namespace pipelines -f values.yaml`
 5. `kubectl get pods -l app.kubernetes.io/instance=airflow`

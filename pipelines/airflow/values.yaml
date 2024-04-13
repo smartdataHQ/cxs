@@ -3,6 +3,9 @@ airflow:
   image:
     repository: quicklookup/airflow-pipelines
     tag: bbaf689
+    pullPolicy: IfNotPresent
+    pullSecret: "dockerlock"
+
   executor: KubernetesExecutor
   fernetKey: ""  
   webserverSecretKey: ""
