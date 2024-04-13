@@ -1,8 +1,8 @@
 airflow:
   legacyCommands: false
   image:
-    repository: apache/airflow
-    tag: 2.6.3-python3.11
+    repository: quicklookup/airflow-pipelines
+    tag: bbaf689
   executor: KubernetesExecutor
   fernetKey: ""  
   webserverSecretKey: ""
