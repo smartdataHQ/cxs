@@ -15,6 +15,10 @@
 4. `helm install airflow airflow/airflow --namespace pipelines -f values.yaml`
 5. `kubectl get pods -l app.kubernetes.io/instance=airflow`
 
+
+## Upgrade
+1 . `helm upgrade airflow airflow/airflow --namespace pipelines -f values.yaml`
+ 
 ## Teardown
 
 1`helm uninstall airflow --namespace pipelines`
