@@ -119,11 +119,9 @@ airflow:
         readOnly: false
     extraVolumes: 
       - name: pipedrive-databases
-        persistentVolumeClaim:
-          claimName: pipedrive-databases
+        mountPath: /data/local/pipelines
       - name: pipedrive-raw
-        persistentVolumeClaim:
-          claimName: pipedrive-raw
+        mountPath: /data/local/pipelines
 scheduler:
   replicas: 1
   resources: {}
