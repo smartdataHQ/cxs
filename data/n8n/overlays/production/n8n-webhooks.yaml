@@ -35,11 +35,11 @@ spec:
                 secretKeyRef:
                   name: n8n
                   key: N8N_ENCRYPTION_KEY
-            - name: QUEUE_BULL_REDIS_HOST
+            - name: QUEUE_BULL_REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: n8n
-                  key: QUEUE_BULL_REDIS_HOST
+                  key: QUEUE_BULL_REDIS_PASSWORD
           envFrom:
             - configMapRef:
                 name: n8n-config
