@@ -10,7 +10,6 @@ metadata:
       more_set_headers "X-Frame-Options: SAMEORIGIN";
       proxy_set_header Accept-Encoding "";
 spec:
-  ingressClassName: "nginx"
   rules:
     - host: n8n.contextsuite.com
       http:
