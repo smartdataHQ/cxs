@@ -1,0 +1,10 @@
+bases:
+  - ../../base
+
+resources:
+  - n8n-config.yaml
+  - n8n-main.yaml
+  - n8n-webhooks.yaml
+  - n8n-worker.yaml
+  - n8n-service.yaml
+  - n8n-ingress.yaml

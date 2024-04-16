@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-config
+  # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
+data:
+  DB_TYPE: "postgresdb"
+  DB_POSTGRESDB_HOST: "cxs-pg-pgbouncer.data"
+  DB_POSTGRESDB_PORT: "5432"
+  DB_POSTGRESDB_DATABASE: "n8n"
+  DB_POSTGRESDB_POOL_SIZE: "3"
+
+  N8N_PROTOCOL: "http"
+  N8N_PORT: "5678"
+  N8N_PUSH_BACKEND: "sse"
+  N8N_DIAGNOSTICS_ENABLED: "false"
+  N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
+  N8N_DISABLE_PRODUCTION_MAIN_PROCESS: "true"
+
+  WEBHOOK_URL: "https://n8n.contextsuite.com"
+  CODE_DISABLE_STDOUT: "true"
+  SKIP_STATISTICS_EVENTS: "true"
+  EXECUTIONS_MODE: "queue"
+  # QUEUE_BULL_REDIS_HOST: "redis-master.data"
