@@ -17,7 +17,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: worker
-          image: n8nio/n8n
+          image: n8nio/n8n:1.19.4
           args: ["worker", "--concurrency=8"]
           env:
             - name: DB_POSTGRESDB_USER
