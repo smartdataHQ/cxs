@@ -4,7 +4,7 @@ metadata:
   name: n8n
 spec:
   rules:
-    - host: n8n.contextsuite.com
+    - host: flows.contextsuite.com
       http:
         paths:
           - path: /webhook/
@@ -30,5 +30,5 @@ spec:
                   number: 5678
   tls:
     - hosts:
-        - n8n.contextsuite.com
+        - flows.contextsuite.com
       secretName: star-contextsuite-com

@@ -20,7 +20,7 @@ data:
   N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
   N8N_DISABLE_PRODUCTION_MAIN_PROCESS: "true"
 
-  WEBHOOK_URL: "https://n8n.contextsuite.com"
+  WEBHOOK_URL: "https://flows.contextsuite.com"
   CODE_DISABLE_STDOUT: "true"
   SKIP_STATISTICS_EVENTS: "true"
   EXECUTIONS_MODE: "queue"
