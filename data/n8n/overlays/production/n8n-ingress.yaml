@@ -2,13 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: n8n
-  annotations:
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_clear_headers "Server";
-      more_set_headers "X-Frame-Options: SAMEORIGIN";
-      proxy_set_header Accept-Encoding "";
 spec:
   rules:
     - host: n8n.contextsuite.com
