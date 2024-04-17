@@ -8,20 +8,22 @@
     - `wget https://raw.githubusercontent.com/smartdataHQ/cxs/main/pipelines/airflow/values.yaml -O values.yaml`
     - *may require editing create+copy+save it in place, to create the file*
 
-    
+
+## Install    
 1. `helm repo add airflow https://airflow-helm.github.io/charts`
 2. `helm repo update`
 3. `helm search repo airflow/`
 4. `helm install airflow airflow/airflow --namespace pipelines -f values.yaml`
 5. `kubectl get pods -l app.kubernetes.io/instance=airflow`
 
-
 ## Upgrade
-1 . `helm upgrade airflow airflow/airflow --namespace pipelines -f values.yaml`
+1. `helm repo add airflow https://airflow-helm.github.io/charts`
+2. `helm repo update`
+3. `helm upgrade airflow airflow/airflow --namespace pipelines -f values.yaml`
  
 ## Teardown
 
-1`helm uninstall airflow --namespace pipelines`
+1. `helm uninstall airflow --namespace pipelines`
 
 ## Configure Access
 NAME: airflow
