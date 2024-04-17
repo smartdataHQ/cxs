@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: n8n
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: n8n
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        service: n8n
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: main
+          image: n8nio/n8n:1.37.1
+          args: ["start"]
+          env:
+            - name: DB_POSTGRESDB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: n8n
+                  key: POSTGRES_NON_ROOT_USER
+            - name: DB_POSTGRESDB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: n8n
+                  key: POSTGRES_NON_ROOT_PASSWORD
+            - name: N8N_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: n8n
+                  key: N8N_ENCRYPTION_KEY
+            - name: QUEUE_BULL_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: n8n
+                  key: QUEUE_BULL_REDIS_PASSWORD
+          envFrom:
+            - configMapRef:
+                name: n8n-config
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n
+spec:
+  type: ClusterIP
+  selector:
+    service: n8n
+  ports:
+    - port: 5678

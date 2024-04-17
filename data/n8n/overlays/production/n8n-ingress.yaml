@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: n8n
+spec:
+  rules:
+    - host: flows.contextsuite.com
+      http:
+        paths:
+          - path: /webhook/
+            pathType: Prefix
+            backend:
+              service:
+                name: n8n-webhook
+                port:
+                  number: 5678
+          - path: /webhook-waiting/
+            pathType: Prefix
+            backend:
+              service:
+                name: n8n-webhook
+                port:
+                  number: 5678
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: n8n-main
+                port:
+                  number: 5678
+  tls:
+    - hosts:
+        - flows.contextsuite.com
+      secretName: star-contextsuite-com

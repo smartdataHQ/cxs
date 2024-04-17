@@ -51,7 +51,7 @@ spec:
             path: /data/logs/keeper
       containers:
       - name: keeper
-        image: clickhouse/clickhouse-keeper:24.1.1-alpine
+        image: clickhouse/clickhouse-keeper:24.3.2.23-alpine
         ports:
         - containerPort: 9181
           hostPort: 9181
