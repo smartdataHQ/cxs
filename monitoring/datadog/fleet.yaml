@@ -1,0 +1,14 @@
+defaultNamespace: ops
+namespace: ops
+
+helm:
+  repo: https://helm.datadoghq.com
+
+targetCustomizations:
+
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: overlays/production
