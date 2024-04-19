@@ -12,3 +12,8 @@ targetCustomizations:
         role: production
     kustomize:
       dir: overlays/production
+
+# helm repo add datadog https://helm.datadoghq.com
+# helm install datadog-operator datadog/datadog-operator
+# kubectl create secret generic datadog-secret --from-literal api-key=f71eadfd7da00d340a846969226e63d8 --from-literal app-key=414803657a206cbf7b4402768769e22c518d95f2 -n pipelines
+# kubectl apply -f datadog-agent.yaml -n pipelines

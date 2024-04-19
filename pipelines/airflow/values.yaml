@@ -17,7 +17,14 @@ airflow:
     AIRFLOW__SMTP__SMTP_HOST: "smtp.sendgrid.net"
     AIRFLOW__SMTP__SMTP_STARTTLS: "True"
     AIRFLOW__SMTP__SMTP_SSL: "False"    
-    AIRFLOW__SMTP__SMTP_PORT: "587"    
+    AIRFLOW__SMTP__SMTP_PORT: "587"
+    AIRFLOW__METRICS__STATSD_ON: true
+    AIRFLOW__METRICS__STATSD_HOST: "localhost"
+    AIRFLOW__METRICS__STATSD_PORT: "8125"
+    AIRFLOW__METRICS__STATSD_PREFIX: "airflow"
+    AIRFLOW__METRICS__STATSD_DATADOG_ENABLED: true
+    AIRFLOW__METRICS__STATSD_ALLOW_LIST: "executor"
+    AIRFLOW__METRICS__STATSD_DATADOG_TAGS: "statsd_group:airflow,statsd_env:pipelines"
   users:
     - username: admin
       password: admin
