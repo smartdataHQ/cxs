@@ -42,7 +42,7 @@ nameOverride: ""
 fullnameOverride: ""
 ## @param clusterDomain Default Kubernetes cluster domain
 ##
-clusterDomain: cluster.local
+clusterDomain: kafka.data
 ## @param commonLabels Labels to add to all deployed objects
 ##
 commonLabels: {}
@@ -2585,7 +2585,7 @@ kraft:
   ## If reusing existing PVCs or migrating from Zookeeper mode, make sure the cluster ID is set matching the stored cluster ID, otherwise new nodes will fail to join the cluster.
   ## In case the cluster ID stored in the secret does not match the value stored in /bitnami/kafka/data/meta.properties, remove the secret and upgrade the chart setting the correct value.
   ##
-  clusterId: ""
+  clusterId: "cxs"
   ## @param kraft.controllerQuorumVoters Override the Kafka controller quorum voters of the Kafka Kraft cluster. If not set, it will be automatically configured to use all controller-elegible nodes.
   ##
   controllerQuorumVoters: ""
