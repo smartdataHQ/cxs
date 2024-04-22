@@ -46,4 +46,4 @@ spec:
               - airflow
             init_config:
             instances:
-              - url: "http://%%host%%:8080"
+              - url: "https://airflow.contextsuite.com"
