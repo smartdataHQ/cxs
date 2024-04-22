@@ -25,6 +25,7 @@ airflow:
     AIRFLOW__METRICS__STATSD_DATADOG_ENABLED: true
     AIRFLOW__METRICS__STATSD_ALLOW_LIST: "executor"
     AIRFLOW__METRICS__STATSD_DATADOG_TAGS: "statsd_group:airflow,statsd_env:pipelines"
+    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE: false
   users:
     - username: admin
       password: admin
