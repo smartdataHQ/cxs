@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: islandshotel2kafka
-    image: quicklookup/ohip-shovel:f3a6d01
+    image: quicklookup/ohip-shovel:139f60a
     env:
       - name: APIGW_URL
         value: https://mtce4pr.hospitality-api.eu-frankfurt-1.ocs.oraclecloud.com
