@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
   - name: islandshotel2kafka
-    image: quicklookup/ohip-shovel:35dc392
+    image: quicklookup/ohip-shovel:756898c
     env:
       - name: APIGW_URL
         value: https://mtce4pr.hospitality-api.eu-frankfurt-1.ocs.oraclecloud.com
@@ -48,6 +48,10 @@ spec:
         value: "10000"
       - name: CHAIN
         value: ISLHTL
+      - name: SEGMENT_CONVERSION
+        value: "true"
+      - name: STACK_VALUES
+        value: "true"
       - name: DELTA
         value: "false"
       - name: LOGLEVEL
