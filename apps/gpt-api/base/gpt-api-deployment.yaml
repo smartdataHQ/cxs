@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/gpt-api:7860f19
+          image: quicklookup/gpt-api:994ab8e
           resources:
             requests:
               cpu: 200m
@@ -91,6 +91,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: REDIS_PASSWORD
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: AWS_SECRET_ACCESS_KEY
           envFrom:
             - configMapRef:
                 name: gpt-api-config

@@ -8,7 +8,7 @@ data:
   OPENAI_LLM_STREAM_ANSWER: 'gpt_4'
   OPENAI_LLM_MAKE_DREAM_TOUR: 'gpt_3_5_turbo'
   OPENAI_LLM_SUMMARISER: 'gpt_3_5_turbo'
-  SUMMARISATION_WINDOW_N_TOKENS: '4000'
+  SUMMARISATION_WINDOW_N_TOKENS: '10000'
   AZURE_OPENAI_API_TYPE: 'azure'
   AZURE_OPENAI_API_VERSION: '2023-05-15'
   AZURE_OPENAI_API_BASE: 'https://smartdatagpt4.openai.azure.com/'
@@ -28,3 +28,6 @@ data:
   BACKEND_BASE_URL: 'https://chat.contextsuite.com'
 
   EVENTS_ENDPOINT: 'https://in.contextsuite.com/api/s/s2s/track'
+
+  EMBEDDINGS_MODEL: 'text-embedding-3-small'
+  AWS_ACCESS_KEY_ID: 'AKIAXXAZOWGCOUZT3DMM'
