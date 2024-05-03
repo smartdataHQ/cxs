@@ -30,13 +30,13 @@ spec:
           livenessProbe:
             httpGet:
               port: 8000
-              path: /gpt_api/status/alive
+              path: /gpt-api/status/alive
             initialDelaySeconds: 5
             periodSeconds: 5
           readinessProbe:
             httpGet:
               port: 8000
-              path: /gpt_api/status/ready
+              path: /gpt-api/status/ready
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 2
