@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/gpt-api:50c14b2
+          image: quicklookup/gpt-api:15e7b48
           resources:
             requests:
               cpu: 200m
@@ -56,6 +56,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: OPENAI_API_KEY
+            - name: OPENAI_API_KEY_SMARTDATA
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: OPENAI_API_KEY_SMARTDATA
             - name: FRESHDESK_API_KEY
               valueFrom:
                 secretKeyRef:
