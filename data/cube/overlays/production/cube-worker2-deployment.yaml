@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cubestore-worker-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cubestore-worker-2
+  template:
+    metadata:
+      labels:
+        app: cubestore-worker-2
+    spec:
+      containers:
+        - name: cubestore-worker-2
+          image: cubejs/cubestore:v0.35.37
+          env:
+            - name: CUBESTORE_SERVER_NAME
+              value: 'cubestore-worker-2:10002'
+            - name: CUBESTORE_WORKER_PORT
+              value: '10002'
+            - name: CUBESTORE_WORKERS
+              value: 'cubestore-worker-1:10001,cubestore-worker-2:10002'
+            - name: CUBESTORE_META_ADDR
+              value: 'cubestore-router:9999'
+            - name: CUBESTORE_REMOTE_DIR
+              value: '/cube/data'
+          volumeMounts:
+            - name: data
+              mountPath: /cube/data
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: cubestore-pvc-worker-2

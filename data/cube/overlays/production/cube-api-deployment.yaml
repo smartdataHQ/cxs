@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cubejs-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cubejs-app
+  template:
+    metadata:
+      labels:
+        app: cubejs-app
+    spec:
+      containers:
+        - name: cubejs-app
+          image: eu.gcr.io/redacted/cubejs-app:latest
+          ports:
+            - containerPort: 4000
+          envFrom:
+            - configMapRef:
+                name: cube-config
+          env:
+            - name: CUBEJS_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: cubejs-secrets
+                  key: CUBEJS_API_SECRET
+            - name: CUBEJS_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cubejs-secrets
+                  key: CLICKHOUSE_USER
+            - name: CUBEJS_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: cubejs-secrets
+                  key: CLICKHOUSE_PASSWORD

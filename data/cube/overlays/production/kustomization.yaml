@@ -1,0 +1,10 @@
+resources:
+  - cube-config.yaml
+  - cube-api-deployment.yaml
+  - cube-api-service.yaml
+  - cube-router-deployment.yaml
+  - cube-router-service.yaml
+  - cube-worker1-deployment.yaml
+  - cube-worker1-service.yaml
+  - cube-worker2-deployment.yaml
+  - cube-worker2-service.yaml
