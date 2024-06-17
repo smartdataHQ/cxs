@@ -8,3 +8,4 @@ resources:
   - cube-worker1-service.yaml
   - cube-worker2-deployment.yaml
   - cube-worker2-service.yaml
+  - cube-volumes.yaml
