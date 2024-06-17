@@ -7,8 +7,6 @@ metadata:
     tier: data
 spec:
   type: ClusterIP
-  externalIPs:
-    - 93.115.27.125
   ports:
     - port: 9000
       name: tcp
