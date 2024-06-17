@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: cubestore-router
-          image: cubejs/cubestore:v0.35.37
+          image: cubejs/cubestore:latest
           env:
             - name: NODE_OPTIONS
               value: '--max-old-space-size=6144'

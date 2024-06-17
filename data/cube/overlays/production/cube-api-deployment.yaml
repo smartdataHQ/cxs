@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: cubejs-app
-          image: eu.gcr.io/redacted/cubejs-app:latest
+          image: cubejs/cube:latest
           ports:
             - containerPort: 4000
           envFrom:

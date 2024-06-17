@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: cubestore-worker-2
-          image: cubejs/cubestore:v0.35.37
+          image: cubejs/cubestore:latest
           env:
             - name: CUBESTORE_SERVER_NAME
               value: 'cubestore-worker-2:10002'
