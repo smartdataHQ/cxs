@@ -2,6 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: cubejs-app
+  annotations:
+    nginx.ingress.kubernetes.io/whitelist-source-range: 194.144.179.29
 spec:
   rules:
     - host: db.contextsuite.com
