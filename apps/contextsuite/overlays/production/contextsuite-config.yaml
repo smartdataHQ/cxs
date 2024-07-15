@@ -32,4 +32,5 @@ data:
 
   REACT_APP_JITSU_DEPLOY_DOMAIN: 'events.contextsuite.com'
   CONTEXTSUITE_ADMIN_URL: 'https://admin.contextsuite.com'
+  NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL: 'https://admin.contextsuite.com'
   NEXT_PUBLIC_CHAT_WSS_ENDPOINT: 'ws://chat.contextsuite.com:8088/api/table_chat'
