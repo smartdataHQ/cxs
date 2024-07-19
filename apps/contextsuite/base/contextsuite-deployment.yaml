@@ -15,7 +15,11 @@ spec:
     spec:
       containers:
         - name: node
+<<<<<<< HEAD
           image: quicklookup/contextsuite:417fe24
+=======
+          image: quicklookup/contextsuite:7c311b1
+>>>>>>> 809f965 (chore: Update contextsuite image version in deployment.yaml)
           resources:
             requests:
               cpu: 200m
