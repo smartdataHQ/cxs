@@ -31,3 +31,7 @@ data:
 
   EMBEDDINGS_MODEL: 'text-embedding-3-small'
   AWS_ACCESS_KEY_ID: 'AKIAXXAZOWGCOUZT3DMM'
+
+  CLICKHOUSE_HOST: 'clickhouse.data'
+  CLICKHOUSE_PORT: '8123'
+  CLICKHOUSE_USER: 'llm'
