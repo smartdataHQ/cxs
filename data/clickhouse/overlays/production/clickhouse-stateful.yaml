@@ -51,7 +51,7 @@ spec:
             path: /data/elastic/clickhouse
       containers:
       - name: clickhouse
-        image: clickhouse/clickhouse-server:24.5.3.5-alpine
+        image: clickhouse/clickhouse-server:24.3.6.48-alpine
         ports:
         - containerPort: 9000
         - containerPort: 8123
