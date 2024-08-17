@@ -1,4 +1,5 @@
 defaultNamespace: tailscale
+
 helm:
   repo: https://pkgs.tailscale.com/helmcharts
   chart: tailscale-operator
