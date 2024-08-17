@@ -1,0 +1,8 @@
+helm:
+  repo: https://pkgs.tailscale.com/helmcharts
+  chart: tailscale-operator
+  # Find new versions
+  #   helm repo add tailscale https://pkgs.tailscale.com/helmcharts
+  #    helm repo update
+  #    helm  search repo -l tailscale
+  version: 1.70.0
