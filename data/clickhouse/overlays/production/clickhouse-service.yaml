@@ -5,6 +5,8 @@ metadata:
   labels:
     app: clickhouse
     tier: data
+  annotations:
+    tailscale.com/expose: "true"
 spec:
   type: ClusterIP
   ports:
