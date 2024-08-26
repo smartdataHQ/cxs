@@ -116,7 +116,22 @@ airflow:
       valueFrom:
         secretKeyRef:
           name: airflow
-          key: airflow-smtp-smtp-password      
+          key: airflow-smtp-smtp-password
+    - name: AZURE_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: azure-client-id
+    - name: AZURE_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: azure-client-secret
+    - name: AZURE_TENANT_ID
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: azure-tenant-id 
   extraVolumeMounts: []
   extraVolumes: []    
   kubernetesPodTemplate:
@@ -155,12 +170,33 @@ web:
     externalPort: 8080
   webserverConfig:
     stringOverride: |
+      import os
       from airflow import configuration as conf
-      from flask_appbuilder.security.manager import AUTH_DB      
-      # the SQLAlchemy connection string
-      SQLALCHEMY_DATABASE_URI = conf.get("core", "SQL_ALCHEMY_CONN")      
-      # use embedded DB for auth
-      AUTH_TYPE = AUTH_DB
+      from flask_appbuilder.security.manager import AUTH_OAUTH
+      AUTH_USER_REGISTRATION = True
+      AUTH_USER_REGISTRATION_ROLE = "Admin"
+      AUTH_TYPE = AUTH_OAUTH
+      OAUTH_PROVIDERS = [
+        {
+        "name": "azure",
+        "icon": "fa-windows",
+        "token_key": "access_token",
+        "remote_app": {
+            "client_id": os.environ.get("AZURE_CLIENT_ID"),
+            "client_secret": os.environ.get("AZURE_CLIENT_SECRET"),
+            "api_base_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2",
+            "client_kwargs": {
+                "scope": "User.read name preferred_username email profile upn",
+                "resource": os.environ.get("AZURE_APPLICATION_ID"),
+                # Optionally enforce signature JWT verification
+                "verify_signature": False
+            },
+            "request_token_url": None,
+            "access_token_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2/token",
+            "authorize_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2/authorize",
+            },
+        }
+      ]
     existingSecret: ""
 workers:
   enabled: false
