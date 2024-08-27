@@ -10,7 +10,10 @@ airflow:
   fernetKey: ""  
   webserverSecretKey: ""
   config:
+    AIRFLOW__WEBSERVER__RBAC: "True"    
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
+    AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX: "True"    
+    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE: false
     AIRFLOW__CORE__LOAD_EXAMPLES: "False"    
     AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
     AIRFLOW__EMAIL__EMAIL_CONN_ID: "smtp_default"        
@@ -18,21 +21,7 @@ airflow:
     AIRFLOW__SMTP__SMTP_STARTTLS: "True"
     AIRFLOW__SMTP__SMTP_SSL: "False"    
     AIRFLOW__SMTP__SMTP_PORT: "587"
-    AIRFLOW__METRICS__STATSD_ON: true
-    AIRFLOW__METRICS__STATSD_HOST: "airflow.contextsuite.com"
-    AIRFLOW__METRICS__STATSD_PORT: "8125"
-    AIRFLOW__METRICS__STATSD_PREFIX: "airflow"
-    AIRFLOW__METRICS__STATSD_DATADOG_ENABLED: true
-    AIRFLOW__METRICS__STATSD_ALLOW_LIST: "executor"
-    AIRFLOW__METRICS__STATSD_DATADOG_TAGS: "statsd_group:airflow,statsd_env:pipelines"
-    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE: false
-  users:
-    - username: admin
-      password: admin
-      role: Admin
-      email: admin@example.com
-      firstName: admin
-      lastName: admin     
+  users: []
   connections: []
   variables: []
   pools: [] 
@@ -138,18 +127,8 @@ airflow:
     stringOverride: ""
     resources: {}
     extraPipPackages: []      
-    extraVolumeMounts: 
-      - name: pipedrive-databases
-        mountPath: /pipedrive/databases
-        readOnly: false
-      - name: pipedrive-raw
-        mountPath: /pipedrive/raw
-        readOnly: false
-    extraVolumes: 
-      - name: pipedrive-databases
-        mountPath: /data/local/pipelines
-      - name: pipedrive-raw
-        mountPath: /data/local/pipelines
+    extraVolumeMounts: []
+    extraVolumes: []
 scheduler:
   replicas: 1
   resources: {}
@@ -172,10 +151,16 @@ web:
     stringOverride: |
       import os
       from airflow import configuration as conf
-      from flask_appbuilder.security.manager import AUTH_OAUTH
-      AUTH_USER_REGISTRATION = True
+      from flask_appbuilder.security.manager import AUTH_OAUTH  
+      
+      WTF_CSRF_ENABLED = True
+      WTF_CSRF_TIME_LIMIT = None   
+            
       AUTH_USER_REGISTRATION_ROLE = "Admin"
+      AUTH_USER_REGISTRATION = True
+      
       AUTH_TYPE = AUTH_OAUTH
+      
       OAUTH_PROVIDERS = [
         {
         "name": "azure",
@@ -187,8 +172,7 @@ web:
             "api_base_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2",
             "client_kwargs": {
                 "scope": "User.read name preferred_username email profile upn",
-                "resource": os.environ.get("AZURE_APPLICATION_ID"),
-                # Optionally enforce signature JWT verification
+                "resource": os.environ.get("AZURE_CLIENT_ID"),                
                 "verify_signature": False
             },
             "request_token_url": None,
