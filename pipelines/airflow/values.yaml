@@ -121,8 +121,16 @@ airflow:
         secretKeyRef:
           name: airflow
           key: azure-tenant-id 
-  extraVolumeMounts: []
-  extraVolumes: []    
+  extraVolumeMounts: 
+    - name: airflow-sftp  
+      mountPath: /opt/airflow/id_rsa
+      readOnly: true
+      subPath: ssh-privatekey
+  extraVolumes: 
+    - name: airflow-sftp
+      secret:
+        defaultMode: 420
+        secretName: airflow-ssh-sftp-secret
   kubernetesPodTemplate:
     stringOverride: ""
     resources: {}
