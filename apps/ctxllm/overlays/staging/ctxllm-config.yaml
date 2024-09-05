@@ -9,7 +9,7 @@ data:
 
   
   AZURE_OPENAI_API_BASE: 'https://smartdatagpt4.openai.azure.com/'
-  AZURE_DEPLOYMENT_NAME_gpt_4: 'Turbo-Thor'
+  AZURE_DEPLOYMENT_NAME_gpt_4: 'O_Thor'
   AZURE_DEPLOYMENT_NAME_gpt_3_5_turbo: 'GTP-Thor35'
 
   OPENAI_LLM_COMBINED_EXTRACTION_PROMPT: 'gpt-4'
