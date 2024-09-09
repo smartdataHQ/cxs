@@ -59,7 +59,8 @@ data:
                 -->
                 <s3_cache>
                     <type>cache</type>
-                    <disk>s3</disk>
+                    <disk>data</disk>
+                    <!--disk>s3</disk-->
                     <path>/var/lib/clickhouse/disks/s3-cache/</path>
                     <max_size>300Gi</max_size>
                 </s3_cache>
