@@ -91,6 +91,13 @@ data:
                     </volumes>
                     <move_factor>0.2</move_factor>
                 </s3_tiered-->                
+                <s3_tiered>
+                    <volumes>
+                        <main>
+                            <disk>data</disk>
+                        </main>
+                    </volumes>
+                </s3_tiered>
                 <s3_main>
                     <volumes>
                         <main>
