@@ -49,10 +49,10 @@ data:
                     <path>/data/</path>
                     <keep_free_space_bytes>0</keep_free_space_bytes>
                 </data>
+                <!--
                 <s3>
                     <type>s3</type>
                     <endpoint>https://chs3data.s3.eu-west-1.amazonaws.com/clickhouse-s3/</endpoint>
-                    <!--endpoint>https://s3.eu-west-1.amazonaws.com/clickhouse-s3/</endpoint-->
                     <access_key_id from_env="AWS_ACCESS_KEY_ID"/>
                     <secret_access_key from_env="AWS_SECRET_ACCESS_KEY"/>
                 </s3>
@@ -62,6 +62,7 @@ data:
                     <path>/var/lib/clickhouse/disks/s3-cache/</path>
                     <max_size>300Gi</max_size>
                 </s3_cache>
+                -->
                 <backups>
                     <type>local</type>
                     <path>/backups/</path>
@@ -79,7 +80,7 @@ data:
                         </main>
                     </volumes>
                 </local>
-                <s3_tiered>
+                <!--s3_tiered>
                     <volumes>
                         <hot>
                             <disk>data</disk>
@@ -96,7 +97,7 @@ data:
                             <disk>s3_cache</disk>
                         </main>
                     </volumes>
-                </s3_main>
+                </s3_main-->
             </policies>
         </storage_configuration>        
     </clickhouse>
