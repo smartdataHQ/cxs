@@ -3,8 +3,8 @@ kind: ConfigMap
 metadata:
   name: cube-config
 data:
-  CUBEJS_DB_HOST: 'clickhouse.data'
-  # CUBEJS_DB_HOST: '10.180.122.32'
+  # CUBEJS_DB_HOST: 'clickhouse.data'
+  CUBEJS_DB_HOST: '10.180.122.32'
   CUBEJS_DB_NAME: 'custom'
   CUBEJS_DB_TYPE: 'clickhouse'
   CUBEJS_DEV_MODE: 'true'
