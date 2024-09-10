@@ -12,6 +12,8 @@ spec:
       labels:
         app: cubestore-router
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: growing-mouse
       containers:
         - name: cubestore-router
           image: cubejs/cubestore:latest
@@ -31,5 +33,6 @@ spec:
               mountPath: /cube/data
       volumes:
         - name: data
-          persistentVolumeClaim:
-            claimName: cubestore-pvc-router
+          hostPath:
+            path: /data/cubestore/data
+            type: DirectoryOrCreate

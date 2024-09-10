@@ -12,6 +12,8 @@ spec:
       labels:
         app: cubestore-worker-1
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: growing-mouse
       containers:
         - name: cubestore-worker-1
           image: cubejs/cubestore:latest
@@ -31,5 +33,6 @@ spec:
               mountPath: /cube/data
       volumes:
         - name: data
-          persistentVolumeClaim:
-            claimName: cubestore-pvc-worker-1
+          hostPath:
+            path: /data/cubestore/data
+            type: DirectoryOrCreate
