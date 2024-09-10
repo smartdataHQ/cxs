@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: gpt-api
   annotations:
-  nginx.ingress.kubernetes.io/proxy-body-size: "5m"
+    nginx.ingress.kubernetes.io/proxy-body-size: "5m"
 spec:
   rules:
     - host: chat.contextsuite.com
