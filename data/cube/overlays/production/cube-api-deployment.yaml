@@ -37,7 +37,7 @@ spec:
                   name: cubejs-secrets
                   key: CLICKHOUSE_PASSWORD
           volumeMounts:
-            - name: data
+            - name: config
               mountPath: /cube/conf
       volumes:
         - name: config
