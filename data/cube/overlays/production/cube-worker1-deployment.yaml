@@ -15,8 +15,6 @@ spec:
       containers:
         - name: cubestore-worker-1
           image: cubejs/cubestore:latest
-          ports:
-            - containerPort: 10001
           env:
             - name: CUBESTORE_SERVER_NAME
               value: 'cubestore-worker-1:10001'
