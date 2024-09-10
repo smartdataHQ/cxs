@@ -36,3 +36,10 @@ spec:
                 secretKeyRef:
                   name: cubejs-secrets
                   key: CLICKHOUSE_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /cube/conf
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: cubestore-pvc-app

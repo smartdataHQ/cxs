@@ -15,6 +15,19 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   labels:
+    service: cubestore-pvc-app
+  name: cubestore-pvc-app
+spec:
+  accessModes:
+      - ReadWriteOnce
+  resources:
+      requests:
+        storage: 6Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
     service: cubestore-pvc-worker-1
   name: cubestore-pvc-worker-1
 spec:
