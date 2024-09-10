@@ -7,6 +7,6 @@ data:
   # CUBEJS_DB_HOST: '10.180.122.32'
   CUBEJS_DB_NAME: 'custom'
   CUBEJS_DB_TYPE: 'clickhouse'
-  CUBEJS_DEV_MODE: 'false'
+  CUBEJS_DEV_MODE: 'true'
   CUBEJS_CUBESTORE_HOST: 'cubestore-router.data'
   CUBEJS_REFRESH_WORKER: 'true'
