@@ -23,7 +23,7 @@ spec:
             - name: CUBESTORE_WORKERS
               value: 'cubestore-worker-1:10001,cubestore-worker-2:10002'
             - name: CUBESTORE_META_ADDR
-              value: 'cubestore-router:3030'
+              value: 'cubestore-router:9999'
             - name: CUBESTORE_REMOTE_DIR
               value: '/cube/data'
           volumeMounts:
