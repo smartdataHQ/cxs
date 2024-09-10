@@ -1,7 +1,7 @@
 namespace: data
 
 helm:
-  chart: apache-solr/solr-operator
+  chart: solr-operator
   repo: https://solr.apache.org/charts
 
 targetCustomizations:
