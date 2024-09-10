@@ -1,4 +1,5 @@
 namespace: data
+defaultNamespace: data
 
 helm:
   chart: solr-operator
