@@ -21,6 +21,16 @@ spec:
             - configMapRef:
                 name: cube-config
           env:
+            - name: CUBEJS_SQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cubejs-secrets
+                  key: CUBEJS_SQL_USER
+            - name: CUBEJS_SQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cubejs-secrets
+                  key: CUBEJS_SQL_PASSWORD
             # Enable Direct Query Mode and set database type to ClickHouse
             - name: CUBEJS_DB_TYPE
               value: “clickhouse”  # Set the DB type to ClickHouse
