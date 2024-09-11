@@ -24,24 +24,14 @@ spec:
                 name: cube-config
           env:
             - name: CUBEJS_CACHE
-              value: “false”  # Disable cache for direct querying
+              value: "false"
             - name: CUBEJS_PRE_AGGREGATIONS
-              value: “false”  # Disable pre-aggregations for direct querying
+              value: "false"
             - name: CUBEJS_API_SECRET
               valueFrom:
                 secretKeyRef:
                   name: cubejs-secrets
                   key: CUBEJS_API_SECRET
-            - name: CUBEJS_DB_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: cubejs-secrets
-                  key: CLICKHOUSE_HOST  # The ClickHouse host URL/IP
-            - name: CUBEJS_DB_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: cubejs-secrets
-                  key: CLICKHOUSE_PORT  # The port ClickHouse is running on
             - name: CUBEJS_DB_USER
               valueFrom:
                 secretKeyRef:
@@ -52,11 +42,6 @@ spec:
                 secretKeyRef:
                   name: cubejs-secrets
                   key: CLICKHOUSE_PASSWORD
-            - name: CUBEJS_DB_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: cubejs-secrets
-                  key: CLICKHOUSE_DB  # The database name in ClickHouse
           volumeMounts:
             - name: config
               mountPath: /cube/conf
