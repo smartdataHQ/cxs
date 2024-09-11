@@ -74,5 +74,5 @@ spec:
       volumes:
         - name: config
           hostPath:
-            path: /data/cubestore/data
+            path: /data/cubestore/conf
             type: DirectoryOrCreate
