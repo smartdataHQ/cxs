@@ -11,7 +11,9 @@ spec:
     - protocol: TCP
       port: 4000
       targetPort: 4000
+      name: http
     - protocol: TCP
       targetPort: 15432
       port: 15432
+      name: postgres
   type: ClusterIP
