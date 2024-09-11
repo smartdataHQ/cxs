@@ -20,6 +20,10 @@ spec:
           ports:
             - containerPort: 10002
           env:
+            - name: CUBEJS_CACHE
+              value: "false"
+            - name: CUBEJS_PRE_AGGREGATIONS
+              value: "false"
             - name: CUBESTORE_SERVER_NAME
               value: 'cubestore-worker-2:10002'
             - name: CUBESTORE_WORKER_PORT

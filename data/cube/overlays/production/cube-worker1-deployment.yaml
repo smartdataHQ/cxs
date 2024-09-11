@@ -18,6 +18,10 @@ spec:
         - name: cubestore-worker-1
           image: cubejs/cubestore:latest
           env:
+            - name: CUBEJS_CACHE
+              value: "false"
+            - name: CUBEJS_PRE_AGGREGATIONS
+              value: "false"
             - name: CUBESTORE_SERVER_NAME
               value: 'cubestore-worker-1:10001'
             - name: CUBESTORE_WORKER_PORT

@@ -21,6 +21,10 @@ spec:
             - configMapRef:
                 name: cube-config
           env:
+            - name: CUBEJS_CACHE
+              value: "false"
+            - name: CUBEJS_PRE_AGGREGATIONS
+              value: "false"
             - name: CUBEJS_API_SECRET
               valueFrom:
                 secretKeyRef:
