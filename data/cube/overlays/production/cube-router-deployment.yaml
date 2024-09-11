@@ -18,7 +18,7 @@ spec:
         - name: cubestore-router
           image: cubejs/cubestore:latest
           env:
-            - name: CUBESTORE_DATA_DIR/cube/data
+            - name: CUBESTORE_DATA_DIR
               value: '/cube/data'
             - name: CUBESTORE_REMOTE_DIR
               value: '/cube/data'
