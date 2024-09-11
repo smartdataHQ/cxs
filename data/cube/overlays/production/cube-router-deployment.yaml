@@ -18,10 +18,10 @@ spec:
         - name: cubestore-router
           image: cubejs/cubestore:latest
           env:
-            - name: CUBEJS_CACHE
-              value: "false"
-            - name: CUBEJS_PRE_AGGREGATIONS
-              value: "false"
+            - name: CUBESTORE_DATA_DIR/cube/data
+              value: '/cube/data'
+            - name: CUBESTORE_REMOTE_DIR
+              value: '/cube/data'
             - name: NODE_OPTIONS
               value: '--max-old-space-size=6144'
             - name: CUBESTORE_SERVER_NAME
