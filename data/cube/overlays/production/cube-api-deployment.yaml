@@ -73,5 +73,6 @@ spec:
               mountPath: /cube/conf
       volumes:
         - name: config
-          persistentVolumeClaim:
-            claimName: cubestore-pvc-app
+          hostPath:
+            path: /data/cubestore/data
+            type: DirectoryOrCreate
