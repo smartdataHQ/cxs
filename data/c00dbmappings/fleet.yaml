@@ -1,6 +1,6 @@
 defaultNamespace: data
-targetCustomizations:
 
+targetCustomizations:
   - name: production
     clusterSelector:
       matchLabels:
