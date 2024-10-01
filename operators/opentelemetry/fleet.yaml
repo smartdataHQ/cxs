@@ -1,0 +1,10 @@
+defaultNamespace: opentelemetry-operator-system
+
+helm:
+  repo: https://open-telemetry.github.io/opentelemetry-helm-charts
+  chart: opentelemetry-operator
+  # Find new versions
+  #   helm repo add jetstack https://charts.jetstack.io --force-update
+  #    helm repo update
+  #    helm  search repo -l cert-manager
+  version: 0.69.0
