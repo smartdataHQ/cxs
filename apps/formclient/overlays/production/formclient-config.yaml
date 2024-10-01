@@ -10,7 +10,7 @@ data:
   # LOCAL_REDIS: 'true'
 
   # Required Services
-  NEXT_PUBLIC_BACKEND_URL: 'https://form.contextsuite.com/form-api'
+  NEXT_PUBLIC_BACKEND_URL: 'https://forms.contextsuite.com/form-api'
   # NEXTAUTH_URL: 'https://app.contextsuite.com'
   # REACT_APP_GRAPH_API_URL: "/graph"
   # REACT_APP_CONTEXT_API_ENDPOINT: "/context"

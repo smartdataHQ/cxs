@@ -11,12 +11,7 @@ data:
   NODE_ENV: 'production'
 
   # Required Services
-  # NEXT_PUBLIC_BACKEND_URL: 'https://form.contextsuite.com/form-api'
-  # NEXTAUTH_URL: 'https://app.contextsuite.com'
-  # REACT_APP_GRAPH_API_URL: "/graph"
-  # REACT_APP_CONTEXT_API_ENDPOINT: "/context"
-  # REACT_APP_STATS_API_ENDPOINT: "/stats"
-  FRONTEND_URL: 'https://form.contextsuite.com'
+  FRONTEND_URL: 'https://forms.contextsuite.com'
   # Redis
   REDIS_URL: 'redis-master.data'
   REDIS_USER: ''
