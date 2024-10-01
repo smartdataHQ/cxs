@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+
+resources:
+  - formclient-config.yaml
+  - formclient-ingress.yml

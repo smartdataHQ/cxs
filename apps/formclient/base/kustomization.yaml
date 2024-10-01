@@ -1,0 +1,3 @@
+resources:
+  - formclient-deployment.yaml
+  - formclient-service.yaml
