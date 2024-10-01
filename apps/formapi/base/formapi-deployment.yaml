@@ -38,6 +38,27 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 2
+          env:
+          - name: AIRTABLE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: AIRTABLE_API_KEY
+          - name: CLOUDINARY_CLOUD_NAME
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: CLOUDINARY_CLOUD_NAME
+          - name: CLOUDINARY_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: CLOUDINARY_API_KEY
+          - name: CLOUDINARY_API_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: CLOUDINARY_API_SECRET
           envFrom:
             - configMapRef:
                 name: formapi-config
