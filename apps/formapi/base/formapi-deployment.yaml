@@ -42,17 +42,17 @@ spec:
           - name: AIRTABLE_API_KEY
             valueFrom:
               secretKeyRef:
-                name: contextsuite
+                name: formapi
                 key: AIRTABLE_API_KEY
           - name: CLOUDINARY_CLOUD_NAME
             valueFrom:
               secretKeyRef:
-                name: contextsuite
+                name: formapi
                 key: CLOUDINARY_CLOUD_NAME
           - name: CLOUDINARY_API_KEY
             valueFrom:
               secretKeyRef:
-                name: contextsuite
+                name: formapi
                 key: CLOUDINARY_API_KEY
           - name: CLOUDINARY_API_SECRET
             valueFrom:
