@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: formapi
+spec:
+  selector:
+    matchLabels:
+      app: formapi
+      tier: app
+  template:
+    metadata:
+      labels:
+        app: formapi
+        tier: app
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/formapi:3c9058e
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          volumeMounts:
+            - mountPath: /cdn
+              name: cdn
+          ports:
+            - containerPort: 3001
+          livenessProbe:
+            httpGet:
+              port: 3001
+              path: /api/status/alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 3001
+              path: /api/status/ready
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+          envFrom:
+            - configMapRef:
+                name: formapi-config
+      imagePullSecrets:
+        - name: dockerlock
+      volumes:
+        - name: cdn
+          hostPath:
+            path: /data/cdn
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: formapi
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: formapi
+  maxReplicas: 4
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60

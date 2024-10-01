@@ -1,0 +1,3 @@
+resources:
+  - formapi-deployment.yaml
+  - formapi-service.yaml
