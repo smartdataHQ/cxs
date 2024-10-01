@@ -9,7 +9,7 @@ spec:
         paths:
           - backend:
               service:
-                name: form-api
+                name: formapi
                 port:
                   number: 3001
             path: /form-api
