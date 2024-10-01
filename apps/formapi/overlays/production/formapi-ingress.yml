@@ -4,7 +4,7 @@ metadata:
   name: formapi
 spec:
   rules:
-    - host: form.contextsuite.com
+    - host: forms.contextsuite.com
       http:
         paths:
           - backend:
@@ -30,5 +30,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - form.contextsuite.com
+        - forms.contextsuite.com
       secretName: star-contextsuite-com
