@@ -9,24 +9,10 @@ spec:
         paths:
           - backend:
               service:
-                name: formapi
+                name: form-api
                 port:
-                  number: 3001
-            path: /stats
-            pathType: Prefix
-          - backend:
-              service:
-                name: formapi
-                port:
-                  number: 3001
-            path: /context
-            pathType: Prefix
-          - backend:
-              service:
-                name: formapi
-                port:
-                  number: 3001
-            path: /graph
+                  number: 8000
+            path: /form-api
             pathType: Prefix
   tls:
     - hosts:
