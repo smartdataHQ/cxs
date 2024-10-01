@@ -6,12 +6,12 @@ spec:
   selector:
     matchLabels:
       app: formapi
-      tier: app
+      tier: api
   template:
     metadata:
       labels:
         app: formapi
-        tier: app
+        tier: api
     spec:
       containers:
         - name: node
