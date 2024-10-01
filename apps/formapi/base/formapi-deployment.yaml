@@ -28,13 +28,13 @@ spec:
           livenessProbe:
             httpGet:
               port: 3001
-              path: /api/status/alive
+              path: /form-api/status/alive
             initialDelaySeconds: 5
             periodSeconds: 5
           readinessProbe:
             httpGet:
               port: 3001
-              path: /api/status/ready
+              path: /form-api/status/ready
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 2
