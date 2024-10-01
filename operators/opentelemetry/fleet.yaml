@@ -8,3 +8,7 @@ helm:
   #    helm repo update
   #    helm  search repo -l cert-manager
   version: 0.69.0
+  values:
+    manager:
+      collectorImage:
+        repository: "otel/opentelemetry-collector-k8s"
