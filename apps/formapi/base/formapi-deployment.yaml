@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/formapi:2358d44
+          image: quicklookup/formapi:b3ce1f4
           resources:
             requests:
               cpu: 200m
@@ -59,6 +59,11 @@ spec:
               secretKeyRef:
                 name: formapi
                 key: CLOUDINARY_API_SECRET
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: formapi
+                key: REDIS_PASSWORD
           envFrom:
             - configMapRef:
                 name: formapi-config

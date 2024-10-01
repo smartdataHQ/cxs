@@ -8,6 +8,7 @@ data:
   # Redis
   # REDIS_URL: 'redis-master.data'
   # LOCAL_REDIS: 'true'
+  NODE_ENV: 'production'
 
   # Required Services
   # NEXT_PUBLIC_BACKEND_URL: 'https://form.contextsuite.com/form-api'
@@ -16,6 +17,10 @@ data:
   # REACT_APP_CONTEXT_API_ENDPOINT: "/context"
   # REACT_APP_STATS_API_ENDPOINT: "/stats"
   FRONTEND_URL: 'https://form.contextsuite.com'
+  # Redis
+  REDIS_URL: 'redis-master.data'
+  REDIS_USER: ''
+
 
   # GRAPHQL_SERVER_PORT: '4001'
   # GRAPHQL_SERVER_PATH: '/context'
