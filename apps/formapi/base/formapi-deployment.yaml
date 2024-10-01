@@ -57,7 +57,7 @@ spec:
           - name: CLOUDINARY_API_SECRET
             valueFrom:
               secretKeyRef:
-                name: contextsuite
+                name: formapi
                 key: CLOUDINARY_API_SECRET
           envFrom:
             - configMapRef:
