@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/formapi:b3ce1f4
+          image: quicklookup/formapi:860b57d
           resources:
             requests:
               cpu: 200m
@@ -39,31 +39,31 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
           env:
-          - name: AIRTABLE_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: formapi
-                key: AIRTABLE_API_KEY
-          - name: CLOUDINARY_CLOUD_NAME
-            valueFrom:
-              secretKeyRef:
-                name: formapi
-                key: CLOUDINARY_CLOUD_NAME
-          - name: CLOUDINARY_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: formapi
-                key: CLOUDINARY_API_KEY
-          - name: CLOUDINARY_API_SECRET
-            valueFrom:
-              secretKeyRef:
-                name: formapi
-                key: CLOUDINARY_API_SECRET
-          - name: REDIS_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: formapi
-                key: REDIS_PASSWORD
+            - name: AIRTABLE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: formapi
+                  key: AIRTABLE_API_KEY
+            - name: CLOUDINARY_CLOUD_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: formapi
+                  key: CLOUDINARY_CLOUD_NAME
+            - name: CLOUDINARY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: formapi
+                  key: CLOUDINARY_API_KEY
+            - name: CLOUDINARY_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: formapi
+                  key: CLOUDINARY_API_SECRET
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: formapi
+                  key: REDIS_PASSWORD
           envFrom:
             - configMapRef:
                 name: formapi-config
