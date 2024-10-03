@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/formclient:fc95284
+          image: quicklookup/formclient:5a6775c
           resources:
             requests:
               cpu: 200m
