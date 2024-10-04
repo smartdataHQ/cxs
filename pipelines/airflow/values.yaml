@@ -196,6 +196,8 @@ web:
       ]
     existingSecret: ""
 workers:
+  logCleanup:
+    enabled: false
   enabled: false
 triggerer:
   enabled: true
@@ -207,7 +209,9 @@ flower:
 logs:  
   path: /opt/airflow/logs
   persistence:
-    enabled: false
+    enabled: true
+    existingClaim: airflow-logs-pvc
+    accessMode: ReadWriteMany
 dags:
   path: /opt/airflow/dags
   persistence:
