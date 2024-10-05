@@ -12,6 +12,7 @@ helm:
     # Shortened as fleet prefixes with csx-deployment breaking the 63 char
     # limit
     nameOverride: otelop
+    releaseName: otelop
     manager:
       collectorImage:
         repository: "otel/opentelemetry-collector-k8s"
