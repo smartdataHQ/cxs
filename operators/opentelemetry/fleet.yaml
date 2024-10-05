@@ -9,6 +9,9 @@ helm:
   #    helm  search repo -l cert-manager
   version: 0.69.0
   values:
+    # Shortened as fleet prefixes with csx-deployment breaking the 63 char
+    # limit
+    nameOverride: otelop
     manager:
       collectorImage:
         repository: "otel/opentelemetry-collector-k8s"
