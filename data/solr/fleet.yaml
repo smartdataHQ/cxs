@@ -4,7 +4,6 @@ helm:
   chart: solr-operator
   repo: https://solr.apache.org/charts
   version: 0.8.1
-  releaseName: solr-operator
 
   values:
     zookeeper-operator:
