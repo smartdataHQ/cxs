@@ -1,4 +1,5 @@
 defaultNamespace: opentelemetry-operator
+namespace: opentelemetry-operator
 
 helm:
   repo: https://open-telemetry.github.io/opentelemetry-helm-charts
