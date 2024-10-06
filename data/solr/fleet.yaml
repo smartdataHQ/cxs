@@ -1,6 +1,13 @@
 defaultNamespace: data
 
+targets:
+  - clusterSelector:
+      matchLabels:
+        role: production
+    name: "production"
+
 helm:
+  releaseName: solr-operator
   chart: solr-operator
   repo: https://solr.apache.org/charts
   version: 0.8.1
