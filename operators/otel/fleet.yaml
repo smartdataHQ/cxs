@@ -8,11 +8,11 @@ helm:
   #    helm repo update
   #    helm  search repo -l opentelemetry-operator
   version: 0.69.0
-  releaseName: otelop
   values:
     # Shortened as fleet prefixes with csx-deployment breaking the 63 char
     # limit
-    nameOverride: otelop
+    #
+    fullnameOverride: otelop
     manager:
       collectorImage:
         repository: "otel/opentelemetry-collector-k8s"
