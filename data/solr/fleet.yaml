@@ -1,28 +1,18 @@
 defaultNamespace: data
 
+targets:
+  - clusterSelector:
+      matchLabels:
+        role: production
+    name: "production"
+
 helm:
+  releaseName: solr-operator
   chart: solr-operator
   repo: https://solr.apache.org/charts
+  version: 0.8.1
 
-targetCustomizations:
-
-  - name: development
-    clusterSelector:
-      matchLabels:
-        role: development
-    kustomize:
-      dir: overlays/development
-
-  - name: production
-    clusterSelector:
-      matchLabels:
-        role: production
-    kustomize:
-      dir: overlays/production
-
-  - name: production
-    clusterSelector:
-      matchLabels:
-        role: production
-    kustomize:
-      dir: overlays/production
+  values:
+    zookeeper-operator:
+      install: false
+      use: true

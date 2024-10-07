@@ -1,0 +1,7 @@
+# Shortened as fleet prefixes with csx-deployment breaking the 63 char
+# limit
+#
+fullnameOverride: otelop
+manager:
+  collectorImage:
+    repository: "otel/opentelemetry-collector-k8s"
