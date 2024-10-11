@@ -47,7 +47,7 @@ metadata:
   name: nifi-service
   namespace: pipelines
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - port: 8443
       targetPort: 8443
