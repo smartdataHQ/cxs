@@ -49,6 +49,7 @@ metadata:
   name: nifi-service
 spec:
   type: ClusterIP
+  namespace: pipelines
   selector:
     app: nifi
   ports:
