@@ -49,9 +49,8 @@ metadata:
   name: nifi-service
   namespace: pipelines
 spec:
-  type: ClusterIP  
+  type: NodePort  
   selector:
     app: nifi
   ports:
     - port: 8443
-      targetPort: 8443
