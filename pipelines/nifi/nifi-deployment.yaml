@@ -1,40 +1,3 @@
-# Persistent Volume (PV)
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: nifi-pv
-  namespace: pipelines
-spec:
-  capacity:
-    storage: 10Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /mnt/data/nifi
----
-# Persistent Volume Claim (PVC)
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: nifi-pvc
-  namespace: pipelines
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 10Gi
----
-# Secret
-apiVersion: v1
-kind: Secret
-metadata:
-  name: nifi-secret
-  namespace: pipelines
-type: Opaque
-data:
-  single_user_credentials_password: bmlmaUBzbmphbGxnb2du
----  
 # NiFi Deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -66,14 +29,17 @@ spec:
                   key: single_user_credentials_password 
           ports:
             - containerPort: 8443
-          volumeMounts:
-            - name: nifi-storage
-              mountPath: /opt/nifi/nifi-current/logs
-      volumes:
-        - name: nifi-storage
-          persistentVolumeClaim:
-            claimName: nifi-pvc
 ---
+# Opaque Secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nifi-secret
+  namespace: pipelines
+type: Opaque
+data:
+  single_user_credentials_password: bmlmaUBzbmphbGxnb2du # base64 encoded
+---  
 # NiFi Service
 apiVersion: v1
 kind: Service
