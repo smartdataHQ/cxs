@@ -41,16 +41,3 @@ metadata:
 type: Opaque
 data:
   single_user_credentials_password: bmlmaUBzbmphbGxnb2du # base64 encoded
----  
-# NiFi Service
-apiVersion: v1
-kind: Service
-metadata:
-  name: nifi-service
-  namespace: pipelines
-spec:
-  type: NodePort  
-  selector:
-    app: nifi
-  ports:
-    - port: 8443
