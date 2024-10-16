@@ -210,7 +210,7 @@ logs:
   path: /opt/airflow/logs
   persistence:
     enabled: true
-    existingClaim: airflow-pvc
+    existingClaim: airflow-logs-pvc
     accessMode: ReadWriteMany
 dags:
   path: /opt/airflow/dags
