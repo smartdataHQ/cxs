@@ -8,7 +8,6 @@ spec:
   defaultBackend:
     service:
       name: formclient
-      tier: app
       port:
         number: 3000
   rules:
