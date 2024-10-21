@@ -5,3 +5,4 @@
 4. `kubectl logs -f nifi-xxx-xxx -n pipelines`
 5. `kubectl delete deployment nifi -n pipelines`
 6. `kubectl delete -f nifi-deployment.yaml`
+
