@@ -1,0 +1,4 @@
+resources:
+  - nifi-deployment.yaml
+  - nifi-sevice.yaml
+  - nifi-ingress.yaml
