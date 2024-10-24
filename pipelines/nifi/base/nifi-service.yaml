@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nifi-web
+  namespace: pipelines
+spec:
+  type: ClusterIP
+  ports:
+    - name: nifi-https
+      port: 8443
+      protocol: TCP
+      targetPort: 8443 
+  selector:
+    app: nifi

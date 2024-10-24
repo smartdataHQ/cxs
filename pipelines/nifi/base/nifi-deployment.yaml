@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nifi
+  namespace: pipelines
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nifi
+  template:
+    metadata:
+      labels:
+        app: nifi
+    spec:     
+      securityContext:
+        sysctls:
+          - name: net.ipv4.ip_local_port_range
+            value: "10000 65000"
+      containers:
+        - name: nifi
+          image: apache/nifi:2.0.0-M4
+          env:
+            - name: HOSTNAME
+              value: nifi.contextsuite.com
+            - name: NIFI_WEB_HTTPS_HOST
+              value: "0.0.0.0"
+            - name: NIFI_WEB_HTTPS_PORT
+              value: "8443"  
+            - name: NIFI_WEB_PROXY_HOST
+              value: nifi.contextsuite.com
+            - name: SINGLE_USER_CREDENTIALS_USERNAME
+              value: admin
+            - name: SINGLE_USER_CREDENTIALS_PASSWORD 
+              valueFrom:
+                secretKeyRef:
+                  name: nifi-secret 
+                  key: single_user_credentials_password 
+          ports:
+            - containerPort: 8443

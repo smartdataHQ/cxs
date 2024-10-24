@@ -1,0 +1,11 @@
+defaultNamespace: pipelines
+namespace: pipelines
+
+targetCustomizations:
+
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: overlays/production
