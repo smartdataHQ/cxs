@@ -2,4 +2,4 @@ bases:
   - ../../base
 
 resources:
-  - nifi-ingress.yml
+  - nifi-ingress.yaml
