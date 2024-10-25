@@ -1,4 +1,5 @@
+bases:
+  - ../../base
+
 resources:
-  - nifi-deployment.yaml
-  - nifi-service.yaml
   - nifi-ingress.yaml
