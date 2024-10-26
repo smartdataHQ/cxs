@@ -59,6 +59,8 @@ kind: Ingress
 metadata:
   name: nifi
   namespace: pipelines
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   rules:
     - host: nifi.contextsuite.com
