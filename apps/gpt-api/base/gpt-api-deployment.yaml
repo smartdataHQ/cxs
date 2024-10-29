@@ -33,6 +33,7 @@ spec:
               path: /gpt-api/status/alive
             initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 5
           readinessProbe:
             httpGet:
               port: 8000
