@@ -35,3 +35,5 @@ data:
   CLICKHOUSE_HOST: '10.180.122.32'
   CLICKHOUSE_PORT: '8123'
   CLICKHOUSE_USER: 'default'
+
+  UNSTRUCTURED_API_URL: 'https://api.unstructuredapp.io'
