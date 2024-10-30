@@ -40,7 +40,7 @@ spec:
               path: /gpt-api/status/ready
             initialDelaySeconds: 15
             periodSeconds: 10
-            timeoutSeconds: 5
+            timeoutSeconds: 8
           env:
             - name: AZURE_OPENAI_API_KEY
               valueFrom:
