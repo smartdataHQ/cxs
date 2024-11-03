@@ -7,6 +7,6 @@ helm:
   #   helm repo add openobserve https://charts.openobserve.ai
   #    helm repo update
   #    helm  search repo -l cert-manager
-  version: 1.13.2
+  version: 0.13.2
   valuesFiles:
     - values.yaml
