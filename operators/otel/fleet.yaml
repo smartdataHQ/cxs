@@ -1,6 +1,12 @@
 defaultNamespace: opentelemetry-operator
 namespace: opentelemetry-operator
 
+targets:
+  - clusterSelector:
+      matchLabels:
+        role: production
+    name: "production"
+
 helm:
   repo: https://open-telemetry.github.io/opentelemetry-helm-charts
   chart: opentelemetry-operator
