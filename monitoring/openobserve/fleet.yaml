@@ -1,13 +1,14 @@
 defaultNamespace: openobserve
 
 releaseName: openobserve
+
 helm:
   repo: https://charts.openobserve.ai
   chart: openobserve-standalone
   # Find new versions
   #   helm repo add openobserve https://charts.openobserve.ai
   #    helm repo update
-  #    helm  search repo -l cert-manager
+  #    helm  search repo -l openobserve-standalone
   version: 0.13.2
   valuesFiles:
     - values.yaml
