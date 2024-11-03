@@ -1,5 +1,6 @@
 defaultNamespace: openobserve
 
+releaseName: openobserve
 helm:
   repo: https://charts.openobserve.ai
   chart: openobserve-standalone
