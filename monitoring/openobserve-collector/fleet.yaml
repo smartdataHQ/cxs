@@ -1,0 +1,14 @@
+defaultNamespace: openobserve-collector
+
+releaseName: openobservecol
+
+helm:
+  repo: https://charts.openobserve.ai
+  chart: openobserve-collector
+  # Find new versions
+  #   helm repo add openobserve https://charts.openobserve.ai
+  #    helm repo update
+  #    helm  search repo -l openobserve-collector
+  version: 0.3.13
+  valuesFiles:
+    - values.yaml

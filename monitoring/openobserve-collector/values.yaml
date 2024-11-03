@@ -1,0 +1,15 @@
+
+fullnameOverride: openobcol
+
+exporters:
+  otlphttp/openobserve:
+    endpoint: http://openobserve.openobserve.svc.cluster.local:5080/api/default/
+    headers:
+      Authorization: Basic Y29sbGVjdG9yQHNuamFsbGdvZ24uaXM6eVFOSlE5Rjkrb0xTanpVTXdFekM=
+
+
+  otlphttp/openobserve_k8s_events:
+    endpoint: http://openobserve.openobserve.svc.cluster.local:5080/api/default/
+    headers:
+      Authorization: Basic Y29sbGVjdG9yQHNuamFsbGdvZ24uaXM6eVFOSlE5Rjkrb0xTanpVTXdFekM=
+      stream-name: k8s_events
