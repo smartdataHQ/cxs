@@ -4,3 +4,7 @@ auth:
   ZO_ROOT_USER_PASSWORD: "TempPasswordReplacedRightAfterInstall"
 
 fullnameOverride: openobserve
+
+service:
+  annotations:
+    tailscale.com/expose: "true"
