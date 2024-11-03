@@ -2,3 +2,5 @@
 auth:
   ZO_ROOT_USER_EMAIL: "tommi@snjallgogn.is"
   ZO_ROOT_USER_PASSWORD: "TempPasswordReplacedRightAfterInstall"
+
+fullnameOverride: openobserve
