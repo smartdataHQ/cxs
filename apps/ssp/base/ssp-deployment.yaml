@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/ssp:fdfa4bf
+          image: quicklookup/ssp:f2185dc
           resources:
             requests:
               cpu: 200m
@@ -131,6 +131,11 @@ spec:
               secretKeyRef:
                 name: social-auth
                 key: TWITTER_API_SECRET
+          - name: MAPPING_TOKEN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: MAPPING_TOKEN_SECRET
           envFrom:
             - configMapRef:
                 name: ssp-config
