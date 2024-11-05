@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/gpt-api:c873512
+          image: quicklookup/gpt-api:65b9a9d
           resources:
             requests:
               cpu: 200m
@@ -119,6 +119,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: UNSTRUCTURED_API_KEY
+            - name: CONTEXT_SUITE_JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: CONTEXT_SUITE_JWT_SECRET_KEY
               
           envFrom:
             - configMapRef:
