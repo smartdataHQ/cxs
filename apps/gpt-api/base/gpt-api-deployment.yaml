@@ -124,26 +124,26 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: CONTEXT_SUITE_JWT_SECRET_KEY
-            - name: USEREMAIL
+            - name: BLUE_USEREMAIL
               valueFrom:
                 secretKeyRef:
                   name: llm
-                  key: USEREMAIL
-            - name: PASSWORD
+                  key: BLUE_USEREMAIL
+            - name: BLUE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: llm
-                  key: PASSWORD
-            - name: BASE_URL
+                  key: BLUE_PASSWORD
+            - name: BLUE_BASE_URL
               valueFrom:
                 secretKeyRef:
                   name: llm
-                  key: BASE_URL
-            - name: API_KEY
+                  key: BLUE_BASE_URL
+            - name: BLUE_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: llm
-                  key: API_KEY
+                  key: BLUE_API_KEY
               
           envFrom:
             - configMapRef:
