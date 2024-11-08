@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/gpt-chat:73ee553
+          image: quicklookup/gpt-chat:b98165d
           resources:
             requests:
               cpu: 200m
@@ -35,6 +35,12 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 2
+          env:
+            - name: CONTEXT_SUITE_JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: CONTEXT_SUITE_JWT_SECRET_KEY
           envFrom:
             - configMapRef:
                 name: gpt-chat-config

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/contextsuite:dae1748  
+          image: quicklookup/contextsuite:1f1173a
           resources:
             requests:
               cpu: 200m

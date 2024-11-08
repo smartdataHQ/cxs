@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/ctxllm:347280d
+          image: quicklookup/ctxllm:ecf9603
           resources:
             requests:
               cpu: 200m
