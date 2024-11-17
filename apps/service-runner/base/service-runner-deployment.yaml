@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/service-runner:8b048c2
+          image: quicklookup/service-runner:6c6e624
           resources:
             requests:
               cpu: 200m
