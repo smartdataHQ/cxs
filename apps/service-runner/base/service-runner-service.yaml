@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: servicerunner
+  labels:
+    app: servicerunner
+    tier: api
+spec:
+  type: NodePort
+  ports:
+    - port: 8088
+  selector:
+    app: servicerunner
+    tier: api
