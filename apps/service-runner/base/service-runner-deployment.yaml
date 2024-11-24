@@ -36,6 +36,11 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 2
           env:
+          - name: CLICKHOUSE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: CLICKHOUSE_PASSWORD
           - name: OPENAI_API_KEY
             valueFrom:
               secretKeyRef:
