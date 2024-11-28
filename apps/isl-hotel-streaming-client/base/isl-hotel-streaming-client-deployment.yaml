@@ -46,7 +46,7 @@ spec:
                 name: isl-hotel-streaming-client-config
           volumeMounts:
             - name: offset-volume
-              mountPath: /src/offset.txt
+              mountPath: /src
               subPath: offset.txt
       volumes:
         - name: offset-volume
