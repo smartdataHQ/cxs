@@ -16,6 +16,11 @@ spec:
       containers:
         - name: app
           image: luisw19/streaming-client:393570e
+          command:
+            - /bin/bash
+          args:
+            - "-c"
+            - "ln -s /mnt/pvc/offset.txt /src/offset.txt && npm start"
           resources:
             requests:
               cpu: 200m
@@ -46,7 +51,7 @@ spec:
                 name: isl-hotel-streaming-client-config
           volumeMounts:
             - name: offset-volume
-              mountPath: /src
+              mountPath: /mnt/pvc
               subPath: offset.txt
       volumes:
         - name: offset-volume
