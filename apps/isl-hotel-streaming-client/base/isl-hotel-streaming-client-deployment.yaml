@@ -21,21 +21,11 @@ spec:
               cpu: 200m
               memory: 200Mi
           env:
-            - name: CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: isl-hotel-streaming-client-secret
-                  key: CLIENT_ID
             - name: CLIENT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: isl-hotel-streaming-client-secret
                   key: CLIENT_SECRET
-            - name: INTEGRATION_USER
-              valueFrom:
-                secretKeyRef:
-                  name: isl-hotel-streaming-client-secret
-                  key: INTEGRATION_USER
             - name: INTEGRATION_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -46,11 +36,11 @@ spec:
                 secretKeyRef:
                   name: isl-hotel-streaming-client-secret
                   key: APP_KEY
-            - name: GRAPHQL_CLIENT_ID
+            - name: KAFKA_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: isl-hotel-streaming-client-secret
-                  key: GRAPHQL_CLIENT_ID
+                  key: KAFKA_PASSWORD
           envFrom:
             - configMapRef:
                 name: isl-hotel-streaming-client-config
@@ -61,4 +51,4 @@ spec:
       volumes:
         - name: offset-volume
           persistentVolumeClaim:
-            claimName: offset-pvc
+            claimName: isl-hotel-streaming-client-pvc

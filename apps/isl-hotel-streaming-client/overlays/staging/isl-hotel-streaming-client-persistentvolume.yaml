@@ -1,12 +1,35 @@
 apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: isl-hotel-streaming-client-pv
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 1Gi
+  csi:
+    driver: driver.longhorn.io
+    fsType: ext4
+    volumeAttributes:
+      diskSelector: ""
+      nodeSelector: ""
+      numberOfReplicas: "1"
+      staleReplicaTimeout: "20"
+    volumeHandle: isl-hotel-streaming-client-volume
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: longhorn-static
+  volumeMode: Filesystem
+---
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  labels:
-    service: isl-hotel-streaming-client
-  name: offset-pvc
+  name: isl-hotel-streaming-client-pvc
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi
+  storageClassName: longhorn-static
+  volumeMode: Filesystem
+  volumeName: isl-hotel-streaming-client-pv
