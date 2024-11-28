@@ -8,3 +8,4 @@ data:
   CLICKHOUSE_HOST: '10.180.122.32'
   CLICKHOUSE_USER: 'default'
   ENVIRONMENT: 'prod'
+  DEVELOPER: 'prod@snjallgogn.is'
