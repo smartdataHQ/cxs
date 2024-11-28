@@ -1,0 +1,5 @@
+bases:
+  - ../../base
+
+resources:
+  - isl-hotel-streaming-client-configmap.yaml

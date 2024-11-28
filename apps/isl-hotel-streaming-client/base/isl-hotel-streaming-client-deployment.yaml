@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: isl-hotel-streaming-client
+spec:
+  selector:
+    matchLabels:
+      app: isl-hotel-streaming-client
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: isl-hotel-streaming-client
+        tier: api
+    spec:
+      containers:
+        - name: app
+          image: luisw19/streaming-client:393570e
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          env:
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: isl-hotel-streaming-client-secret
+                  key: CLIENT_ID
+            - name: CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: isl-hotel-streaming-client-secret
+                  key: CLIENT_SECRET
+            - name: INTEGRATION_USER
+              valueFrom:
+                secretKeyRef:
+                  name: isl-hotel-streaming-client-secret
+                  key: INTEGRATION_USER
+            - name: INTEGRATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: isl-hotel-streaming-client-secret
+                  key: INTEGRATION_PASSWORD
+            - name: APP_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: isl-hotel-streaming-client-secret
+                  key: APP_KEY
+            - name: GRAPHQL_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: isl-hotel-streaming-client-secret
+                  key: GRAPHQL_CLIENT_ID
+          envFrom:
+            - configMapRef:
+                name: isl-hotel-streaming-client-config
+          volumeMounts:
+            - name: offset-volume
+              mountPath: /src/offset.txt
+              subPath: offset.txt
+      volumes:
+        - name: offset-volume
+          persistentVolumeClaim:
+            claimName: offset-pvc
