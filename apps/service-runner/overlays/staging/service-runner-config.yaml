@@ -7,3 +7,4 @@ data:
   OPENAI_LLM_MAKE_DREAM_TOUR: 'gpt_3_5_turbo'
   CLICKHOUSE_HOST: '10.180.122.32'
   CLICKHOUSE_USER: 'default'
+  ENVIRONMENT: 'prod'
