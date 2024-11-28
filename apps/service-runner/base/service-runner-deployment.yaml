@@ -46,6 +46,11 @@ spec:
               secretKeyRef:
                 name: llm
                 key: OPENAI_API_KEY
+          - name: FERNET_KEY_PATTERN
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: FERNET_KEY_PATTERN
           envFrom:
             - configMapRef:
                 name: servicerunner-config
