@@ -51,6 +51,21 @@ spec:
               secretKeyRef:
                 name: llm
                 key: FERNET_KEY_PATTERN
+          - name: NOVA_ZENDESK_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: NOVA_ZENDESK_EMAIL
+          - name: NOVA_ZENDESK_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: NOVA_ZENDESK_API_KEY
+          - name: NOVA_ZENDESK_SUBDOMAIN
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: NOVA_ZENDESK_SUBDOMAIN
           envFrom:
             - configMapRef:
                 name: servicerunner-config
