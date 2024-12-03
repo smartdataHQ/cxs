@@ -81,3 +81,37 @@ sudo tailscale up
 
 After that, approved the machine in the tailscale admin and disabled key
 expiry.
+
+# Sharing ports on linux Machines
+
+This example is setting up port 6379 (*redis*) to be shared on the VPN.
+
+## Setup systemctl unit
+
+To share a port on a linux machine permanently, you have to setup the following
+file, after installing tailscale itself.
+
+*File*: `/etc/systemd/system/tailscale-serve-6379.service`
+
+Contents (replacing 6379 port with the port you want to share):
+```ini
+[Unit]
+Description=Tailscale Serve TCP Port 6379
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/tailscale serve --tcp 6379 6379
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## Enable and start the service
+
+```bash
+sudo systemctl enable tailscale-serve-6379
+sudo systemctl start tailscale-serve-6379
+```
