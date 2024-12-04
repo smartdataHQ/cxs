@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/service-runner:f94e8a4
+          image: quicklookup/service-runner:7657958
           resources:
             requests:
               cpu: 200m
@@ -56,6 +56,11 @@ spec:
               secretKeyRef:
                 name: llm
                 key: NOVA_ZENDESK_EMAIL
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: REDIS_PASSWORD
           - name: NOVA_ZENDESK_API_KEY
             valueFrom:
               secretKeyRef:

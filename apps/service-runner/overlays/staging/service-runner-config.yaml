@@ -9,3 +9,5 @@ data:
   CLICKHOUSE_USER: 'default'
   ENVIRONMENT: 'prod'
   DEVELOPER: 'prod@snjallgogn.is'
+  REDIS_USER: ''
+  REDIS_HOST: 'redis-master.data.svc.cluster.local'
