@@ -3,7 +3,7 @@ defaultNamespace: data
 targets:
   - clusterSelector:
       matchLabels:
-        role: production
+        role: unused
     name: "production"
 
 helm:
