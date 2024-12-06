@@ -1,10 +1,14 @@
 defaultNamespace: data
 
-targets:
-  - clusterSelector:
+
+targetCustomizations:
+  - name: production
+    clusterSelector:
       matchLabels:
         role: unused
-    name: "production"
+    kustomize:
+      dir: overlays/production
+
 
 helm:
   releaseName: solr-operator
