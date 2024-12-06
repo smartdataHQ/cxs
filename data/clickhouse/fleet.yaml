@@ -6,6 +6,6 @@ targetCustomizations:
   - name: production
     clusterSelector:
       matchLabels:
-        role: production
+        role: unused
     kustomize:
       dir: overlays/production
