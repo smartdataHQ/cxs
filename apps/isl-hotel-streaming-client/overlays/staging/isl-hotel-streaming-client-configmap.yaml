@@ -18,8 +18,8 @@ data:
   SEGMENT_CONVERSION: "true"
   CLIENT_ID: ISLHTL_Client
   INTEGRATION_USER: ISLHTL_SNJALLGOGN
-  GRAPHQL_CLIENT_ID: 5645ff12-fd10-482d-9808-1015a14ee4ac
-  KAFKA_ENABLED: "false"
+  GRAPHQL_CLIENT_ID: bea04c89-586c-4f18-a9a3-6850818950dc
+  KAFKA_ENABLED: "true"
   KAFKA_HOST: kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092
   KAFKA_USER: user1
   KAFKA_CLIENT_ID: ohip-shovel

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: luisw19/streaming-client:393570e
+          image: quicklookup/streaming-client:4c7c1c0
           command:
             - /bin/bash
           args:
