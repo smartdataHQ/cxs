@@ -24,3 +24,4 @@ data:
   KAFKA_USER: user1
   KAFKA_CLIENT_ID: ohip-shovel
   KAFKA_TOPIC: se2-islandshotel-is
+  LOGLEVEL: debug
