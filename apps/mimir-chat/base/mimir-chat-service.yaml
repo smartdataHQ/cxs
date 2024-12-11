@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-chat-web
+  labels:
+    app: mimir-chat-web
+    tier: web
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+  selector:
+    app: mimir-chat-web
+    tier: web

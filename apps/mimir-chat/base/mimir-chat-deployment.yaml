@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mimir-chat-web
+spec:
+  selector:
+    matchLabels:
+      app: mimir-chat-web
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: mimir-chat-web
+        tier: web
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/mimir-chat:5ea4ef1
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /api/status/alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /api/status/ready
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+          env:
+            - name: CONTEXT_SUITE_JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: CONTEXT_SUITE_JWT_SECRET_KEY
+          envFrom:
+            - configMapRef:
+                name: mimir-chat-config
+      imagePullSecrets:
+        - name: dockerlock
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mimir-chat-web
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mimir-chat-web
+  maxReplicas: 1
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60

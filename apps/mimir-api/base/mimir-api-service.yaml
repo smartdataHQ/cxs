@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir-api
+  labels:
+    app: mimir-api
+    tier: api
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+  selector:
+    app: mimir-api
+    tier: api
