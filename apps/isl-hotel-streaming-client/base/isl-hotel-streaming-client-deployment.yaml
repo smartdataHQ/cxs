@@ -57,3 +57,5 @@ spec:
         - name: offset-volume
           persistentVolumeClaim:
             claimName: isl-hotel-streaming-client-pvc
+      imagePullSecrets:
+        - name: dockerlock
