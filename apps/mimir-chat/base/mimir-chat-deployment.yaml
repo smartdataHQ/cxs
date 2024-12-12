@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/mimir-chat:003e27f
+          image: quicklookup/mimir-chat:1d02ae7
           resources:
             requests:
               cpu: 200m
