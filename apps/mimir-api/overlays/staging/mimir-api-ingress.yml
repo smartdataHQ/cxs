@@ -6,7 +6,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "5m"
 spec:
   rules:
-    - host: chat.contextsuite.com
+    - host: mimir.contextsuite.com
       http:
         paths:
           - backend:

@@ -25,7 +25,7 @@ data:
   FRESHCHAT_CHANNEL_ID: "1f909ba8-a6f5-4d6d-bc65-1fdab508bd4f"
   FRESHCHAT_GROUP_ID: "82c37fba-cf1e-44dd-9870-58c6b571ecce"
 
-  BACKEND_BASE_URL: "https://chat.contextsuite.com"
+  BACKEND_BASE_URL: "https://mimir.contextsuite.com"
 
   EVENTS_ENDPOINT: "https://in.contextsuite.com/api/s/s2s/track"
 
