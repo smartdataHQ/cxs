@@ -16,7 +16,9 @@ spec:
       containers:
         - name: node
           image: quicklookup/mimir-chat:1d02ae7
-          command: npm start
+          args:
+            - npm
+            - start
           resources:
             requests:
               cpu: 200m
