@@ -8,7 +8,7 @@ data:
   CUBEJS_DB_NAME: 'custom'
   CUBEJS_DB_TYPE: 'clickhouse'
   CUBEJS_DB_CLICKHOUSE_READONLY: 'true'
-  CUBEJS_DEV_MODE: 'true'
+  CUBEJS_DEV_MODE: 'false'
   # CUBEJS_CUBESTORE_HOST: 'cubestore-router.data'
   # CUBEJS_REFRESH_WORKER: 'true'
   # CUBEJS_CACHE_AND_QUEUE_DRIVER: "cubestore"
