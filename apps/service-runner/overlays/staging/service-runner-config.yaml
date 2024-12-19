@@ -11,3 +11,7 @@ data:
   DEVELOPER: 'prod@snjallgogn.is'
   REDIS_USER: ''
   REDIS_HOST: 'redis-master.data.svc.cluster.local'
+  POSTGRES_DB: 'ssp'
+  POSTGRES_PORT: '5432'
+  POSTGRES_HOST: 'cxs-pg-pgbouncer.data'
+  POSTGRES_USER: 'cxs-pg'
