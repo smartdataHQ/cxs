@@ -75,7 +75,7 @@ airflow:
     - name: CLICKHOUSE_DB
       value: "default"
     - name: CLICKHOUSE_HOST
-      value: "10.180.122.32"
+      value: "10.180.122.46"
     - name: CLICKHOUSE_USER
       value: "default"
     - name: CLICKHOUSE_PASSWORD
