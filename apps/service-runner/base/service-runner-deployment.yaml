@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/service-runner:06b6694
+          image: quicklookup/service-runner:35710b5
           resources:
             requests:
               cpu: 200m
@@ -41,6 +41,11 @@ spec:
               secretKeyRef:
                 name: contextsuite
                 key: CLICKHOUSE_PASSWORD
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: DB_PASSWORD
           - name: OPENAI_API_KEY
             valueFrom:
               secretKeyRef:

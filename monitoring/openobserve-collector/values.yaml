@@ -5,11 +5,11 @@ exporters:
   otlphttp/openobserve:
     endpoint: http://openobserve.openobserve.svc.cluster.local:5080/api/default/
     headers:
-      Authorization: Basic dG9tbWlAc25qYWxsZ29nbi5pczpnQ1U2TVJ2OTVNeFhIY1lC
+      Authorization: Basic YWtzaGF5QHNuamFsbGdvZ24uaXM6TmZ2VkpRd2NVeXhFSm5VSA==
 
 
   otlphttp/openobserve_k8s_events:
     endpoint: http://openobserve.openobserve.svc.cluster.local:5080/api/default/
     headers:
-      Authorization: Basic dG9tbWlAc25qYWxsZ29nbi5pczpnQ1U2TVJ2OTVNeFhIY1lC
+      Authorization: Basic YWtzaGF5QHNuamFsbGdvZ24uaXM6TmZ2VkpRd2NVeXhFSm5VSA==
       stream-name: k8s_events

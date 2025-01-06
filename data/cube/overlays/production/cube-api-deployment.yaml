@@ -16,7 +16,7 @@ spec:
         kubernetes.io/hostname: growing-mouse
       containers:
         - name: cubejs-app
-          image: cubejs/cube:latest
+          image: cubejs/cube:v1.1.11
           ports:
             - containerPort: 4000
           envFrom:
