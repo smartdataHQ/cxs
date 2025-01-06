@@ -21,13 +21,6 @@ spec:
                   number: 3001
             path: /socket.io
             pathType: Prefix
-          - backend:
-            service:
-              name: formapi
-              port:
-                number: 3001
-            path: /wss
-            pathType: Prefix
   tls:
     - hosts:
         - forms.contextsuite.com
