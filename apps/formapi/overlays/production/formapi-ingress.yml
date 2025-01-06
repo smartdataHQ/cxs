@@ -4,7 +4,7 @@ metadata:
   name: formapi
 spec:
   rules:
-    - host: forms.contextsuite.com
+    - host: forms-api.contextsuite.com
       http:
         paths:
           - backend:
@@ -12,21 +12,7 @@ spec:
                 name: formapi
                 port:
                   number: 3001
-            path: /form-api
-            pathType: Prefix
-          - backend:
-              service:
-                name: formapi
-                port:
-                  number: 3001
-            path: /socket.io
-            pathType: Prefix
-          - backend:
-              service:
-                name: formapi
-                port:
-                  number: 3001
-            path: /wss
+            path: /
             pathType: Prefix
   tls:
     - hosts:
