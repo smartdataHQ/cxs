@@ -47,30 +47,28 @@ spec:
             - name: SPEECHMATICS_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: llm
+                  name: translator-api
                   key: SPEECHMATICS_API_KEY
             - name: LOCAL_DEVELOPMENT
               valueFrom:
                 secretKeyRef:
-                  name: llm
+                  name: translator-api
                   key: LOCAL_DEVELOPMENT
-                  value: False
             - name: ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: llm
+                  name: translator-api
                   key: ADMIN_USERNAME
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: llm
+                  name: translator-api
                   key: ADMIN_PASSWORD
             - name: FRONTEND_URL
               valueFrom:
                 secretKeyRef:
-                  name: llm
+                  name: translator-api
                   key: FRONTEND_URL
-                  value: https://transcribe.contextsuite.com
           envFrom:
             - configMapRef:
                 name: translator-api-config
