@@ -30,7 +30,7 @@ spec:
           livenessProbe:
             httpGet:
               port: 8000
-              path: api/status/alive
+              path: translator-api/status/alive
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 7
@@ -38,7 +38,7 @@ spec:
           readinessProbe:
             httpGet:
               port: 8000
-              path: api/status/ready
+              path: translator-api/status/ready
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 8
