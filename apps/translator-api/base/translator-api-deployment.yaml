@@ -30,7 +30,7 @@ spec:
           livenessProbe:
             httpGet:
               port: 8000
-              path: /translator-api/status/alive
+              path: api/status/alive
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 7
@@ -38,7 +38,7 @@ spec:
           readinessProbe:
             httpGet:
               port: 8000
-              path: /translator-api/status/ready
+              path: api/status/ready
             initialDelaySeconds: 15
             periodSeconds: 10
             timeoutSeconds: 8
@@ -47,28 +47,28 @@ spec:
             - name: SPEECHMATICS_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: translator-api
+                  name: llm
                   key: SPEECHMATICS_API_KEY
             - name: LOCAL_DEVELOPMENT
               valueFrom:
                 secretKeyRef:
-                  name: translator-api
+                  name: llm
                   key: LOCAL_DEVELOPMENT
                   value: False
             - name: ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: translator-api
+                  name: llm
                   key: ADMIN_USERNAME
             - name: ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: translator-api
+                  name: llm
                   key: ADMIN_PASSWORD
             - name: FRONTEND_URL
               valueFrom:
                 secretKeyRef:
-                  name: translator-api
+                  name: llm
                   key: FRONTEND_URL
                   value: https://transcribe.contextsuite.com
           envFrom:
