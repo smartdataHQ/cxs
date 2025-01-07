@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/translator-client:8841518
+          image: quicklookup/translator-client:940427a
           resources:
             requests:
               cpu: 200m
