@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: translator-client-config
+  # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
+data:
+  NEXT_PUBLIC_API_URL: https://transcribe.contextsuite.com
+  NEXT_PUBLIC_WEBSOCKET_URL: wss://transcribe.contextsuite.com

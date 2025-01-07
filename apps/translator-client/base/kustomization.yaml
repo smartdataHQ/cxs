@@ -1,0 +1,3 @@
+resources:
+  - translator-client-deployment.yaml
+  - translator-client-service.yaml

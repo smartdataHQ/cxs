@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+
+resources:
+  - translator-api-config.yaml
+  - translator-api-ingress.yml

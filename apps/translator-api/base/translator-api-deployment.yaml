@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: translator-api
+spec:
+  selector:
+    matchLabels:
+      app: translator-api
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: translator-api
+        tier: api
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/translator-api:426b82e
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          # volumeMounts:
+          # - name: ephemerala
+          #   mountPath: /usr/local/share/fonts
+          # - name: ephemeralb
+          #   mountPath: /cache
+          ports:
+            - containerPort: 8000
+          livenessProbe:
+            httpGet:
+              port: 8000
+              path: /translator-api/status/alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 7
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /translator-api/status/ready
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 8
+            failureThreshold: 6
+          env:
+            - name: SPEECHMATICS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: translator-api
+                  key: SPEECHMATICS_API_KEY
+            - name: LOCAL_DEVELOPMENT
+              valueFrom:
+                secretKeyRef:
+                  name: translator-api
+                  key: LOCAL_DEVELOPMENT
+                  value: False
+            - name: ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: translator-api
+                  key: ADMIN_USERNAME
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: translator-api
+                  key: ADMIN_PASSWORD
+            - name: FRONTEND_URL
+              valueFrom:
+                secretKeyRef:
+                  name: translator-api
+                  key: FRONTEND_URL
+                  value: https://transcribe.contextsuite.com
+          envFrom:
+            - configMapRef:
+                name: translator-api-config
+      imagePullSecrets:
+        - name: dockerlock
+      # volumes:
+      #   - name: ephemerala
+      #     emptyDir:
+      #       sizeLimit: 5Gi
+      #   - name: ephemeralb
+      #     emptyDir:
+      #       sizeLimit: 5Gi
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: translator-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: translator-api
+  maxReplicas: 2
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60
