@@ -25,3 +25,4 @@ data:
   KAFKA_CLIENT_ID: ohip-shovel
   KAFKA_TOPIC: se2-islandshotel-is
   LOGLEVEL: debug
+  EXTRA_PAYLOAD_VALS: '{"partition": "islandshotel.is"}'
