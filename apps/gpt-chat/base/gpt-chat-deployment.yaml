@@ -41,6 +41,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: CONTEXT_SUITE_JWT_SECRET_KEY
+            - name: NEXT_PUBLIC_LOCIZE_PROJECT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: NEXT_PUBLIC_LOCIZE_PROJECT_ID
           envFrom:
             - configMapRef:
                 name: gpt-chat-config
