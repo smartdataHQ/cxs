@@ -6,12 +6,12 @@ spec:
   selector:
     matchLabels:
       app: gpt-chat-web
-      tier: web
+      tier: app
   template:
     metadata:
       labels:
         app: gpt-chat-web
-        tier: web
+        tier: app
     spec:
       containers:
         - name: node
