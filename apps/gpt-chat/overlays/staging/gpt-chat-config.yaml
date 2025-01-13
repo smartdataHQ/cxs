@@ -6,3 +6,4 @@ metadata:
 data:
   API_ENDPOINT: "http://chat.contextsuite.com"
   WSS_ENDPOINT: "wss://chat.contextsuite.com"
+  NEXT_PUBLIC_LOCIZE_PROJECT_ID: "605eb209-6f22-4e15-b0bd-58cc443be60b"
