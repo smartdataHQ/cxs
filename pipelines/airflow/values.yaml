@@ -75,7 +75,10 @@ airflow:
     - name: CLICKHOUSE_DB
       value: "default"
     - name: CLICKHOUSE_HOST
-      value: "10.180.122.46"
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: clickhouse-host
     - name: CLICKHOUSE_USER
       value: "default"
     - name: CLICKHOUSE_PASSWORD
