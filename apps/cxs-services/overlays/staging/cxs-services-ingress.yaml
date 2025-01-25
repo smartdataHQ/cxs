@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: servicerunner
+  name: cxsservices
 spec:
   rules:
     - host: services.contextsuite.com
@@ -9,12 +9,12 @@ spec:
         paths:
           - backend:
               service:
-                name: servicerunner
+                name: cxsservices
                 port:
                   number: 8088
             path: /
             pathType: Prefix
   tls:
     - hosts:
-        - services.contextsuite.com
+        - cxs.contextsuite.com
       secretName: star-contextsuite-com

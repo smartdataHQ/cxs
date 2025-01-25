@@ -1,0 +1,3 @@
+resources:
+  - cxs-services-deployment.yaml
+  - cxs-services-service.yaml

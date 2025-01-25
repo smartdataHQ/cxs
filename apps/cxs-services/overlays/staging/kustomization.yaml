@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+
+resources:
+  - cxs-services-config.yaml
+#  - cxs-services-ingress.yaml

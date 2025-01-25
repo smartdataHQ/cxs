@@ -3,4 +3,3 @@ bases:
 
 resources:
   - service-runner-config.yaml
-  - service-runner-ingress.yaml

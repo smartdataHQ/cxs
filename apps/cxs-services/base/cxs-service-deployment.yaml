@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxsservices
+spec:
+  selector:
+    matchLabels:
+      app: cxsservices
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: cxsservices
+        tier: api
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/cxs-services:21115e1
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          ports:
+            - containerPort: 8088
+          livenessProbe:
+            httpGet:
+              port: 8088
+              path: /api/status/alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 8088
+              path: /api/status/ready
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+          env:
+          - name: CLICKHOUSE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: CLICKHOUSE_PASSWORD
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: DB_PASSWORD
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: OPENAI_API_KEY
+          - name: FERNET_KEY_PATTERN
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: FERNET_KEY_PATTERN
+          - name: NOVA_ZENDESK_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: NOVA_ZENDESK_EMAIL
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: REDIS_PASSWORD
+          - name: NOVA_ZENDESK_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: NOVA_ZENDESK_API_KEY
+          - name: NOVA_ZENDESK_SUBDOMAIN
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: NOVA_ZENDESK_SUBDOMAIN
+          envFrom:
+            - configMapRef:
+                name: cxs-services-config
+      imagePullSecrets:
+        - name: dockerlock
+
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cxsservices
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cxsservices
+  maxReplicas: 3
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60
