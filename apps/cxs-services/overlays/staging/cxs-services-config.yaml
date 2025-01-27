@@ -11,8 +11,22 @@ data:
   DEVELOPER: 'prod@snjallgogn.is'
   REDIS_USER: ''
   REDIS_HOST: 'redis-master.data'
+  REDIS_DB: '0'
   REDIS_URL: 'redis-master.data'
   POSTGRES_DB: 'ssp'
   POSTGRES_PORT: '5432'
   POSTGRES_HOST: 'cxs-pg-pgbouncer.data'
   POSTGRES_USER: 'cxs-pg'
+  SERVER_VERSION: '0.1.0'
+
+  DEFAULT_VECTOR_PROVIDER: 'Voyage'
+  DEFAULT_VECTOR_MODEL: 'voyage-multilingual-2'
+  MOCK_CONFIG_ROOT: 'resources/mock-config'
+  ALGORITHM: 'HS256'
+
+  SCRAPER_TEMP_DIR: '/tmp'
+  ACCESS_TOKEN_EXPIRE_MINUTES: '525600'
+
+  UNSTRUCTURED_API_URL: 'https://api.unstructuredapp.io'
+  LOCAL_FILE_INPUT_DIR: "/tmp/input"
+  LOCAL_FILE_OUTPUT_DIR: "/tmp/output"

@@ -15,11 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-services:21115e1
-          resources:
-            requests:
-              cpu: 200m
-              memory: 200Mi
+          image: quicklookup/cxs-services:2b43cd4
           ports:
             - containerPort: 8088
           livenessProbe:
@@ -71,16 +67,41 @@ spec:
               secretKeyRef:
                 name: llm
                 key: NOVA_ZENDESK_API_KEY
+          - name: DEFAULT_VECTOR_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: DEFAULT_VECTOR_API_KEY
+          - name: UNSTRUCTURED_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: UNSTRUCTURED_API_KEY
+          - name: VOYAGE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: VOYAGE_API_KEY
           - name: NOVA_ZENDESK_SUBDOMAIN
             valueFrom:
               secretKeyRef:
                 name: llm
                 key: NOVA_ZENDESK_SUBDOMAIN
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: TOKEN_SECRET_KEY
           envFrom:
             - configMapRef:
                 name: cxs-services-config
       imagePullSecrets:
         - name: dockerlock
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: cxs-service-pvc
+
 
 ---
 apiVersion: autoscaling/v1
