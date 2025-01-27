@@ -5,6 +5,8 @@ metadata:
   labels:
     app: cxsservices
     tier: api
+  annotations:
+    tailscale.com/expose: "true"
 spec:
   type: NodePort
   ports:
