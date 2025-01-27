@@ -37,3 +37,5 @@ data:
   CLICKHOUSE_USER: 'default'
 
   UNSTRUCTURED_API_URL: 'https://api.unstructuredapp.io'
+
+  SERVICES_BACKEND_URL: 'http://cxsservices:8088'
