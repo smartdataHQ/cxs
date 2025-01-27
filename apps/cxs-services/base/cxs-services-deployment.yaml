@@ -95,12 +95,16 @@ spec:
           envFrom:
             - configMapRef:
                 name: cxs-services-config
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
       imagePullSecrets:
         - name: dockerlock
       volumes:
-        - name: config
-          persistentVolumeClaim:
-            claimName: cxs-service-pvc
+        - name: cache
+          hostPath:
+            path: /cache
+            type: DirectoryOrCreate
 
 
 ---
