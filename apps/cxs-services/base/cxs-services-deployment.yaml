@@ -101,11 +101,9 @@ spec:
       imagePullSecrets:
         - name: dockerlock
       volumes:
-        - name: cache
-          hostPath:
-            path: /cache
-            type: DirectoryOrCreate
-
+        - name: config
+          persistentVolumeClaim:
+            claimName: cxs-service-pvc
 
 ---
 apiVersion: autoscaling/v1
