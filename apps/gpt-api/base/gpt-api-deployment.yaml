@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/gpt-api:8a4416d
+          image: quicklookup/gpt-api:9760a27
           resources:
             requests:
               cpu: 200m
