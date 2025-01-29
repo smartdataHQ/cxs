@@ -287,10 +287,11 @@ spec:
     #    imagePullPolicy: IfNotPresent
     secret: cluster1-pmm-secret
     serverHost: monitoring-service
-#  patroni:
-#    dynamicConfiguration:
-#      postgresql:
-#        parameters:
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        parameters:
+          max_connections: 150
 #          max_parallel_workers: 2
 #          max_worker_processes: 2
 #          shared_buffers: 1GB
