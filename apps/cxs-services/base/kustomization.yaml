@@ -2,3 +2,5 @@ resources:
   - cxs-services-deployment.yaml
   - cxs-services-service.yaml
   - cxs-services-volumes.yaml
+  - cxs-services-config.yaml
+  - cxs-services-ingress.yaml
