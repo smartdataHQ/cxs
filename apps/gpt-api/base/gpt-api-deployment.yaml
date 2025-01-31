@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/gpt-api:fa9f17e
+          image: quicklookup/gpt-api:75ca860
           resources:
             requests:
               cpu: 200m
@@ -144,7 +144,12 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: BLUE_API_KEY
-              
+            - name: MICROSOFT_CLIENT_SECRET_GOI
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: MICROSOFT_CLIENT_SECRET_GOI
+                  
           envFrom:
             - configMapRef:
                 name: gpt-api-config
