@@ -4,3 +4,6 @@ images:
 
 resources:
   - ../../base
+
+patches:
+  - path: contextsuite-config.yaml

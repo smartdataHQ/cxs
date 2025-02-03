@@ -1,0 +1,17 @@
+images:
+  - name: quicklookup/cxs-services
+    newTag: ae10154
+
+resources:
+  - ../../base
+patches:
+  - target:
+      kind: Ingress
+      name: cxs-services
+    patch: |
+      - "op": replace
+        "path": /spec/rules/0/host
+        "value": &fqdn cxs.staging.contextsuite.com
+      - "op": replace
+        "path": /spec/tls/0/hosts/0
+        "value": *fqdn  # <- this is a YAML anchor
