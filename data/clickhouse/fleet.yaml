@@ -9,3 +9,10 @@ targetCustomizations:
         role: unused
     kustomize:
       dir: overlays/production
+
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        role: staging
+    kustomize:
+      dir: overlays/staging
