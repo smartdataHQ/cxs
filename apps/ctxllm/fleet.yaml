@@ -5,6 +5,16 @@
 # are configured with a namespace so this default will apply
 namespace: solutions
 
-kustomize:
-  # To use a kustomization.yaml different from the one in the root folder
-  dir: ""
+targetCustomizations:
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: overlays/production
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        role: staging
+    kustomize:
+      dir: overlays/staging
