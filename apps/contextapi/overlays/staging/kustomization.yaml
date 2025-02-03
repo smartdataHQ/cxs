@@ -1,9 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-- ../../base
+  - ../../base
 patches:
-  # Set the image for the contextapi container on prod
   - target:
       kind: Deployment
       name: contextapi
@@ -12,3 +11,14 @@ patches:
         "path": /spec/template/spec/containers/0/image
         "value": "quicklookup/contextapi:87861e3"
   - path: contextapi-config.yaml
+  - target:
+      kind: Ingress
+      name: contextapi
+    patch: |
+      - "op": replace
+        "path": /spec/rules/0/host
+        "value": &fqdn app.staging.contextsuite.com
+      - "op": replace
+        "path": /spec/tls/0/hosts/0
+        "value": *fqdn  # <- this is a YAML anchor
+      

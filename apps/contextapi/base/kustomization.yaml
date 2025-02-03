@@ -1,3 +1,5 @@
 resources:
   - contextapi-deployment.yaml
   - contextapi-service.yaml
+  - contextapi-config.yaml
+  - contextapi-ingress.yaml
