@@ -1,6 +1,6 @@
-bases:
-  - ../../base
+images:
+  - name: quicklookup/formclient
+    newTag: "55111e8"
 
 resources:
-  - formclient-config.yaml
-  - formclient-ingress.yml
+  - ../../base
