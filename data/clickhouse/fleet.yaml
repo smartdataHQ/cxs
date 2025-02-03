@@ -13,6 +13,6 @@ targetCustomizations:
   - name: staging
     clusterSelector:
       matchLabels:
-        role: staging
+        role: unused
     kustomize:
       dir: overlays/staging
