@@ -1,6 +1,12 @@
-bases:
-  - ../../base
+images:
+  - name: quicklookup/ctxllm
+    newTag: 95a2104
 
 resources:
-  - ctxllm-config.yaml
-  - ctxllm-ingress.yaml
+  - ../../base
+patches:
+  - target:
+      kind: Deployment
+      name: ctxllm
+
+

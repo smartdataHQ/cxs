@@ -1,3 +1,5 @@
 resources:
   - ctxllm-deployment.yaml
   - ctxllm-service.yaml
+  - ctxllm-ingress.yaml
+  - ctxllm-config.yaml

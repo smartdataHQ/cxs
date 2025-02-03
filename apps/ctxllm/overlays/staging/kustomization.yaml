@@ -1,19 +1,18 @@
 images:
-  - name: quicklookup/contextapi
-    newTag: 87861e3
+  - name: quicklookup/ctxllm
+    newTag: 95a2104
 
 resources:
   - ../../base
 patches:
-  - path: contextapi-config.yaml
+  - path: ctxllm-config.yaml
   - target:
       kind: Ingress
-      name: contextapi
+      name: ctxllm
     patch: |
       - "op": replace
         "path": /spec/rules/0/host
-        "value": &fqdn app.staging.contextsuite.com
+        "value": &fqdn llm.staging.contextsuite.com
       - "op": replace
         "path": /spec/tls/0/hosts/0
         "value": *fqdn  # <- this is a YAML anchor
-      

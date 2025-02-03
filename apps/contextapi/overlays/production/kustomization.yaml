@@ -1,13 +1,6 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
+images:
+  - name: quicklookup/contextapi
+    newTag: 87861e3
+
 resources:
 - ../../base
-patches:
-  # Set the image for the contextapi container on prod
-  - target:
-      kind: Deployment
-      name: contextapi
-    patch: |
-      - "op": replace
-        "path": /spec/template/spec/containers/0/image
-        "value": "quicklookup/contextapi:87861e3"
