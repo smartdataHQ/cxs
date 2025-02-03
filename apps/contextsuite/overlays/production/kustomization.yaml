@@ -1,6 +1,12 @@
-bases:
+resources:
   - ../../base
 
-resources:
-  - contextsuite-config.yaml
-  - contextsuite-ingress.yml
+patches:
+  - target:
+      kind: Deployment
+      name: contextsuite
+    patch: |
+      - "op": replace
+        "path": /spec/template/spec/containers/0/image
+        "value": "quicklookup/contextsuite:82b25bb"
+

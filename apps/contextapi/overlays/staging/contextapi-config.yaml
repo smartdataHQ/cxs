@@ -4,9 +4,7 @@ metadata:
   name: contextapi-config
   # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
 data:
-  # Clickhouse
-  CLICKHOUSE_CONNECTION: 'http://10.180.122.46:8123'
-#  # Sentry
+  # Sentry
   SENTRY_ENVIRONMENT: 'contextsuite-staging'
   NEXT_PUBLIC_SENTRY_DSN:  #'https://97964f08ea76422f830fba0618967fc4@o982223.ingest.sentry.io/5937160'
   SENTRY_DSN: '' # 'https://97964f08ea76422f830fba0618967fc4@o982223.ingest.sentry.io/5937160'

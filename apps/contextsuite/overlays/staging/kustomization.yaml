@@ -1,0 +1,21 @@
+resources:
+  - ../../base
+patches:
+  - path: contextsuite-config.yaml
+  - target:
+      kind: Deployment
+      name: contextsuite
+    patch: |
+      - "op": replace
+        "path": /spec/template/spec/containers/0/image
+        "value": "quicklookup/contextsuite:82b25bb"
+  - target:
+      kind: Ingress
+      name: contextsuite
+    patch: |
+      - "op": replace
+        "path": /spec/rules/0/host
+        "value": &fqdn app.staging.contextsuite.com
+      - "op": replace
+        "path": /spec/tls/0/hosts/0
+        "value": *fqdn  # <- this is a YAML anchor
