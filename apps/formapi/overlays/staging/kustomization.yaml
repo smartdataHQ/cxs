@@ -1,0 +1,18 @@
+images:
+  - name: quicklookup/formapi
+    newTag: "82b25bb"
+
+resources:
+  - ../../base
+patches:
+  - path: formapi-config.yaml
+  - target:
+      kind: Ingress
+      name: formapi-ingress
+    patch: |
+      - "op": replace
+        "path": /spec/rules/0/host
+        "value": &fqdn forms.staging.contextsuite.com
+      - "op": replace
+        "path": /spec/tls/0/hosts/0
+        "value": *fqdn  # <- this is a YAML anchor

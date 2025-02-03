@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: formapi-config
+data:
+  NODE_ENV: 'staging'
+  # Required Services
+  FRONTEND_URL: 'https://forms.staging.contextsuite.com'

@@ -1,3 +1,5 @@
 resources:
   - formapi-deployment.yaml
   - formapi-service.yaml
+  - formapi-config.yaml
+  - formapi-ingress.yml
