@@ -2,4 +2,4 @@ resources:
   - formclient-deployment.yaml
   - formclient-service.yaml
   - formclient-config.yaml
-  - formclient-ingress.yml
+  - formclient-ingress.yaml
