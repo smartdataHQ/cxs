@@ -12,7 +12,7 @@ data:
   NEXTAUTH_URL: 'https://app.contextsuite.com'
 
 
-  REACT_APP_JITSU_DEPLOY_DOMAIN: 'events.staging.contextsuite.com'
-  CONTEXTSUITE_ADMIN_URL: 'https://admin.staging.contextsuite.com'
-  NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL: 'https://admin.staging.contextsuite.com'
-  NEXT_PUBLIC_CHAT_WSS_ENDPOINT: 'ws://chat.staging.contextsuite.com:8088/api/table_chat'
+  REACT_APP_JITSU_DEPLOY_DOMAIN: 'events-staging.contextsuite.com'
+  CONTEXTSUITE_ADMIN_URL: 'https://admin-staging.contextsuite.com'
+  NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL: 'https://admin-staging.contextsuite.com'
+  NEXT_PUBLIC_CHAT_WSS_ENDPOINT: 'ws://chat-staging.contextsuite.com:8088/api/table_chat'

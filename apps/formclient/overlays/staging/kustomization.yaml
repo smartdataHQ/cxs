@@ -13,7 +13,7 @@ patches:
     patch: |
       - "op": replace
         "path": /spec/rules/0/host
-        "value": &fqdn forms.staging.contextsuite.com
+        "value": &fqdn forms-staging.contextsuite.com
       - "op": replace
         "path": /spec/tls/0/hosts/0
         "value": *fqdn  # <- this is a YAML anchor
