@@ -1,3 +1,5 @@
+namespace: data
+
 resources:
   - clickhouse-stateful.yaml
   - clickhouse-service.yaml
