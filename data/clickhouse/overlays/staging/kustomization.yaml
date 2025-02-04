@@ -1,2 +1,11 @@
 resources:
   - ../../base
+
+# Create patch that removes the nodeAffinity section from the StatefulSet
+patches:
+  - target:
+      kind: StatefulSet
+      name: clickhouse
+    patch: |
+      - "op": remove
+        "path": /spec/template/spec/affinity/nodeAffinity
