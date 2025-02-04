@@ -1,6 +1,6 @@
 images:
   - name: quicklookup/formapi
-    newTag: "82b25bb"
+    newTag: "9149074"
 
 resources:
   - ../../base
