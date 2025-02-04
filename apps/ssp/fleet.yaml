@@ -15,4 +15,4 @@ targetCustomizations:
         role: staging
     kustomize:
       dir: overlays/staging
-    doNotDeploy: false
+    donotDeploy: true
