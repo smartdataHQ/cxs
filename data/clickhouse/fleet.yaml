@@ -6,13 +6,15 @@ targetCustomizations:
   - name: production
     clusterSelector:
       matchLabels:
-        role: unused
+        role: production
     kustomize:
       dir: overlays/production
+    doNotDeploy: true
 
   - name: staging
     clusterSelector:
       matchLabels:
-        role: unused
+        role: production
     kustomize:
       dir: overlays/staging
+    doNotDeploy: true
