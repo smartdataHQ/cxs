@@ -123,7 +123,22 @@ airflow:
       valueFrom:
         secretKeyRef:
           name: airflow
-          key: azure-tenant-id 
+          key: azure-tenant-id
+    - name: ISLHTL_AIRTABLE_LOCATION_METADATA_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: islandshotel
+          key: AIRTABLE_LOCATION_METADATA_API_KEY
+    - name: ISLHTL_AIRTABLE_LOCATION_METADATA_APP_ID
+      valueFrom:
+        secretKeyRef:
+          name: islandshotel
+          key: AIRTABLE_LOCATION_METADATA_APP_ID
+    - name: ISLHTL_AIRTABLE_LOCATION_METADATA_TABLE_ID
+      valueFrom:
+        secretKeyRef:
+          name: islandshotel
+          key: AIRTABLE_LOCATION_METADATA_TABLE_ID
   extraVolumeMounts:
     #- name: airflow-logs      
       #mountPath: /opt/airflow/logs

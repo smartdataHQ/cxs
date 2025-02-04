@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/ssp:52aeea0
+          image: quicklookup/ssp:06776c6
           resources:
             requests:
               cpu: 200m
@@ -136,6 +136,26 @@ spec:
               secretKeyRef:
                 name: social-auth
                 key: MAPPING_TOKEN_SECRET
+          - name: CXS_CDN_HOST
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: CXS_CDN_HOST
+          - name: CXS_CDN_PORT
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: CXS_CDN_PORT
+          - name: CXS_CDN_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: CXS_CDN_USERNAME
+          - name: CXS_CDN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: social-auth
+                key: CXS_CDN_PASSWORD
           envFrom:
             - configMapRef:
                 name: ssp-config

@@ -8,7 +8,7 @@ data:
   OPENAI_LLM_STREAM_ANSWER: "gpt_4"
   OPENAI_LLM_MAKE_DREAM_TOUR: "gpt_3_5_turbo"
   OPENAI_LLM_SUMMARISER: "gpt_3_5_turbo"
-  SUMMARISATION_WINDOW_N_TOKENS: "10000"
+  SUMMARISATION_WINDOW_N_TOKENS: "35000"
   AZURE_OPENAI_API_TYPE: "azure"
   AZURE_OPENAI_API_VERSION: "2023-05-15"
   AZURE_OPENAI_API_BASE: "https://smartdatagpt4.openai.azure.com/"
@@ -37,3 +37,5 @@ data:
   CLICKHOUSE_USER: "default"
 
   UNSTRUCTURED_API_URL: "https://api.unstructuredapp.io"
+
+  SERVICES_BACKEND_URL: 'http://cxsservices:8088'
