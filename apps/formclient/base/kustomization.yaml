@@ -1,3 +1,5 @@
+namespace: solutions
+
 resources:
   - formclient-deployment.yaml
   - formclient-service.yaml
