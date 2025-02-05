@@ -1,0 +1,18 @@
+namespace: data
+
+resources:
+  - solr-cloud.yaml
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+helmCharts:
+  - name: solr-operator
+    repo: https://solr.apache.org/charts
+    version: 0.8.1
+    releaseName: solr-operator
+    namespace: data
+    valuesInline:
+      zookeeper-operator:
+          install: false
+          use: true
