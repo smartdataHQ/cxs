@@ -47,7 +47,7 @@ spec:
             name: clickhouse-config
         - name: clickhouse-data
           hostPath:
-            path: /data/local/clickhouse
+            path: /data/local/clickhouse2
         - name: clickhouse-elastic
           hostPath:
             path: /data/elastic/clickhouse
@@ -80,7 +80,7 @@ spec:
             subPath: config.xml
             name: config-volume
           - name: clickhouse-data
-            mountPath: /var/lib/clickhouse2
+            mountPath: /var/lib/clickhouse
       dnsPolicy: ClusterFirstWithHostNet
       dnsConfig:
         searches:
