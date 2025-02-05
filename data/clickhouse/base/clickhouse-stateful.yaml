@@ -21,6 +21,8 @@ spec:
         app: clickhouse
         tier: data
     spec:
+      securityContext:
+        fsGroup: 101  # All files in the volume will belong to group 1000
       affinity:
         nodeAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
