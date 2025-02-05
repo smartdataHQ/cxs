@@ -49,6 +49,24 @@ spec:
         - name: keeper-logs
           hostPath:
             path: /data/logs/keeper
+      initContainers:
+        - name: init-chown
+          image: busybox
+          securityContext:
+            runAsUser: 0  # Runs as root to modify ownership
+          command: [ 'sh', '-c' ]
+          args:
+            - |
+              echo "Setting ownership of Keeper data directory at $KEEPER_DATA_PATH to $KEEPER_USER_ID";
+              chown -v $KEEPER_USER_ID:$KEEPER_USER_ID $KEEPER_DATA_PATH;
+          env:
+            - name: KEEPER_USER_ID
+              value: "101"
+            - name: KEEPER_DATA_PATH
+              value: /var/lib/clickhouse-keeper
+          volumeMounts:
+            - name: keeper-data
+              mountPath: /var/lib/clickhouse-keeper
       containers:
       - name: keeper
         image: clickhouse/clickhouse-keeper:24.3.2.23-alpine
