@@ -1,6 +1,7 @@
 namespace: data
 
 resources:
+  - https://solr.apache.org/operator/downloads/crds/v0.8.1/all-with-dependencies.yaml
   - solr-cloud.yaml
 
 apiVersion: kustomize.config.k8s.io/v1beta1
