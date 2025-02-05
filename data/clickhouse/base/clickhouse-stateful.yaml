@@ -41,16 +41,6 @@ spec:
                     values:
                       - clickhouse
               topologyKey: "kubernetes.io/hostname"
-      volumes:
-        - name: config-volume
-          configMap:
-            name: clickhouse-config
-        - name: clickhouse-data
-          hostPath:
-            path: /data/local/clickhouse
-        - name: clickhouse-elastic
-          hostPath:
-            path: /data/elastic/clickhouse
       initContainers:
         - name: init-chown
           image: busybox
@@ -100,6 +90,16 @@ spec:
             name: config-volume
           - name: clickhouse-data
             mountPath: /var/lib/clickhouse
+      volumes:
+        - name: config-volume
+          configMap:
+            name: clickhouse-config
+        - name: clickhouse-data
+          hostPath:
+            path: /data/local/clickhouse
+        - name: clickhouse-elastic
+          hostPath:
+            path: /data/elastic/clickhouse
       dnsPolicy: ClusterFirstWithHostNet
       dnsConfig:
         searches:

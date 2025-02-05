@@ -39,16 +39,6 @@ spec:
                     values:
                       - keeper
               topologyKey: "kubernetes.io/hostname"
-      volumes:
-        - name: config-volume
-          configMap:
-            name: keeper-config
-        - name: keeper-data
-          hostPath:
-            path: /data/local/keeper
-        - name: keeper-logs
-          hostPath:
-            path: /data/logs/keeper
       initContainers:
         - name: init-chown
           image: busybox
@@ -86,3 +76,13 @@ spec:
             mountPath: /var/lib/clickhouse-keeper
           - name: keeper-logs
             mountPath: /var/log
+      volumes:
+        - name: config-volume
+          configMap:
+            name: keeper-config
+        - name: keeper-data
+          hostPath:
+            path: /data/local/keeper
+        - name: keeper-logs
+          hostPath:
+            path: /data/logs/keeper
