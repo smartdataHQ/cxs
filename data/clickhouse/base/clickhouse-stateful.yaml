@@ -47,13 +47,34 @@ spec:
             name: clickhouse-config
         - name: clickhouse-data
           hostPath:
-            path: /data/local/clickhouse2
+            path: /data/local/clickhouse
         - name: clickhouse-elastic
           hostPath:
             path: /data/elastic/clickhouse
+      initContainers:
+        - name: init-chown
+          image: busybox
+          securityContext:
+            runAsUser: 0  # Runs as root to modify ownership
+          command: ['sh', '-c' ]
+          args:
+            - |
+              chown -v $CLICKHOUSE_USER_ID $CLICKHOUSE_DATA_PATH
+          env:
+           - name: CLICKHOUSE_USER_ID
+             value: "101"
+           - name: CLICKHOUSE_DATA_PATH
+             valueFrom:
+               resourceFieldRef:
+                 resource: "volumeMounts.clickhouse-data.mountPath"
+
+          volumeMounts:
+              - name: clickhouse-data
+                mountPath: /var/lib/clickhouse
       containers:
       - name: clickhouse
         image: clickhouse/clickhouse-server:24.8.4.13-alpine
+
         ports:
         - containerPort: 9000
         - containerPort: 8123
