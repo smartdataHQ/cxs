@@ -15,5 +15,5 @@ helmCharts:
     namespace: data
     valuesInline:
       zookeeper-operator:
-          install: false
+          install: true
           use: true
