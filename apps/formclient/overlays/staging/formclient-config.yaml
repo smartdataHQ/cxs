@@ -10,4 +10,4 @@ data:
   # LOCAL_REDIS: 'true'
 
   # Required Services
-  NEXT_PUBLIC_BACKEND_URL: 'https://forms-staging.contextsuite.com/form-api'
+  NEXT_PUBLIC_BACKEND_URL: 'https://forms.contextsuite.dev/form-api'

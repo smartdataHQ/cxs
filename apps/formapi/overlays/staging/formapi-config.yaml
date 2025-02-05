@@ -5,4 +5,4 @@ metadata:
 data:
   NODE_ENV: 'staging'
   # Required Services
-  FRONTEND_URL: 'https://forms-staging.contextsuite.com'
+  FRONTEND_URL: 'https://forms.contextsuite.dev'
