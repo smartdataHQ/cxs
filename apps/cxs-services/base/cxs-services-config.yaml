@@ -5,7 +5,7 @@ metadata:
 data:
   OPENAI_LLM_COMBINED_EXTRACTION_PROMPT: 'gpt-4o'
   OPENAI_LLM_MAKE_DREAM_TOUR: 'gpt_3_5_turbo'
-  CLICKHOUSE_HOST: '10.180.122.32'
+  CLICKHOUSE_HOST: 'clickhouse.data'
   CLICKHOUSE_USER: 'default'
   ENVIRONMENT: 'prod'
   DEVELOPER: 'prod@snjallgogn.is'
