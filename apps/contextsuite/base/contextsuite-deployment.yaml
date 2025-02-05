@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/contextsuite:dd825b0
+          image: quicklookup/contextsuite:ebd3605
           resources:
             requests:
               cpu: 200m
@@ -114,6 +114,11 @@ spec:
                 secretKeyRef:
                   name: contextsuite
                   key: TWITTER_API_SECRET
+            - name: NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL
           envFrom:
             - configMapRef:
                 name: contextsuite-config

@@ -6,6 +6,10 @@ metadata:
     ingress.kubernetes.io/ssl-redirect: "true"
     external-dns.alpha.kubernetes.io/hostname: admin.contextsuite.com
     nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET,HEAD,PUT,PATCH,POST,DELETE"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization, x-authorization, x-requested-with"
+    nginx.ingress.kubernetes.io/cors-expose-headers: "Access-Control-Allow-Origin"
 
 spec:
   rules:
