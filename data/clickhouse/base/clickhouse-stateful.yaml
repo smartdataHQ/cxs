@@ -80,7 +80,7 @@ spec:
             subPath: config.xml
             name: config-volume
           - name: clickhouse-data
-            mountPath: /var/lib/clickhouse
+            mountPath: /var/lib/clickhouse2
       dnsPolicy: ClusterFirstWithHostNet
       dnsConfig:
         searches:
