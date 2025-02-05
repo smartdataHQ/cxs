@@ -59,15 +59,13 @@ spec:
           command: ['sh', '-c' ]
           args:
             - |
-              chown -v $CLICKHOUSE_USER_ID $CLICKHOUSE_DATA_PATH
+              echo "Setting ownership of ClickHouse data directory at $CLICKHOUSE_DATA_PATH to $CLICKHOUSE_USER_ID";
+              chown -v $CLICKHOUSE_USER_ID $CLICKHOUSE_DATA_PATH;
           env:
            - name: CLICKHOUSE_USER_ID
              value: "101"
            - name: CLICKHOUSE_DATA_PATH
-             valueFrom:
-               resourceFieldRef:
-                 resource: "volumeMounts.clickhouse-data.mountPath"
-
+             value: /var/lib/clickhouse
           volumeMounts:
               - name: clickhouse-data
                 mountPath: /var/lib/clickhouse
