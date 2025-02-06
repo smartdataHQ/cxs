@@ -117,7 +117,7 @@ spec:
             - name: NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL
               valueFrom:
                 configMapKeyRef:
-                  name: contextsuite
+                  name: contextsuite-config
                   key: NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL
           envFrom:
             - configMapRef:
