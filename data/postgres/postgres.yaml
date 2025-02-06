@@ -147,8 +147,8 @@ spec:
       exposeSuperusers: true
       config:
         global:
-          max_client_conn: 200
-          default_pool_size: 50
+          max_client_conn: "200"
+          default_pool_size: "50"
 
 
       #          pool_mode: transaction
