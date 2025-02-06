@@ -14,7 +14,18 @@ spec:
                   number: 8088
             path: /
             pathType: Prefix
+    - host: cxs.contextsuite.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: cxsservices
+                port:
+                  number: 8088
+            path: /
+            pathType: Prefix
   tls:
     - hosts:
         - cxs.contextsuite.com
+        - services.contextsuite.com
       secretName: star-contextsuite-com
