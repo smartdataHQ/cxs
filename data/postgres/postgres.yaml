@@ -145,6 +145,13 @@ spec:
       replicas: 3
       image: percona/percona-postgresql-operator:2.3.1-ppg16-pgbouncer
       exposeSuperusers: true
+      config:
+        global:
+          max_client_conn: 200
+          default_pool_size: 50
+
+
+      #          pool_mode: transaction
       #      resources:
       #        limits:
       #          cpu: 200m
@@ -190,9 +197,6 @@ spec:
   #      customTLSSecret:
   #        name: keycloakdb-pgbouncer.tls
   #
-  #      config:
-  #        global:
-  #          pool_mode: transaction
 
   backups:
     pgbackrest:
