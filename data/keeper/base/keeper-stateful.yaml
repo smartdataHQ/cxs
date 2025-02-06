@@ -65,7 +65,6 @@ spec:
           hostPort: 9181
         - containerPort: 9234
           hostPort: 9234
-        restartPolicy: Never
         command: [ "/bin/bash", "-c"]
         args: [ "IFS=- read -r var1 var2 <<< $HOSTNAME ; echo 'Custom Entrypoint' ; echo $var2 ; declare -x PODNR=$var2 ; /entrypoint.sh" ]
         volumeMounts:

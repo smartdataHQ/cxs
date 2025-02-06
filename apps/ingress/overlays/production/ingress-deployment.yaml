@@ -26,7 +26,6 @@ spec:
           name: http
         - containerPort: 2222
           name: sftp
-        restartPolicy: Never
         env:
           - name: POSTGRES_PASSWORD
             valueFrom:
