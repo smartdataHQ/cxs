@@ -8,7 +8,7 @@ patches:
   - path: formapi-config.yaml
   - target:
       kind: Ingress
-      name: formapi-ingress
+      name: formapi
     patch: |
       - "op": replace
         "path": /spec/rules/0/host
