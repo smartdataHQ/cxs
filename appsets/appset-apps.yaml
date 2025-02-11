@@ -15,6 +15,7 @@ spec:
           - path: data/*/overlays/staging
           - path: authentication/*/overlays/staging
           - path: data/postgres # This could go into another AppSet definition perhaps **shruggies**
+          - path: monitoring/*/overlays/staging
   template:
     metadata:
       name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
