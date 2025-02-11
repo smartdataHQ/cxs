@@ -1,0 +1,17 @@
+resources:
+  - ../../base
+
+namespace: monitoring
+
+helmCharts:
+  - name: victoria-metrics-agent
+    repo: https://victoriametrics.github.io/helm-charts/
+    releaseName: vma
+    version: 0.15.7
+    namespace: monitoring
+    valuesFile: values.yaml
+
+
+
+
+
