@@ -154,6 +154,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: MICROSOFT_CLIENT_SECRET_BLUE
+            - name: TRAVIA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: TRAVIA_API_KEY
                   
           envFrom:
             - configMapRef:
