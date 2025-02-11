@@ -1,0 +1,10 @@
+resources:
+  - ../../base/
+
+helmCharts:
+  - name: prometheus-postgres-exporter
+    repo: https://prometheus-community.github.io/helm-charts
+    releaseName: postgres-exporter
+    version: 6.8.1
+    namespace: monitoring
+    valuesFile: values.yaml

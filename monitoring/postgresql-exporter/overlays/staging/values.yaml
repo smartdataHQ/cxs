@@ -1,0 +1,9 @@
+config:
+  datasource:
+    host: 'cxs-pg-pgbouncer.data.svc'
+    user: 'postgres'
+    port: '5432'
+    sslmode: require
+    passwordSecret:
+      name: 'postgres-data'
+      key: 'password'
