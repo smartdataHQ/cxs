@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/gpt-api:5a0fd35
+          image: quicklookup/gpt-api:74cd749
           resources:
             requests:
               cpu: 200m
@@ -154,6 +154,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: MICROSOFT_CLIENT_SECRET_BLUE
+            - name: TRAVIA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: TRAVIA_API_KEY
                   
           envFrom:
             - configMapRef:
@@ -177,6 +182,6 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: gpt-api
-  maxReplicas: 2
-  minReplicas: 1
+  maxReplicas: 4
+  minReplicas: 2
   targetCPUUtilizationPercentage: 60
