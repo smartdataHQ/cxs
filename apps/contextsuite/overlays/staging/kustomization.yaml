@@ -1,6 +1,6 @@
 images:
   - name: quicklookup/contextsuite
-    newTag: 82b25bb
+    newTag: c721d76
 
 resources:
   - ../../base
