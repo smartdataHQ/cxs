@@ -10,3 +10,6 @@ helm:
   version: 1.15.3
   valuesFiles:
     - values.yaml
+
+kustomize:
+  dir: overlays/production
