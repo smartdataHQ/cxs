@@ -6,3 +6,6 @@ metadata:
 data:
   API_ENDPOINT: "http://agents.contextsuite.com"
   WSS_ENDPOINT: "wss://agents.contextsuite.com"
+  NEXT_PUBLIC_API_ENDPOINT: "http://agents.contextsuite.com"
+  NEXT_PUBLIC_WSS_ENDPOINT: "wss://agents.contextsuite.com"
+
