@@ -9,7 +9,7 @@ spec:
         paths:
           - backend:
               service:
-                name: csx-mimir-web
+                name: cxs-mimir-web
                 port:
                   number: 3000
             path: /
