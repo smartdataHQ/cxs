@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: mimir-chat-web
+  name: cxs-mimir-web
 spec:
   rules:
     - host: agents.contextsuite.com
@@ -9,7 +9,7 @@ spec:
         paths:
           - backend:
               service:
-                name: mimir-chat-web
+                name: csx-mimir-web
                 port:
                   number: 3000
             path: /
