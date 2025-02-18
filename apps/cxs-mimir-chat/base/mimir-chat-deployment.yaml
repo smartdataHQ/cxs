@@ -46,7 +46,7 @@ spec:
                   key: CONTEXT_SUITE_JWT_SECRET_KEY
           envFrom:
             - configMapRef:
-                name: mimir-chat-config
+                name: cxs-mimir-chat-config
       imagePullSecrets:
         - name: dockerlock
 ---
