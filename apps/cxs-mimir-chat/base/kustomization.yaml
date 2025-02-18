@@ -1,0 +1,3 @@
+resources:
+  - cxs-mimir-chat-deployment.yaml
+  - cxs-mimir-chat-service.yaml
