@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cxs-mimir-apimimir-api-config
+  name: cxs-mimir-api-config
   # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
 data:
   DEFAULT_LLM_MODEL: "Azure"
