@@ -8,6 +8,4 @@ data:
   WSS_ENDPOINT: "wss://agents.contextsuite.com"
   NEXT_PUBLIC_API_ENDPOINT: "http://agents.contextsuite.com"
   NEXT_PUBLIC_WSS_ENDPOINT: "wss://agents.contextsuite.com"
-  REACT_APP_API_ENDPOINT: "http://agents.contextsuite.com"
-  REACT_APP_WSS_ENDPOINT: "wss://agents.contextsuite.com"
 
