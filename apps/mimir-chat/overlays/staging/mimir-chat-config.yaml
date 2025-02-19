@@ -4,5 +4,5 @@ metadata:
   name: mimir-chat-config
   # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
 data:
-  API_ENDPOINT: "http://mimir.contextsuite.com"
+  API_ENDPOINT: "https://mimir.contextsuite.com"
   WSS_ENDPOINT: "wss://mimir.contextsuite.com"
