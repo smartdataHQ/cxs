@@ -22,8 +22,8 @@ spec:
             httpGet:
               port: 8088
               path: /api/status/alive
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 10
+            periodSeconds: 10
           readinessProbe:
             httpGet:
               port: 8088
