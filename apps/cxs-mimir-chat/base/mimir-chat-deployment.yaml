@@ -1,21 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gpt-chat-web
+  name: cxs-mimir-web
 spec:
   selector:
     matchLabels:
-      app: gpt-chat-web
+      app: cxs-mimir-web
       tier: web
   template:
     metadata:
       labels:
-        app: gpt-chat-web
+        app: cxs-mimir-web
         tier: web
     spec:
       containers:
         - name: node
-          image: quicklookup/gpt-chat:691401a
+          image: quicklookup/mimir-chat:3e7cf44
+          args:
+            - npm
+            - start
           resources:
             requests:
               cpu: 200m
@@ -41,26 +44,21 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: CONTEXT_SUITE_JWT_SECRET_KEY
-            - name: NEXT_PUBLIC_LOCIZE_PROJECT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: NEXT_PUBLIC_LOCIZE_PROJECT_ID
           envFrom:
             - configMapRef:
-                name: gpt-chat-config
+                name: cxs-mimir-web-config
       imagePullSecrets:
         - name: dockerlock
 ---
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: gpt-chat-web
+  name: cxs-mimir-web
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: gpt-chat-web
+    name: cxs-mimir-web
   maxReplicas: 1
   minReplicas: 1
   targetCPUUtilizationPercentage: 60

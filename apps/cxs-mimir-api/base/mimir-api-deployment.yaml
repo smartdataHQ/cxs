@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mimir-api
+  name: cxs-mimir-api
 spec:
   selector:
     matchLabels:
-      app: mimir-api
+      app: cxs-mimir-api
       tier: api
   template:
     metadata:
       labels:
-        app: mimir-api
+        app: cxs-mimir-api
         tier: api
     spec:
       containers:
         - name: node
-          image: quicklookup/mimir-api:53babd6
+          image: quicklookup/cxs-mimir-api:879631f
           resources:
             requests:
               cpu: 200m
@@ -124,35 +124,14 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: CONTEXT_SUITE_JWT_SECRET_KEY
-            - name: BLUE_USEREMAIL
+            - name: TAVILY_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: llm
-                  key: BLUE_USEREMAIL
-            - name: BLUE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: BLUE_PASSWORD
-            - name: BLUE_BASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: BLUE_BASE_URL
-            - name: BLUE_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: BLUE_API_KEY
-            - name: TRAVIA_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: TRAVIA_API_KEY
-
+                  key: TAVILY_API_KEY
           envFrom:
             - configMapRef:
-                name: mimir-api-config
+                name: cxs-mimir-api-config
       imagePullSecrets:
         - name: dockerlock
       volumes:
@@ -166,12 +145,12 @@ spec:
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: mimir-api
+  name: cxs-mimir-api
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: mimir-api
+    name: cxs-mimir-api
   maxReplicas: 2
   minReplicas: 1
   targetCPUUtilizationPercentage: 60

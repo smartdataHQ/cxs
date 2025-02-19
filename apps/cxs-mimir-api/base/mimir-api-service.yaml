@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cxs-mimir-api
+  labels:
+    app: cxs-mimir-api
+    tier: api
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+  selector:
+    app: cxs-mimir-api
+    tier: api

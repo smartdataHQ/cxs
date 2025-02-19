@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+
+resources:
+  - mimir-api-config.yaml
+  - mimir-api-ingress.yml

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/formapi:9149074
+          image: quicklookup/formapi:7a0827a
           resources:
             requests:
               cpu: 200m
@@ -64,6 +64,21 @@ spec:
                 secretKeyRef:
                   name: formapi
                   key: REDIS_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: formapi
+                  key: JWT_SECRET
+            - name: JWT_EXPIRES_IN
+              valueFrom:
+                secretKeyRef:
+                  name: formapi
+                  key: JWT_EXPIRES_IN
+            - name: HASH_SALT
+              valueFrom:
+                secretKeyRef:
+                  name: formapi
+                  key: HASH_SALT
           envFrom:
             - configMapRef:
                 name: formapi-config

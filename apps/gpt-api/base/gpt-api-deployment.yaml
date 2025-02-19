@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/gpt-api:6fa2ef9
+          image: quicklookup/gpt-api:9d3e8d6
           resources:
             requests:
               cpu: 200m
@@ -154,6 +154,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: MICROSOFT_CLIENT_SECRET_BLUE
+            - name: TRAVIA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: TRAVIA_API_KEY
                   
           envFrom:
             - configMapRef:
