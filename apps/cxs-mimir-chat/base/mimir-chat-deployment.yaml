@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/mimir-chat:3e7cf44
+          image: quicklookup/mimir-chat:dff275e
           args:
             - npm
             - start
