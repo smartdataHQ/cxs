@@ -17,7 +17,7 @@ data:
   AZURE_DEPLOYMENT_NAME_gpt_4_32k: "Uber-Thor"
 
   ENV: "prod"
-  REDIS_HOST: "redis://redis-master.data.svc.cluster.local:6379"
+  REDIS_HOST: "redis://redis-master.data.svc.cluster.local"
   FRESHDESK_BASE_URL: "https://arctic-adventures.freshdesk.com"
   FRESHDESK_OUTBOUND_EMAIL_ID: "103000132039"
 
