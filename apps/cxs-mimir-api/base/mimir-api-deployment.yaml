@@ -126,7 +126,7 @@ spec:
                   key: CONTEXT_SUITE_JWT_SECRET_KEY
           envFrom:
             - configMapRef:
-                name: mimir-api-config
+                name: cxs-mimir-api-config
       imagePullSecrets:
         - name: dockerlock
       volumes:
