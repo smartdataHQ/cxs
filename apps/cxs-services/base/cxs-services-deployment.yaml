@@ -30,7 +30,7 @@ spec:
               path: /api/status/ready
             initialDelaySeconds: 5
             periodSeconds: 10
-            timeoutSeconds: 2
+            timeoutSeconds: 3
           env:
           - name: CLICKHOUSE_PASSWORD
             valueFrom:
