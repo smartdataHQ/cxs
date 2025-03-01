@@ -36,6 +36,9 @@ spec:
     - name: convoy-db
       databases:
         - convoy
+    - name: grafana-db
+      databases:
+        - grafana
   #  users:
   #    - name: rhino
   #      databases:
