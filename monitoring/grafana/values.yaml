@@ -15,6 +15,7 @@ grafana.ini:
   database:
     type: postgres
     url: $__file{/etc/secrets/csx-secrets/db-url}
+    ssl_mode: disable
 
 extraSecretMounts:
   - name: csx-secrets
