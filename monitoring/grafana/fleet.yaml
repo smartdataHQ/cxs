@@ -1,0 +1,14 @@
+defaultNamespace: grafana
+
+releaseName: grafana
+
+helm:
+  repo: https://grafana.github.io/helm-charts
+  chart: grafana
+  # Find new versions
+  #   helm repo add grafana https://grafana.github.io/helm-charts
+  #    helm repo update
+  #    helm  search repo -l grafana
+  version: 8.10.1
+  valuesFiles:
+    - values.yaml

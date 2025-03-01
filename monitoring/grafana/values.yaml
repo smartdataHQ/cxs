@@ -1,0 +1,24 @@
+grafana.ini:
+  paths:
+    data: /var/lib/grafana/
+    logs: /var/log/grafana
+    plugins: /var/lib/grafana/plugins
+    provisioning: /etc/grafana/provisioning
+  analytics:
+    check_for_updates: true
+  log:
+    mode: console
+  grafana_net:
+    url: https://grafana.net
+  server:
+    domain: grafana.contextsuite.com
+  database:
+    type: postgres
+	url: $__file{/etc/secrets/csx-secrets/db-url}
+
+extraSecretMounts:
+  name: csx-secrets
+  mountPath: /etc/secrets/csx-secrets
+  secretName: csx-secrets
+  readOnly: true
+  optional: false
