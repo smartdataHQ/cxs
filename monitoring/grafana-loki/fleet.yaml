@@ -12,6 +12,3 @@ helm:
   version: 6.27.0
   valuesFiles:
     - values.yaml
-
-  # Disable go template pre-processing on the fleet values
-  disablePreProcess: false
