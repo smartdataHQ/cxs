@@ -51,8 +51,8 @@ loki:
       s3: null
       endpoint: http://minio.storage.svc.cluster.local:9025
       region: null
-      accessKeyId: ${S3_LOKI_ACCESS_KEY_ID}
-      secretAccessKey: ${S3_LOKI_SECRET_ACCESS_KEY}
+      accessKeyId: "${S3_LOKI_ACCESS_KEY_ID}"
+      secretAccessKey: "${S3_LOKI_SECRET_ACCESS_KEY}"
       s3ForcePathStyle: true
       insecure: true
     bucketNames:
