@@ -22,7 +22,9 @@ loki:
         index:
           prefix: index_
           period: 24h
-
+# https://github.com/grafana/loki/issues/7287
+global:
+   dnsService: "rke2-coredns-rke2-coredns"
 # How to use secrets in loki helm chart
 # https://github.com/grafana/loki/issues/8572
 backend:
