@@ -1,8 +1,7 @@
 defaultNamespace: grafana
 
-releaseName: grafana-loki
-
 helm:
+  releaseName: loki
   repo: https://grafana.github.io/helm-charts
   chart: loki
   # Find new versions
