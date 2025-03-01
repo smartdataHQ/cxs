@@ -14,7 +14,7 @@ grafana.ini:
     domain: grafana.contextsuite.com
   database:
     type: postgres
-	url: $__file{/etc/secrets/csx-secrets/db-url}
+    url: $__file{/etc/secrets/csx-secrets/db-url}
 
 extraSecretMounts:
   name: csx-secrets
