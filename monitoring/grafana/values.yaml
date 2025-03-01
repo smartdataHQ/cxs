@@ -23,3 +23,8 @@ extraSecretMounts:
     secretName: csx-secrets
     readOnly: true
     optional: false
+
+service:
+  annotations:
+    tailscale.com/hostname: grafana
+    tailscale.com/expose: "true"
