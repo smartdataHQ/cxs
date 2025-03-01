@@ -9,6 +9,21 @@ helm:
   #   helm repo add grafana https://grafana.github.io/helm-charts
   #    helm repo update
   #    helm  search repo -l grafana
-  version: 8.10.1
+
+
+
+#    
+#    #     #     #     ######   #     #  
+#    #  #  #    # #    #     #  ##    #  
+#    #  #  #   #   #   #     #  # #   #  
+#    #  #  #  #     #  ######   #  #  #  
+#    #  #  #  #######  #   #    #   # #  
+#    #  #  #  #     #  #    #   #    ##  
+#     ## ##   #     #  #     #  #     #  
+#    
+# Before upgrading, check if the following issue is fixed, pinned to 11.4.1 for
+# now
+# https://github.com/grafana/grafana/issues/99774
+  version: 8.8.6
   valuesFiles:
     - values.yaml
