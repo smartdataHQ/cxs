@@ -4,7 +4,7 @@ loki:
     type: "s3"
     s3:
       s3: null
-      endpoint: http://minio.storage.svc.cluster.local:9024
+      endpoint: http://minio.storage.svc.cluster.local:9025
       region: null
       accessKeyId: "${`${S3_LOKI_ACCESS_KEY_ID}`}"
       secretAccessKey: "${`${S3_LOKI_SECRET_ACCESS_KEY}`}"
