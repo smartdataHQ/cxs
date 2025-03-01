@@ -17,8 +17,8 @@ grafana.ini:
     url: $__file{/etc/secrets/csx-secrets/db-url}
 
 extraSecretMounts:
-  name: csx-secrets
-  mountPath: /etc/secrets/csx-secrets
-  secretName: csx-secrets
-  readOnly: true
-  optional: false
+  - name: csx-secrets
+    mountPath: /etc/secrets/csx-secrets
+    secretName: csx-secrets
+    readOnly: true
+    optional: false
