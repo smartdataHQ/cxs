@@ -12,6 +12,7 @@ grafana.ini:
     url: https://grafana.net
   server:
     domain: grafana.contextsuite.com
+    root_url: https://grafana.contextsuite.com
   database:
     type: postgres
     url: $__file{/etc/secrets/csx-secrets/db-url}
