@@ -1,0 +1,14 @@
+defaultNamespace: grafana
+
+helm:
+  releaseName: alloy
+  repo: https://grafana.github.io/helm-charts
+  chart: alloy
+  # Find new versions
+  #   helm repo add grafana https://grafana.github.io/helm-charts
+  #    helm repo update
+  #    helm  search repo -l grafana/alloy
+
+  version: 0.12.1
+  valuesFiles:
+    - values.yaml

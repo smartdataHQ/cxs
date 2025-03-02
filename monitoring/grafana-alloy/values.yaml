@@ -1,0 +1,61 @@
+controller:
+  type: 'deployment'
+alloy:
+  configMap:
+    content: |-
+      // Write your Alloy config here:
+      loki.write "default" {
+        endpoint {
+          url = "http://loki-write:3100/loki/api/v1/push"
+        }
+      }
+      
+      // discovery.kubernetes allows you to find scrape targets from Kubernetes resources.
+      // It watches cluster state and ensures targets are continually synced with what is currently running in your cluster.
+      discovery.kubernetes "node" {
+        role = "pod"
+      }
+      discovery.kubernetes "pods" {
+        role = "pod"
+      }
+      
+      discovery.relabel "pods" {
+        targets = discovery.kubernetes.pods.targets
+        rule {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_name"]
+          separator     = "/"
+          target_label  = "job"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          target_label  = "app"
+        }
+        rule {
+          source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+          target_label  = "app"
+        }
+        rule {
+          action = "replace"
+          source_labels = ["__meta_kubernetes_pod_container_id"]
+          regex = "^(\\w+):\\/\\/.+$"
+          replacement = "$1"
+          target_label = "tmp_container_runtime"
+        }
+      }
+      
+      loki.source.kubernetes "pods" {
+        targets    = discovery.relabel.pods.output
+        forward_to = [loki.write.default.receiver]
+      }
