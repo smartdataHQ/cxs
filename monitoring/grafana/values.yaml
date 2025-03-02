@@ -17,6 +17,15 @@ grafana.ini:
     url: $__file{/etc/secrets/csx-secrets/db-url}
     ssl_mode: require
 
+ingress:
+  enabled: true
+  hosts:
+    - grafana.contextsuite.com
+  tls:
+    - hosts:
+        - grafana.contextsuite.com
+      secretName: star-contextsuite-com
+
 extraSecretMounts:
   - name: csx-secrets
     mountPath: /etc/secrets/csx-secrets
