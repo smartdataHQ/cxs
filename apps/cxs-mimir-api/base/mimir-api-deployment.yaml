@@ -48,7 +48,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: llm
-                  key: AZURE_OPENAI_API_KEY_gpt_3_5_turbo
+                  key: AZURE_OPENAI_API_KEY
             - name: AZURE_OPENAI_API_KEY_gpt_4
               valueFrom:
                 secretKeyRef:
