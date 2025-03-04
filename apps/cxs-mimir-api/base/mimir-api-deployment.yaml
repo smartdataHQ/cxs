@@ -49,61 +49,21 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: AZURE_OPENAI_API_KEY
-            - name: AZURE_OPENAI_API_KEY_gpt_4
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: AZURE_OPENAI_API_KEY_gpt_4
             - name: OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: llm
                   key: OPENAI_API_KEY_MIMIR2
-            - name: OPENAI_API_KEY_SMARTDATA
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: OPENAI_API_KEY_SMARTDATA
-            - name: FRESHDESK_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: CHAT_FRESHDESK_API_KEY
-            - name: CHAT_FRESHDESK_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: CHAT_FRESHDESK_API_KEY
-            - name: BOKUN_PROD_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: BOKUN_PROD_API_KEY
-            - name: FRESHCHAT_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: FRESHCHAT_API_TOKEN
             - name: EVENTS_SERVER_KEY
               valueFrom:
                 secretKeyRef:
                   name: llm
                   key: EVENTS_SERVER_KEY
-            - name: GOOGLE_MAPS_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: GOOGLE_MAPS_API_KEY
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: llm
                   key: REDIS_PASSWORD
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: AWS_SECRET_ACCESS_KEY
             - name: CLICKHOUSE_PASSWORD_LLM
               valueFrom:
                 secretKeyRef:
