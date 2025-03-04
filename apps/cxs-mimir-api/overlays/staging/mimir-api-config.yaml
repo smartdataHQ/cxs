@@ -13,7 +13,6 @@ data:
   AZURE_OPENAI_API_BASE: "https://snjallgpt-swe.openai.azure.com/"
   AZURE_OPENAI_API_VERSION: "2025-02-01-preview"
   AZURE_DEPLOYMENT_NAME: "gpt-4o"
-  AZURE_OPENAI_API_KEY: "4778ac678181421c977be2527efffe0c"
   AZURE_OPENAI_API_TYPE: "azure"
 
   # AZURE_OPENAI_API_TYPE: "azure"
