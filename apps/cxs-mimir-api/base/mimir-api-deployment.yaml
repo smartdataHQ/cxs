@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-mimir-api:9d1c04c
+          image: quicklookup/cxs-mimir-api:392c85c
           resources:
             requests:
               cpu: 200m
@@ -44,7 +44,7 @@ spec:
             timeoutSeconds: 9
             failureThreshold: 6
           env:
-            - name: AZURE_OPENAI_API_KEY
+            - name: AZURE_OPENAI_API_KEY_NOT_USED
               valueFrom:
                 secretKeyRef:
                   name: llm
