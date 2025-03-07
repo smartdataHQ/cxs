@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/formapi:7446923
+          image: quicklookup/formapi:04961dc
           resources:
             requests:
               cpu: 200m
