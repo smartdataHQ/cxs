@@ -1,5 +1,5 @@
 remoteWrite:
-  - url: "https://push.runit.is/api/v1/write"
+  - git: "https://ingest.observe.skyvafnir.cloud/api/v1/write"
 
 env:
   - name: VM_remoteWrite_basicAuth_username
