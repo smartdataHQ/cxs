@@ -5,7 +5,7 @@ helm:
   repo: https://helm.releases.hashicorp.com
   chart: vault
   # Find new versions
-https://helm.releases.hashicorp.com
+  #   helm repo add hashicorp https://helm.releases.hashicorp.com
   #    helm repo update
   #    helm  search repo -l hashicorp/vault
 
