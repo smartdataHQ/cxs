@@ -1,4 +1,4 @@
-defaultNamespace: vault
+defaultNamespace: data
 
 helm:
   releaseName: vault
