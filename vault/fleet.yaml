@@ -1,0 +1,14 @@
+defaultNamespace: vault
+
+helm:
+  releaseName: vault
+  repo: https://helm.releases.hashicorp.com
+  chart: vault
+  # Find new versions
+https://helm.releases.hashicorp.com
+  #    helm repo update
+  #    helm  search repo -l hashicorp/vault
+
+  version: 0.29.1
+  valuesFiles:
+    - values.yaml
