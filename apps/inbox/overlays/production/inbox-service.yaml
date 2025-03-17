@@ -9,7 +9,7 @@ spec:
   type: ClusterIP
   sessionAffinity: ClientIP
   ports:
-    - port: 8080
+    - port: 9090
       name: http
     - port: 2222
       name: sftp
