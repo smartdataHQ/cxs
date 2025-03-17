@@ -1,0 +1,6 @@
+resources:
+  - inbox-deployment.yaml
+  - inbox-config.yaml
+  - inbox-service.yaml
+  - inbox-ingress.yaml
+  - inbox-autoscaler.yaml

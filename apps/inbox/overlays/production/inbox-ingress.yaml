@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: inbox
+spec:
+  rules:
+    - host: inbox.contextsuite.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: inbox
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - inbox.contextsuite.com
+      secretName: star-contextsuite-com
