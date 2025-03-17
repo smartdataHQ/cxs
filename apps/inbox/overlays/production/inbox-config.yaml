@@ -26,7 +26,7 @@ data:
   REDIS_LOCAL: 'true'
 
   ## Postgres
-  POSTGRES_HOST: 'data-cxs-pg-ha'
+  POSTGRES_HOST: 'cxs-pg-pgbouncer.data'
   POSTGRES_PORT: '5432'
   POSTGRES_USER: 'cxs-pg'
   POSTGRES_DB: 'ssp'
@@ -59,7 +59,7 @@ data:
   JWT_EXPIRATION: '3600000'
   JWT_REFRESH_EXPIRATION: '86400000'
 
-  VAULT_HOST: 'data-vault-vault'
+  VAULT_HOST: 'vault-vault.data'
   VAULT_PORT: '8200'
   VAULT_SCHEME: 'http'
   VAULT_TOKEN: 'ingression'
