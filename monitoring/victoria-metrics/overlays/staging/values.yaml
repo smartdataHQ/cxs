@@ -24,3 +24,7 @@ config:
     - job_name: postgresql-exporter
       static_configs:
         - targets: ["postgres-exporter-prometheus-postgres-exporter.monitoring.svc:80"]
+    
+    - job_name: kubernetes-metrics
+      static_configs:
+        - targets: ["rke2-metrics-server.kube-system.svc:443"]
