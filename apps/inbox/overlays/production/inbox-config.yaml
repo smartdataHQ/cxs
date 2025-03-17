@@ -26,7 +26,7 @@ data:
   REDIS_LOCAL: 'true'
 
   ## Postgres
-  POSTGRES_HOST: 'cxs-pg-pgbouncer.data'
+  POSTGRES_HOST: 'cxs-pg-ha.data'
   POSTGRES_PORT: '5432'
   POSTGRES_USER: 'cxs-pg'
   POSTGRES_DB: 'ssp'
