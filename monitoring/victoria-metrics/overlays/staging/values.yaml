@@ -26,5 +26,8 @@ config:
         - targets: ["postgres-exporter-prometheus-postgres-exporter.monitoring.svc:80"]
     
     - job_name: kubernetes-metrics
+      scheme: https
+      tls_config:
+        insecure_skip_verify: true
       static_configs:
         - targets: ["rke2-metrics-server.kube-system.svc:443"]
