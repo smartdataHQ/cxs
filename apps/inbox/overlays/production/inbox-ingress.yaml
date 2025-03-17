@@ -11,7 +11,7 @@ spec:
               service:
                 name: inbox
                 port:
-                  number: 8080
+                  number: 9090
             path: /
             pathType: Prefix
   tls:
