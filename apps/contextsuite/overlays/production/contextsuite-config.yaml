@@ -6,7 +6,7 @@ data:
   ZONE: 'dev_sbx'
 
   # Redis
-  REDIS_URL: 'redis-headless.data'
+  REDIS_URL: 'redis-master.data'
   LOCAL_REDIS: 'true'
 
   # Required Services
