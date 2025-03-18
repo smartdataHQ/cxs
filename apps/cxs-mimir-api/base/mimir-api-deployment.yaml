@@ -114,12 +114,12 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: TRAVIA_API_KEY
-             - name: SFTP_USERNAME
+            - name: SFTP_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: llm
                   key: SFTP_USERNAME
-              - name: SFTP_PASSWORD
+            - name: SFTP_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: llm
