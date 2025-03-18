@@ -7,7 +7,7 @@ data:
   ZONE: 'dev_sbx'
 
   # Redis
-  REDIS_URL: 'redis-master.data'
+  REDIS_URL: 'redis-headless.data'
   REDIS_USER: ''
   LOCAL_REDIS: 'false'
 
