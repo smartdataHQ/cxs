@@ -1,0 +1,12 @@
+defaultNamespace: data
+
+helm:
+  releaseName: kafka-schema-registry
+  # Copied from https://github.com/confluentinc/cp-helm-charts/blob/master/charts/cp-schema-registry/README.md
+  #
+  # Added annotation to the service to expose it via tailscale
+  # Added customEnvBlock for secret
+  chart: ./cp-schema-registry/
+
+  valuesFiles:
+    - values.yaml

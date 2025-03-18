@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-mimir-api:204f26a
+          image: quicklookup/cxs-mimir-api:d4c3709
           resources:
             requests:
               cpu: 200m
@@ -89,6 +89,41 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: TAVILY_API_KEY
+            - name: BLUE_USEREMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: BLUE_USEREMAIL
+            - name: BLUE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: BLUE_PASSWORD
+            - name: BLUE_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: BLUE_BASE_URL
+            - name: BLUE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: BLUE_API_KEY
+            - name: TRAVIA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: TRAVIA_API_KEY
+            - name: SFTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: SFTP_USERNAME
+            - name: SFTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: SFTP_PASSWORD
           envFrom:
             - configMapRef:
                 name: cxs-mimir-api-config

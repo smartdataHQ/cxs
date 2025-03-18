@@ -23,6 +23,8 @@ loki:
         index:
           prefix: index_
           period: 24h
+  limits_config:
+    ingestion_rate_mb: 20
 # https://github.com/grafana/loki/issues/7287
 global:
    dnsService: "rke2-coredns-rke2-coredns"

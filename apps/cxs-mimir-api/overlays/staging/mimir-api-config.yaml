@@ -10,7 +10,7 @@ data:
   AZURE_OPENAI_API_TYPE: "azure"
 
   ENV: "prod"
-  REDIS_HOST: "redis-master.data"
+  REDIS_HOST: "redis-headless.data"
 
   BACKEND_BASE_URL: "https://agents.contextsuite.com"
 
@@ -22,3 +22,5 @@ data:
 
   UNSTRUCTURED_API_URL: "https://api.unstructuredapp.io"
   SERVICES_BACKEND_URL: 'http://cxsservices:8088'
+  SFTP_HOSTNAME: "ams.origin.gcdn.co"
+  JWT_ALGORITHM: "HS256"
