@@ -22,3 +22,4 @@ data:
 
   UNSTRUCTURED_API_URL: "https://api.unstructuredapp.io"
   SERVICES_BACKEND_URL: 'http://cxsservices:8088'
+  SFTP_HOSTNAME: "ams.origin.gcdn.co"
