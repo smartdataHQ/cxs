@@ -114,6 +114,16 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: TRAVIA_API_KEY
+             - name: SFTP_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: SFTP_USERNAME
+              - name: SFTP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: SFTP_PASSWORD
           envFrom:
             - configMapRef:
                 name: cxs-mimir-api-config
