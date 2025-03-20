@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: inbox
+  labels:
+    app: inbox
+    tier: api
+spec:
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  ports:
+    - port: 9090
+      name: http
+    - port: 2222
+      name: sftp
+  selector:
+    app: inbox
+    tier: api
