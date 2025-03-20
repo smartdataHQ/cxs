@@ -13,7 +13,7 @@ data:
   # Required Services
   FRONTEND_URL: 'https://forms.contextsuite.com'
   # Redis
-  REDIS_URL: 'redis-headless.data'
+  REDIS_URL: 'redis-master.data'
   REDIS_USER: ''
 
 

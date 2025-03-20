@@ -10,7 +10,7 @@ data:
   AZURE_OPENAI_API_TYPE: "azure"
 
   ENV: "prod"
-  REDIS_HOST: "redis-headless.data"
+  REDIS_HOST: "redis-master.data"
 
   BACKEND_BASE_URL: "https://agents.contextsuite.com"
 

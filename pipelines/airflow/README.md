@@ -1,13 +1,8 @@
-# Custom setup values for AirflowNeo4j for QL
-
+# Custom setup values for Airflow
 
 ## Setup
 1. open a kubectl shell
-2. copy the right (dev,staging,prod) file to zookeeper.values.yaml (uses authentication)
-    - Remember to replace the 'YOUR-ACCESS-TOKEN-HERE' text with your access token
-    - `wget https://raw.githubusercontent.com/smartdataHQ/cxs/main/pipelines/airflow/values.yaml -O values.yaml`
-    - *may require editing create+copy+save it in place, to create the file*
-
+2. `wget https://raw.githubusercontent.com/smartdataHQ/cxs/main/pipelines/airflow/values.yaml -O values.yaml`
 
 ## Install    
 1. `helm repo add airflow https://airflow-helm.github.io/charts`
@@ -22,7 +17,6 @@
 3. `helm upgrade airflow airflow/airflow --namespace pipelines -f values.yaml`
  
 ## Teardown
-
 1. `helm uninstall airflow --namespace pipelines`
 
 ## Configure Access
