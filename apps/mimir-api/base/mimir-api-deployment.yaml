@@ -58,7 +58,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: llm
-                  key: OPENAI_API_KEY
+                  key: OPENAI_API_KEY_MIMIR2
             - name: OPENAI_API_KEY_SMARTDATA
               valueFrom:
                 secretKeyRef:

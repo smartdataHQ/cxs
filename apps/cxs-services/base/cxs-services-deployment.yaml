@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-services:55d574a
+          image: quicklookup/cxs-services:898133c
           ports:
             - containerPort: 8088
           livenessProbe:
@@ -46,7 +46,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: llm
-                key: OPENAI_API_KEY
+                key: OPENAI_API_KEY_MIMIR2
           - name: FERNET_KEY_PATTERN
             valueFrom:
               secretKeyRef:
