@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-mimir-api:2319f57
+          image: quicklookup/cxs-mimir-api:41f1e0d
           resources:
             requests:
               cpu: 200m
@@ -124,6 +124,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: SFTP_PASSWORD
+            - name: TOKEN_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: TOKEN_SECRET_KEY
           envFrom:
             - configMapRef:
                 name: cxs-mimir-api-config
