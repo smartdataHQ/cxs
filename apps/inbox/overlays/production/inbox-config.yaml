@@ -24,6 +24,7 @@ data:
   REDIS_PORT: '6379'
   REDIS_DB: '0'
   REDIS_LOCAL: 'true'
+  REDIS_TTL: '120'
 
   ## Postgres
   POSTGRES_HOST: 'cxs-pg-ha.data'
