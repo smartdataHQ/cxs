@@ -24,6 +24,7 @@ data:
   REDIS_PORT: '6379'
   REDIS_DB: '0'
   REDIS_LOCAL: 'true'
+  REDIS_TTL: '120'
 
   ## Postgres
   POSTGRES_HOST: 'cxs-pg-ha.data'
@@ -39,6 +40,9 @@ data:
 
   S3_REGION: 's-darz'
   S3_ENDPOINT: 'http://s-darz.cloud.gcore.lu:4566'
+  GEOIP_BUCKET_NAME: 'geoip-bucket'
+  GEOIP_FILE_NAME: 'GeoIP2-City.mmdb'
+  GEOIP_ENABLED: 'false'
 
   AIRFLOW_DAG_ID: 'ingression'
   AIRFLOW_TRIGGER_URL: 'http://localhost:8082/api/v1/dags/ingression/dagRuns'

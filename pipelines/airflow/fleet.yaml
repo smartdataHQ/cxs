@@ -1,0 +1,8 @@
+defaultNamespace: ingestion
+
+helm:
+  repo: https://airflow-helm.github.io/charts
+  chart: airflow-stable
+  version: 8.9.0
+  valuesFiles:
+    - test.yaml
