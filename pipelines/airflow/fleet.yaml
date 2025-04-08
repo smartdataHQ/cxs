@@ -1,8 +1,11 @@
-defaultNamespace: ingestion
-
+namespace: ingestion
 helm:
-  repo: https://airflow-helm.github.io/charts
-  chart: airflow-stable
-  version: 8.9.0
+  repo: "https://airflow-helm.github.io/charts"
+  releaseName: "airflow"
+  chart: "airflow"  
+  version: "8.9.0"
+  disablePreProcess: true
+  force: false
+  timeoutSeconds: 0
   valuesFiles:
     - test.yaml
