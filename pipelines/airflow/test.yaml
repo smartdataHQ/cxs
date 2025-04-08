@@ -42,8 +42,16 @@ airflow:
 
   ## a list airflow connections to create
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/dags/airflow-connections.md
-  connections: []
-
+  connections: 
+    - id: wod_auth
+      type: generic
+      description: "Belginur's weather-on-demand(WOD) api key"
+      password: ${WOD_AUTH}
+  connectionsTemplates:
+    WOD_AUTH:
+      kind: secret
+      name: airflow
+      key: wod_auth    
   ## a list airflow variables to create
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/dags/airflow-variables.md
   variables: []
