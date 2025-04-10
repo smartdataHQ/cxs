@@ -18,8 +18,8 @@ spec:
           image: quicklookup/cxs-mimir-api:7fcc6b2
           resources:
             requests:
-              cpu: 200m
-              memory: 200Mi
+              cpu: 300m
+              memory: 300Mi
           volumeMounts:
             - name: ephemerala
               mountPath: /usr/local/share/fonts
