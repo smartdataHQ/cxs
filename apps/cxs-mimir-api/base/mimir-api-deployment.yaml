@@ -44,7 +44,7 @@ spec:
             timeoutSeconds: 9
             failureThreshold: 6
           env:
-            - name: AZURE_OPENAI_API_KEY_NOT_USED
+            - name: AZURE_OPENAI_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: llm
