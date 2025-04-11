@@ -15,6 +15,12 @@
 - vault
 - vector
 
+### Services without gitops configuration 
+
+#### Haproxy
+We have `haproxy` pod running in the `data` namespace and I can't find any trace of it in repo. By looking at config map `haproxy-config` it's exposing postgres?
+
+
 ### List of helm installations
 
 | NAMESPACE | NAME | REVISION | UPDATED | STATUS | CHART | APP VERSION |
