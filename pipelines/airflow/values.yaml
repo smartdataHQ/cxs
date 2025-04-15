@@ -2,7 +2,7 @@ airflow:
   legacyCommands: false
   image:
     repository: quicklookup/airflow-pipelines
-    tag: 7dfd10a
+    tag: 8bbdfbb
     pullPolicy: IfNotPresent
     pullSecret: "dockerlock"
 
@@ -22,7 +22,25 @@ airflow:
     AIRFLOW__SMTP__SMTP_SSL: "False"    
     AIRFLOW__SMTP__SMTP_PORT: "587"
   users: []
-  connections: []
+  connections:
+    - id: blue_car_azure_sql
+      type: mssql
+      description: "Blue car caren azure sql db"
+      host: caren-prod-server.database.windows.net
+      schema: CarenProd
+      login: bluecarlogin
+      password: ${BLUE_CAR_AZURE_SQL_PASSWORD}
+      port: 1433
+      extra: |-
+        { 
+          "timeout": 10000
+        }
+  connectionsTemplates:
+    BLUE_CAR_AZURE_SQL_PASSWORD:
+      kind: secret
+      name: airflow
+      key: blue-car-azure-sql-password
+  connectionsUpdate: false    
   variables: []
   pools: [] 
   extraPipPackages: []
