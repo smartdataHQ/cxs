@@ -24,11 +24,9 @@ steps below.
 
 1. Login to c001db1 and edit `/usr/local/bin/tailscale-advertise-routes.sh`
    adding the network you want to route.
-2. Run `tailscale-advertise-routes.sh` on c001db1
-3. Open the [tailscale machine settings for c001db1][c001db1] and approve the
-   new route under the "Subnets" section.
+2. Wait for the script to run (every minute), you can tail the logs with 
+   `tail -f /root/tailscale-advertise-routes.log`
 
-[c001db1]: https://login.tailscale.com/admin/machines/100.103.106.55
 
 ## Setup on c001db1
 
