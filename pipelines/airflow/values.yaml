@@ -41,7 +41,7 @@ airflow:
       extra: |-
         { 
           "project": "arctic-data",
-          "key_json": ${ARCTIC_DATA_BIGQUERY_SERVICE_ACCOUNT},
+          "keyfile_dict": ${ARCTIC_DATA_BIGQUERY_SERVICE_ACCOUNT},
           "num_retries": 5,
           "is_anonymous": false,
           "use_legacy_sql": true,
