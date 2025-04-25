@@ -35,13 +35,13 @@ airflow:
         { 
           "timeout": 10000
         }
-    - id: arctic-bigquery
+    - id: arctic_bigquery
       type: gcpbigquery
       description: "Arctic booking data big query db"
       extra: |-
         { 
           "project": "arctic-data",
-          "keyfile_dict": "${ARCTIC_DATA_BIGQUERY_SERVICE_ACCOUNT}",
+          "key_path": "/opt/airflow/arctic-data-bigquery-service-account.json",
           "num_retries": 5,
           "is_anonymous": false,
           "use_legacy_sql": true,
@@ -180,6 +180,10 @@ airflow:
       mountPath: /opt/airflow/id_rsa
       readOnly: true
       subPath: ssh-privatekey
+    - name: arctic-bigquery-service-account
+      mountPath: /opt/airflow/arctic-data-bigquery-service-account.json
+      readOnly: true
+      subPath: arctic-data-bigquery-service-account
   extraVolumes:
     #- name: airflow-logs
       #persistentVolumeClaim:
@@ -188,6 +192,10 @@ airflow:
       secret:
         defaultMode: 420
         secretName: airflow-ssh-sftp-secret
+    - name: arctic-bigquery-service-account
+      secret:
+        defaultMode: 420
+        secretName: airflow
   kubernetesPodTemplate:
     stringOverride: ""
     resources: {}
