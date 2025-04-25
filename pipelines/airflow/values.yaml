@@ -2,7 +2,7 @@ airflow:
   legacyCommands: false
   image:
     repository: quicklookup/airflow-pipelines
-    tag: 8bbdfbb
+    tag: a20edea
     pullPolicy: IfNotPresent
     pullSecret: "dockerlock"
 
@@ -35,11 +35,27 @@ airflow:
         { 
           "timeout": 10000
         }
+    - id: arctic-bigquery
+      type: gcpbigquery
+      description: "Arctic booking data big query db"
+      extra: |-
+        { 
+          "project": "arctic-data",
+          "key_json": ${ARCTIC_DATA_BIGQUERY_SERVICE_ACCOUNT},
+          "num_retries": 5,
+          "is_anonymous": false,
+          "use_legacy_sql": true,
+          "priority": "INTERACTIVE"
+        }
   connectionsTemplates:
     BLUE_CAR_AZURE_SQL_PASSWORD:
       kind: secret
       name: airflow
       key: blue-car-azure-sql-password
+    ARCTIC_DATA_BIGQUERY_SERVICE_ACCOUNT:
+      kind: secret
+      name: airflow
+      key: arctic-data-bigquery-service-account      
   connectionsUpdate: false    
   variables: []
   pools: [] 
