@@ -22,7 +22,7 @@ spec:
             - configMapRef:
                 name: kafkaui-config
           env:
-            - name: KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD
+            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: kafka-user-passwords
