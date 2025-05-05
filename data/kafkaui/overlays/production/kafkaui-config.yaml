@@ -4,5 +4,5 @@ metadata:
   name: kafkaui-config
 data:
   KAFKA_CLUSTERS_0_NAME: production
-  KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092
+  KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka.data:9092
   KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: user1
