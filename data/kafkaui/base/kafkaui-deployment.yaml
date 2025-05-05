@@ -22,11 +22,11 @@ spec:
             - configMapRef:
                 name: kafkaui-config
           env:
-            - name: KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS_PASSWORD
+            - name: KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG
               valueFrom:
                 secretKeyRef:
-                  name: kafka-user-passwords
-                  key: system-user-password
+                  name: kafka-ui-secret
+                  key: KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG
 
 ---
 apiVersion: autoscaling/v1
