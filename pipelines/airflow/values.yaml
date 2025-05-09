@@ -2,7 +2,7 @@ airflow:
   legacyCommands: false
   image:
     repository: quicklookup/airflow-pipelines
-    tag: 7dfd10a
+    tag: 77c03c5
     pullPolicy: IfNotPresent
     pullSecret: "dockerlock"
 
@@ -22,7 +22,41 @@ airflow:
     AIRFLOW__SMTP__SMTP_SSL: "False"    
     AIRFLOW__SMTP__SMTP_PORT: "587"
   users: []
-  connections: []
+  connections:
+    - id: blue_car_azure_sql
+      type: mssql
+      description: "Blue car caren azure sql db"
+      host: caren-prod-server.database.windows.net
+      schema: CarenProd
+      login: bluecarlogin
+      password: ${BLUE_CAR_AZURE_SQL_PASSWORD}
+      port: 1433
+      extra: |-
+        { 
+          "timeout": 10000
+        }
+    - id: arctic_bigquery
+      type: gcpbigquery
+      description: "Arctic booking data big query db"
+      extra: |-
+        { 
+          "project": "arctic-data",
+          "key_path": "/opt/airflow/arctic-data-bigquery-service-account.json",
+          "num_retries": 5,
+          "is_anonymous": false,
+          "use_legacy_sql": true,
+          "priority": "INTERACTIVE"
+        }
+  connectionsTemplates:
+    BLUE_CAR_AZURE_SQL_PASSWORD:
+      kind: secret
+      name: airflow
+      key: blue-car-azure-sql-password
+    ARCTIC_DATA_BIGQUERY_SERVICE_ACCOUNT:
+      kind: secret
+      name: airflow
+      key: arctic-data-bigquery-service-account      
+  connectionsUpdate: false    
   variables: []
   pools: [] 
   extraPipPackages: []
@@ -146,6 +180,10 @@ airflow:
       mountPath: /opt/airflow/id_rsa
       readOnly: true
       subPath: ssh-privatekey
+    - name: arctic-bigquery-service-account
+      mountPath: /opt/airflow/arctic-data-bigquery-service-account.json
+      readOnly: true
+      subPath: arctic-data-bigquery-service-account
   extraVolumes:
     #- name: airflow-logs
       #persistentVolumeClaim:
@@ -154,6 +192,10 @@ airflow:
       secret:
         defaultMode: 420
         secretName: airflow-ssh-sftp-secret
+    - name: arctic-bigquery-service-account
+      secret:
+        defaultMode: 420
+        secretName: airflow
   kubernetesPodTemplate:
     stringOverride: ""
     resources: {}

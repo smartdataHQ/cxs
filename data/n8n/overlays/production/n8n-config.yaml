@@ -12,8 +12,6 @@ data:
 
   QUEUE_BULL_REDIS_HOST: "redis-master.data.svc"
   QUEUE_BULL_REDIS_DB: "3"
-
-  N8N_PROTOCOL: "http"
   N8N_PORT: "5678"
   N8N_PUSH_BACKEND: "sse"
   N8N_DIAGNOSTICS_ENABLED: "false"
@@ -25,3 +23,7 @@ data:
   SKIP_STATISTICS_EVENTS: "true"
   EXECUTIONS_MODE: "queue"
   # QUEUE_BULL_REDIS_HOST: "redis-master.data"
+  N8N_PROTOCOL: "http"
+
+  N8N_RUNNERS_ENABLED: "true"
+  OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS: "true"
