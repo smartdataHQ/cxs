@@ -1,0 +1,57 @@
+argo-cd:
+  global:
+    domain: argo.observe.skyvafnir.cloud
+
+  configs:
+    params:
+      server.insecure: true
+    rbac:
+      policy.default: "role:readonly"
+      policy.csv: |
+        p, role:org-admin, applications, *, */*, allow
+        p, role:org-admin, clusters, get, *, allow
+        p, role:org-admin, repositories, get, *, allow
+        p, role:org-admin, repositories, create, *, allow
+        p, role:org-admin, repositories, update, *, allow
+        p, role:org-admin, repositories, delete, *, allow
+        g, "753756eb-381e-40aa-9c26-f23c428d6cb9", role:org-admin
+      scopes: '[groups]'
+
+    cm:
+      dex.config: |
+        connectors:
+        - type: saml
+          id: saml
+          name: saml
+          config:
+            entityIssuer: https://argo.observe.skyvafnir.cloud/api/dex/callback
+            ssoURL: https://login.microsoftonline.com/96f7670c-0da8-4e82-8c7e-bf8dd8ad8163/saml2
+            caData: |
+              LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tDQpNSUlDOERDQ0FkaWdBd0lCQWdJUUZwRFU5RmFyTEtSUFZoaERHYTlzb1RBTkJna3Foa2lHOXcwQkFRc0ZBREEwTVRJd01BWURWUVFEDQpFeWxOYVdOeWIzTnZablFnUVhwMWNtVWdSbVZrWlhKaGRHVmtJRk5UVHlCRFpYSjBhV1pwWTJGMFpUQWVGdzB5TlRBeU1UUXlNVE0zDQpORFJhRncweU9EQXlNVFF5TVRNM05ETmFNRFF4TWpBd0JnTlZCQU1US1UxcFkzSnZjMjltZENCQmVuVnlaU0JHWldSbGNtRjBaV1FnDQpVMU5QSUVObGNuUnBabWxqWVhSbE1JSUJJakFOQmdrcWhraUc5dzBCQVFFRkFBT0NBUThBTUlJQkNnS0NBUUVBNFpPbVBvdkRmdnJBDQpzYVVJMW9mVjE4RGtjLy80NnBuOWhPanZ2dEZvTjAwd3JacE5XUWQxNzVhVXkvcnR2MCsybThpZmdVdEdEa0RVVWFDQ1FWd2FWWkZLDQo4ZHpJdUUveHk3YTFURFBzUngwYjdkZDRCR1gzM1QzWU04bTNHdFBpaGNSM3I3aTl2RHhVRW85L2FrdXJjWnE2bjMyS2dBeXE1RlpVDQpkLzJJMXROZ3BmQ2VhNldYd3haZlEreU1oRnNDcGpjVGpSVVBvc2JDUHNHRWlabERZSDVQZHp1TjJyYnhWdHFBS054bG9zT3hPeUtaDQpTR1V1Ymx0MDYrRUdBdlgwSVlHcHpaNjNqOFVWM0M4dExaRG81TEdLdGsySXp4Z0d3aEgyUG5pak42RHhZdW9kNnUwN3NFWTl2UnpnDQpURHZqZFUxNmxrOUE2ZUtRSExrN2hFS3NVUUlEQVFBQk1BMEdDU3FHU0liM0RRRUJDd1VBQTRJQkFRQVhlNHNLWGJyRDZJeHVma1dODQpvMUlvWE12UkRIN0ZJUEpocjV4NnM3YXk5a1BOTFJsYStpNDUxVng0MGYxYWxUa3RPRGdKd3J4SjV0UzNTWjdNcG1HNG5vQkd1YW5VDQpZTHJHL2xMRFEraDUrNmUrUUk1UDYwS2FjSXNWV21kbWYxUmxEVk1WcFRPMDBLMWN2S1BrUnkzdkx1eGpEQW0xNWtla0Q2S3k3VkI1DQpqVi9BTXJPVXUzazJUcFFRVHFMU2dpMWJrMitYR29Yb1lBUW5qRDl4dFViQ0M4UWtGZWcyanRCM0ZMNjlXQWVXVnlIT0pzejhveVFqDQprREdPcytzbWRySlpKTW51N0RKRmxDMTZ3eVJCamNiUWd4cm5KM1FWZHRWT0FvSm1qWTY0anIwRDdpVk1xZGFIaGROeG1ualo1YVFODQp1TXMwOElpTUhUci9hMllvaEhuWg0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQ0K
+            redirectURI: https://argo.observe.skyvafnir.cloud/api/dex/callback
+            usernameAttr: email
+            emailAttr: email
+            groupsAttr: Group
+
+  redis-ha:
+    enabled: false
+
+  controller:
+    replicas: 1
+
+  server:
+    replicas: 1
+    ingress:
+      enabled: true
+      ingressClassName: azure-application-gateway
+      annotations:
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
+        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+      tls: true
+
+  repoServer:
+    replicas: 1
+
+  applicationSet:
+    replicas: 1
