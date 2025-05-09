@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+
+resources:
+  - mimir-chat-config.yaml
+  - mimir-chat-ingress.yml

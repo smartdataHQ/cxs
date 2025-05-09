@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/mimir-api:e3af76c
+          image: quicklookup/mimir-api:53babd6
           resources:
             requests:
               cpu: 200m
@@ -58,7 +58,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: llm
-                  key: OPENAI_API_KEY
+                  key: OPENAI_API_KEY_MIMIR2
             - name: OPENAI_API_KEY_SMARTDATA
               valueFrom:
                 secretKeyRef:
@@ -144,6 +144,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: BLUE_API_KEY
+            - name: TRAVIA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: TRAVIA_API_KEY
 
           envFrom:
             - configMapRef:

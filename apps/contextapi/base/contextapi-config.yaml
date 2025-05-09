@@ -37,14 +37,15 @@ data:
   SOLR_PROTOCALL: 'http'
 
   # Clickhouse
+  # CLICKHOUSE_CONNECTION: 'http://10.180.122.46:8123'
+  CLICKHOUSE_CONNECTION: 'http://10.180.122.32:8123'
   CLICKHOUSE_USER: 'default'
-  CLICKHOUSE_CONNECTION: 'http://10.180.122.46:8123'
 
   GRAPHQL_SERVER_PORT: '4001'
   GRAPHQL_SERVER_PATH: '/context'
   WKT_FOLDER: '/cdn/wkt_cache'
 
-  #  # Sentry
+  # Sentry
   SENTRY_ENVIRONMENT: 'contextsuite-prod'
   NEXT_PUBLIC_SENTRY_DSN: 'https://97964f08ea76422f830fba0618967fc4@o982223.ingest.sentry.io/5937160'
   SENTRY_DSN: 'https://97964f08ea76422f830fba0618967fc4@o982223.ingest.sentry.io/5937160'

@@ -15,22 +15,22 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-services:ae10154
+          image: quicklookup/cxs-services:f0e0050
           ports:
             - containerPort: 8088
           livenessProbe:
             httpGet:
               port: 8088
               path: /api/status/alive
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 7
+            periodSeconds: 8
           readinessProbe:
             httpGet:
               port: 8088
               path: /api/status/ready
             initialDelaySeconds: 5
             periodSeconds: 10
-            timeoutSeconds: 2
+            timeoutSeconds: 3
           env:
           - name: CLICKHOUSE_PASSWORD
             valueFrom:

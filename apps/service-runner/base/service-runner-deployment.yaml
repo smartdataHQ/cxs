@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/service-runner:c57a9a0
+          image: quicklookup/service-runner:ffd71f0
           resources:
             requests:
               cpu: 200m
@@ -50,7 +50,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: llm
-                key: OPENAI_API_KEY
+                key: OPENAI_API_KEY_MIMIR2
           - name: FERNET_KEY_PATTERN
             valueFrom:
               secretKeyRef:

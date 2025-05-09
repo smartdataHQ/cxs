@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxs-mimir-web
+spec:
+  selector:
+    matchLabels:
+      app: cxs-mimir-web
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: cxs-mimir-web
+        tier: web
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/mimir-chat:f7fe4cf
+          args:
+            - npm
+            - start
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /api/status/alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /api/status/ready
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 2
+          env:
+            - name: CONTEXT_SUITE_JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: CONTEXT_SUITE_JWT_SECRET_KEY
+          envFrom:
+            - configMapRef:
+                name: cxs-mimir-web-config
+      imagePullSecrets:
+        - name: dockerlock
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cxs-mimir-web
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cxs-mimir-web
+  maxReplicas: 1
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60
