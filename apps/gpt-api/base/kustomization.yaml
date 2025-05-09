@@ -1,3 +1,5 @@
 resources:
   - gpt-api-deployment.yaml
   - gpt-api-service.yaml
+  - gpt-api-config.yaml
+  - gpt-api-ingress.yml

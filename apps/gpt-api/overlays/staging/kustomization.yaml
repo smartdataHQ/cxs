@@ -1,0 +1,69 @@
+images:
+  - name: quicklookup/gpt-api
+    newTag: 2998c0d  # Using the same tag as in production for now
+
+resources:
+  - ../../base
+
+namespace: solutions
+
+# Staging-specific patches
+patches:
+  - target:
+      kind: Deployment
+      name: gpt-api
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 200m
+            memory: 200Mi
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: gpt-api
+    patch: |
+      - op: replace
+        path: /spec/maxReplicas
+        value: 2
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
+      - op: replace
+        path: /spec/targetCPUUtilizationPercentage
+        value: 80
+  - target:
+      kind: ConfigMap
+      name: gpt-api-config
+    patch: |
+      - op: replace
+        path: /data/ENV
+        value: staging
+      - op: replace
+        path: /data/BACKEND_BASE_URL
+        value: https://chat.contextsuite.dev
+      - op: replace
+        path: /data/EVENTS_ENDPOINT
+        value: https://in.contextsuite.dev/api/s2s/track
+      - op: add
+        path: /data/RATE_LIMIT_REQUESTS
+        value: "20"
+      - op: add
+        path: /data/RATE_LIMIT_WINDOW_MS
+        value: "60000"
+  - target:
+      kind: Ingress
+      name: gpt-api
+    patch: |
+      - op: replace
+        path: /spec/rules/0/host
+        value: chat.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: chat.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: star-contextsuite-dev 
