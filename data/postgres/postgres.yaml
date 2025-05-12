@@ -259,9 +259,11 @@ spec:
           - --type=full
       repos:
         - name: repo1
+          retentionFull: 8  # store 8 full backups 
+          retentionFullType: count  # expire backups based on backup count
           schedules:
-            full: "0 0 * * 6"
-          #          differential: "0 1 * * 1-6"
+            full: "0 0 * * 6"  # every Saturday at 00:00
+            differential: "0 0 * * 0-5"  # every day (except Saturday) at 00:00
           volume:
             volumeClaimSpec:
               accessModes:
