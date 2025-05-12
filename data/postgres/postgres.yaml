@@ -235,7 +235,7 @@ spec:
       #        repo4-path: /pgbackrest/postgres-operator/cluster1-multi-repo/repo4
       global:
         # Configuration for "repo1"
-        repo1-retention-full: 8          # store 8 full backups 
+        repo1-retention-full: "8"        # store 8 full backups 
         repo1-retention-full-type: count # expire backups based on backup count
       repoHost:
         affinity:
