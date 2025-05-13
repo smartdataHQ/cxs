@@ -233,6 +233,10 @@ spec:
       #        repo2-path: /pgbackrest/postgres-operator/cluster1-multi-repo/repo2
       #        repo3-path: /pgbackrest/postgres-operator/cluster1-multi-repo/repo3
       #        repo4-path: /pgbackrest/postgres-operator/cluster1-multi-repo/repo4
+      global:
+        # Configuration for "repo1"
+        repo1-retention-full: "8"        # store 8 full backups 
+        repo1-retention-full-type: count # expire backups based on backup count
       repoHost:
         affinity:
           podAntiAffinity:
@@ -260,8 +264,8 @@ spec:
       repos:
         - name: repo1
           schedules:
-            full: "0 0 * * 6"
-          #          differential: "0 1 * * 1-6"
+            full: "0 0 * * 6"  # every Saturday at 00:00
+            differential: "0 0 * * 0-5"  # every day (except Saturday) at 00:00
           volume:
             volumeClaimSpec:
               accessModes:
