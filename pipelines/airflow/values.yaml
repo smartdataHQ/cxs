@@ -47,6 +47,13 @@ airflow:
           "use_legacy_sql": true,
           "priority": "INTERACTIVE"
         }
+    - id: n1_sftp
+      type: sftp
+      description: "sftp snjallgogn@file.festi.is"
+      host: file.festi.is
+      port: 22
+      login: snjallgogn
+      password: ${N1_SFTP_PASSWORD}      
   connectionsTemplates:
     BLUE_CAR_AZURE_SQL_PASSWORD:
       kind: secret
@@ -55,7 +62,11 @@ airflow:
     ARCTIC_DATA_BIGQUERY_SERVICE_ACCOUNT:
       kind: secret
       name: airflow
-      key: arctic-data-bigquery-service-account      
+      key: arctic-data-bigquery-service-account     
+    N1_SFTP_PASSWORD:  
+      kind: secret
+      name: airflow
+      key: n1-sftp-password
   connectionsUpdate: false    
   variables: []
   pools: [] 
