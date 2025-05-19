@@ -27,7 +27,7 @@ airflow:
       type: mssql
       description: "Blue car caren azure sql db"
       host: caren-prod-server.database.windows.net
-      schema: CarenProd
+      schema: CarenProd_Copy
       login: bluecarlogin
       password: ${BLUE_CAR_AZURE_SQL_PASSWORD}
       port: 1433
