@@ -40,9 +40,8 @@ service:
     tailscale.com/hostname: grafana
     tailscale.com/expose: "true"
 
-sidecar:
-  alerts:
-    enabled: true
-    folder: /etc/grafana/provisioning/alerting
-    searchNamespace: grafana
-    reloadURL: ""
+extraConfigmapMounts:
+  - name: grafana-longhorn-alerts
+    mountPath: /etc/grafana/provisioning/alerting
+    configMap: grafana-longhorn-alerts
+    readOnly: true
