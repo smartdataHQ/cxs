@@ -37,7 +37,7 @@ extraSecretMounts:
 # Mount the Longhorn alerts ConfigMap
 extraConfigmapMounts:
   - name: longhorn-alerts
-    mountPath: /etc/grafana/provisioning/alerting
+    mountPath: /etc/grafana/provisioning/alerting/rules
     configMap: grafana-longhorn-alerts
     readOnly: true
 
@@ -60,19 +60,6 @@ service:
 #         options:
 #           path: /var/lib/grafana/dashboards
 
+# Standard Grafana alerting configuration
 alerting:
-  provisioning.yaml:
-    folder: 
-      name: Alerts
-    alertmanagerConfiguration:
-      - action: reconcile
-        apiVersion: 1
-        name: default
-    rules:
-      - name: default
-        type: file
-        folder: Alerts
-        disableDeletion: false
-        allowUiUpdates: true
-        options:
-          path: /etc/grafana/provisioning/alerting/rules
+  enabled: true
