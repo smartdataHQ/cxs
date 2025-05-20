@@ -8,6 +8,7 @@ groups:
         - uid: demdytobesni8d
           title: 'Longhorn: Disk space low on volume'
           condition: Threshold
+          for: "0s"
           data:
             - refId: usageBytes
               relativeTimeRange:
