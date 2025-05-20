@@ -11,6 +11,13 @@ configMapGenerator:
       disableNameSuffixHash: true
       labels:
         grafana_alert: "1"
+  - name: grafana-test-alerts
+    files:
+      - test-rule.yaml=test-rule.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_alert: "1"
     
 
 resources: []

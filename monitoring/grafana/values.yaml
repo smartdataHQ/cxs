@@ -43,4 +43,6 @@ service:
 sidecar:
   alerts:
     enabled: true
+    folder: /etc/grafana/provisioning/alerting
     searchNamespace: grafana
+    reloadURL: ""
