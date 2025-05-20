@@ -27,3 +27,15 @@ helm:
   version: 8.8.6
   valuesFiles:
     - values.yaml
+
+# Mount alert rules as ConfigMaps
+kubectl:
+  manifests:
+    - apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: grafana-alert-rules
+        namespace: grafana
+      data:
+        longhorn_space_alerts.yaml: |
+          {{- (.Files.Get "provisioning/alerting/longhorn_space_alerts.yaml") | nindent 10 }}

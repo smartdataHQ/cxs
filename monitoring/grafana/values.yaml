@@ -38,3 +38,31 @@ service:
   annotations:
     tailscale.com/hostname: grafana
     tailscale.com/expose: "true"
+
+# Provisioning alert rules
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards
+
+alerting:
+  provisioning:
+    folder: 
+      name: Alerts
+    alertmanagerConfiguration:
+      - action: reconcile
+        apiVersion: 1
+        name: default
+
+provisioning:
+  alerting:
+    enabled: true
+    path: /etc/grafana/provisioning/alerting
