@@ -34,11 +34,12 @@ extraSecretMounts:
     readOnly: true
     optional: false
 
-# Mount the Longhorn alerts ConfigMap
+# Mount the Longhorn alerts ConfigMap with subPath
 extraConfigmapMounts:
   - name: longhorn-alerts
-    mountPath: /etc/grafana/provisioning/alerting
+    mountPath: /etc/grafana/provisioning/alerting/storage-alerting.yaml
     configMap: grafana-longhorn-alerts
+    subPath: storage-alerting.yaml
     readOnly: true
 
 service:
