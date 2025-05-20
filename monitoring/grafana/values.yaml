@@ -34,6 +34,13 @@ extraSecretMounts:
     readOnly: true
     optional: false
 
+# Mount the Longhorn alerts ConfigMap
+extraConfigmapMounts:
+  - name: longhorn-alerts
+    mountPath: /etc/grafana/provisioning/alerting
+    configMap: grafana-longhorn-alerts
+    readOnly: true
+
 service:
   annotations:
     tailscale.com/hostname: grafana
@@ -61,6 +68,14 @@ alerting:
       - action: reconcile
         apiVersion: 1
         name: default
+    rules:
+      - name: default
+        type: file
+        folder: Alerts
+        disableDeletion: false
+        allowUiUpdates: true
+        options:
+          path: /etc/grafana/provisioning/alerting
 
 provisioning:
   alerting:
