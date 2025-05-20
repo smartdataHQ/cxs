@@ -34,33 +34,13 @@ extraSecretMounts:
     readOnly: true
     optional: false
 
-# Mount the Longhorn alerts ConfigMap with subPath
-extraConfigmapMounts:
-  - name: longhorn-alerts
-    mountPath: /etc/grafana/provisioning/alerting/storage-alerting.yaml
-    configMap: grafana-longhorn-alerts
-    subPath: storage-alerting.yaml
-    readOnly: true
 
 service:
   annotations:
     tailscale.com/hostname: grafana
     tailscale.com/expose: "true"
 
-# Provisioning alert rules
-# dashboardProviders:
-#   dashboardproviders.yaml:
-#     apiVersion: 1
-#     providers:
-#       - name: 'default'
-#         orgId: 1
-#         folder: ''
-#         type: file
-#         disableDeletion: false
-#         editable: true
-#         options:
-#           path: /var/lib/grafana/dashboards
-
-# Mostly remove alerting section to let defaults work
-alertmanagerIntegration:
-  enabled: true
+sidecar:
+  alerts:
+    enabled: true
+    searchNamespace: grafana

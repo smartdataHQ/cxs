@@ -1,6 +1,8 @@
 defaultNamespace: grafana
 
 releaseName: grafana
+kustomize:
+  dir: alerting
 
 helm:
   repo: https://grafana.github.io/helm-charts
@@ -9,8 +11,6 @@ helm:
   #   helm repo add grafana https://grafana.github.io/helm-charts
   #    helm repo update
   #    helm  search repo -l grafana
-
-
 
 #    
 #    #     #     #     ######   #     #  
@@ -28,6 +28,3 @@ helm:
   valuesFiles:
     - values.yaml
 
-# Apply kustomize before Helm chart
-kustomize:
-  dir: alert_rules
