@@ -1,8 +1,6 @@
 defaultNamespace: grafana
 
 releaseName: grafana
-kustomize:
-  dir: alerting
 
 helm:
   repo: https://grafana.github.io/helm-charts
@@ -27,4 +25,7 @@ helm:
   version: 8.8.6
   valuesFiles:
     - values.yaml
+
+kustomize:
+  dir: alerting
 
