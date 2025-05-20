@@ -6,7 +6,7 @@ namespace: grafana
 configMapGenerator:
   - name: grafana-longhorn-alerts
     files:
-      - longhorn_space_alerts.yaml
+      - storage-alerting.yaml=longhorn_space_alerts.yaml
     options:
       disableNameSuffixHash: true
 
