@@ -37,7 +37,7 @@ extraSecretMounts:
 # Mount the Longhorn alerts ConfigMap
 extraConfigmapMounts:
   - name: longhorn-alerts
-    mountPath: /etc/grafana/provisioning/alerting
+    mountPath: /etc/grafana/provisioning/alerting/rules
     configMap: grafana-longhorn-alerts
     readOnly: true
 
@@ -75,7 +75,7 @@ alerting:
         disableDeletion: false
         allowUiUpdates: true
         options:
-          path: /etc/grafana/provisioning/alerting
+          path: /etc/grafana/provisioning/alerting/rules
 
 provisioning:
   alerting:
