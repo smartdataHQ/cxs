@@ -60,6 +60,6 @@ service:
 #         options:
 #           path: /var/lib/grafana/dashboards
 
-# Standard Grafana alerting configuration
-alerting:
+# Mostly remove alerting section to let defaults work
+alertmanagerIntegration:
   enabled: true
