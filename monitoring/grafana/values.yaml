@@ -42,6 +42,7 @@ service:
 
 extraConfigmapMounts:
   - name: grafana-longhorn-alerts
-    mountPath: /etc/grafana/provisioning/alerting
+    mountPath: /etc/grafana/provisioning/alerting/longhorn-rules.yaml
+    subPath: longhorn-rules.yaml
     configMap: grafana-longhorn-alerts
     readOnly: true
