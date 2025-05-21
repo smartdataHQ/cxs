@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/ssp:846eb4c
+          image: quicklookup/ssp:35e5edd
           resources:
             requests:
               cpu: 200m
