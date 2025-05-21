@@ -26,7 +26,7 @@ spec:
             - name: NIFI_WEB_HTTPS_HOST
               value: "0.0.0.0"
             - name: NIFI_WEB_HTTPS_PORT
-              value: "8443"  
+              value: "8443X"  
             - name: NIFI_WEB_PROXY_HOST
               value: nifi.contextsuite.com
             - name: SINGLE_USER_CREDENTIALS_USERNAME
