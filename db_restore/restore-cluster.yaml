@@ -1,0 +1,57 @@
+apiVersion: pgv2.percona.com/v2
+kind: PerconaPGCluster
+metadata:
+  name: cxs-pg-restore
+  namespace: data
+spec:
+  crVersion: 2.3.1
+  users:
+  - name: postgres
+  - name: cxs-pg
+    options: "SUPERUSER"
+    databases:
+      - ssp
+  postgresVersion: 16
+  image: percona/percona-postgresql-operator:2.3.1-ppg16-postgres
+  imagePullPolicy: Always
+  instances:
+    - name: instance2
+      replicas: 1
+      dataVolumeClaimSpec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+  
+  proxy:  # required cruft. Omitting this caused the operator to crash
+    pgBouncer:
+      replicas: 1
+      image: percona/percona-postgresql-operator:2.3.1-ppg16-pgbouncer
+      exposeSuperusers: true
+      config:
+        global:
+          max_client_conn: "200"
+    
+  
+  backups: 
+    pgbackrest:  
+      image: percona/percona-postgresql-operator:2.3.1-ppg16-pgbackrest
+      repos: 
+      - name: repo2
+        volume:
+          volumeClaimSpec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+  dataSource:
+    postgresCluster:
+      clusterName: cxs-pg
+      clusterNamespace: data
+      repoName: repo1
+      options:
+        - --type=immediate
+        - --db-include=ssp
+        
+        
