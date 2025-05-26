@@ -4,6 +4,7 @@ metadata:
   name: contextsuite
   annotations:
     nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
+    nginx.ingress.kubernetes.io/proxy-body-size: "5m"
 spec:
   defaultBackend:
     service:
