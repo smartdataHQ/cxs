@@ -8,7 +8,7 @@ groups:
         - uid: demdytobesni8d
           title: 'Longhorn: Disk space low on volume'
           condition: Threshold
-          for: "15m"
+          for: 15m
           data:
             - refId: usageBytes
               relativeTimeRange:
@@ -214,9 +214,19 @@ groups:
           annotations:
             __dashboardUid__: ozk-lh-mon
             __panelId__: "12"
+            description: |-
+                A Longhorn volume is nearing capacity limits, which may result in application failures if the volume becomes full.
+                - Volume name: {{ $labels.volume }} 
+                - Current usage: {{ $values.usageGiBLast }} GiB of {{ $values.capacityGiBLast }} GiB used.
+                - Percentage full: {{ $values.usagePercentLast }}%
+                What should you do?
+                1. Seek to understand why the volume is nearing capacity limits.
+                2. Consider whether it makes sense to Trim or Expand the Volume (this can be done via the Longhorn UI)
+                  - Expand: https://longhorn.io/docs/1.8.1/nodes-and-volumes/volumes/expansion/#expand-a-longhorn-volume
+                  - Trim: https://longhorn.io/docs/1.8.1/nodes-and-volumes/volumes/trim-filesystem/
             summary: |-
-                PVC {{ $labels.volume }} is at {{ $values.usagePercentLast }}% capacity!
-                - {{ $values.usageGiBLast }} GiB of {{ $values.capacityGiBLast }} GiB
+                Volume "{{ $labels.volume }}" is at or over {{ $values.usagePercentLast }}% capacity!
+                {{ $values.usageGiBLast }} GiB of {{ $values.capacityGiBLast }} GiB used.
           labels:
             app: longhorn
             type: storage
