@@ -1,2 +1,3 @@
 resources:
   - postgres.yaml
+  - backup-jobs/postgres-backup-cronjobs.yaml
