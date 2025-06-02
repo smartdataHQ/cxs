@@ -1,0 +1,69 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cxs-mimir-web-logreglan-next
+  namespace: solutions
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 5m
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: leo.logreglan.is
+      http:
+        paths:
+          # Next.js paths - NO REWRITE (these go to backend as-is)
+          - path: /_next(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cxs-mimir-web
+                port:
+                  number: 3000
+          # API paths - NO REWRITE
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cxs-mimir-web
+                port:
+                  number: 3000
+          - path: /manifest.webmanifest
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cxs-mimir-web
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - leo.logreglan.is
+      secretName: leo-logreglan-is-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cxs-mimir-web-logreglan-app
+  namespace: solutions
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 5m
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /logreglan/$1
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+    - host: leo.logreglan.is
+      http:
+        paths:
+          # App routes - REWRITE to /logreglan
+          - path: /(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: cxs-mimir-web
+                port:
+                  number: 3000
+  tls:
+    - hosts:
+        - leo.logreglan.is
+      secretName: leo-logreglan-is-tls
