@@ -232,4 +232,4 @@ groups:
             type: storage
           isPaused: false
           notification_settings:
-            receiver: Skývafnir Teams
+            receiver: Snjallgogn Teams
