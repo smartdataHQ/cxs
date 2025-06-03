@@ -26,6 +26,13 @@ spec:
                 name: cxs-mimir-web
                 port:
                   number: 3000
+          - path: /assets
+            pathType: Prefix
+            backend:
+              service:
+                name: cxs-mimir-web
+                port:
+                  number: 3000
           - path: /manifest.webmanifest
             pathType: Prefix
             backend:
@@ -38,24 +45,23 @@ spec:
         - leo.logreglan.is
       secretName: leo-logreglan-is-tls
 ---
-# Separate Ingress for rewrite to avoid conflicts
+# Root path rewrite - no trailing slash
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: cxs-mimir-web-logreglan-app
+  name: cxs-mimir-web-logreglan-root
   namespace: solutions
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: 5m
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/rewrite-target: /logreglan/$1
+    nginx.ingress.kubernetes.io/rewrite-target: /logreglan
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
     - host: leo.logreglan.is
       http:
         paths:
-          # App routes - negative lookahead to exclude static paths
-          - path: /(?!_next|api|manifest\.webmanifest)(.*)
+          # Root path only - rewrite to /logreglan (no trailing slash)
+          - path: /$
             pathType: ImplementationSpecific
             backend:
               service:
