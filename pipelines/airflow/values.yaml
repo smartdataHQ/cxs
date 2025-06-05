@@ -2,7 +2,7 @@ airflow:
   legacyCommands: false
   image:
     repository: quicklookup/airflow-pipelines
-    tag: 0ad6f6a
+    tag: 2aff9fa
     pullPolicy: IfNotPresent
     pullSecret: "dockerlock"
 
