@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxs-onenote-auth
+spec:
+  selector:
+    matchLabels:
+      app: cxs-onenote-auth
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: cxs-onenote-auth
+        tier: api
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/cxs-onenote:006fe63
+          ports:
+            - containerPort: 8000
+          livenessProbe:
+            httpGet:
+              port: 8000
+              path: /health
+            initialDelaySeconds: 6
+            periodSeconds: 6
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /health
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+      imagePullSecrets:
+        - name: dockerlock
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: cxs-service-pvc

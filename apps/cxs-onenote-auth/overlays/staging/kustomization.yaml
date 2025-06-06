@@ -1,0 +1,5 @@
+bases:
+  - ../../base
+
+resources:
+  - cxs-onenote-auth-ingress.yaml
