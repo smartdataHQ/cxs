@@ -1,4 +1,4 @@
 resources:
-  - cxs-services-deployment.yaml
-  - cxs-services-service.yaml
-  - cxs-services-volumes.yaml
+  - cxs-onenote-auth-deployment.yaml
+  - cxs-onenote-auth-service.yaml
+  - cxs-onenote-auth-volumes.yaml
