@@ -37,6 +37,6 @@ spec:
       imagePullSecrets:
         - name: dockerlock
       volumes:
-        - name: config
+        - name: cache
           persistentVolumeClaim:
-            claimName: cxs-service-pvc
+            claimName: cxs-onenote-auth-pvc
