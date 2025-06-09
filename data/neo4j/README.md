@@ -1,8 +1,17 @@
-# Custom setup values for Neo4j for QL
+# Neo4j Graph Database
 
-We use the default neo4j image from the Bitnami helm chart. (See [Further Reading](#further-reading) below.)
+## Purpose
+Provides a native graph database management system, used for applications that require managing and querying highly connected data. This deployment is configured to use the enterprise edition of Neo4j. It appears to use the official Neo4j Helm chart.
 
-## Versions
+## Configuration
+- **Primary Configuration:** Managed via Helm values files, specifically `neo4j.prod.values.yaml` for the production environment. This file defines overrides for the Helm chart.
+- **Secrets Management:**
+    - The original README notes `password: "qldevpass"` and warns about storing passwords in plain text, recommending `neo4j.passwordFromSecret`.
+    - **Standard Practice:** All secrets, including Neo4j passwords, must be managed in Rancher and injected securely at deployment time. Refer to the main project `README.md` for general guidance on secret management.
+- **Neo4j Edition:** Configured for "enterprise" edition, which requires a valid license (`acceptLicenseAgreement: "yes"`).
+- **APOC Plugins:** APOC (Awesome Procedures On Cypher) triggers are enabled (`apoc.trigger.enabled: "true"`). Custom setup for APOC and APOC extended libraries is detailed in the "Special Considerations" section.
+
+### Versions (from original README)
 
 | File                       | Environment |
 |----------------------------|-------------|
@@ -10,9 +19,7 @@ We use the default neo4j image from the Bitnami helm chart. (See [Further Readin
 | **not needed**             | staging     |
 | **not needed**             | dev         |
 
-## Overrides
-A list of the override values and their purpose.</br>
-*These are changes that we made to the default values.yaml file.*
+### Key Overrides from `neo4j.prod.values.yaml` (examples from original README)
 
 Prod:
 - `name: "neo4j"`
@@ -24,7 +31,16 @@ Prod:
 - `apoc.jdbc.apoctest.url: "jdbc:foo:bar"` 
 - Various disk volumn settings to mount the backup-pvc claim to the /tmp/backup folder
 
-## Setup
+## Deployment and Management
+- **Deployment Method:** Neo4j is deployed and managed via Fleet, as specified in `fleet.yaml`. Fleet utilizes the Helm chart along with the `neo4j.prod.values.yaml` values file.
+- **Cluster Access:** The Neo4j instance is accessible within the Kubernetes cluster at `neo4j://neo4j.data.svc.cluster.local:7687`.
+- **Kustomize Overlays:** The `overlays/` directory suggests Kustomize might be used for further environment-specific adjustments beyond the Helm values.
+
+## Backup and Restore
+- **Mechanism:** The configuration mentions "Various disk volume settings to mount the backup-pvc claim to the /tmp/backup folder," suggesting that backups are facilitated by mounting a persistent volume claim intended for backup storage.
+- **Procedures:** [Detailed procedures for performing backups (e.g., using `neo4j-admin backup`) and restoring them (e.g., `neo4j-admin restore`) targeting this `/tmp/backup` directory need to be formally documented. This includes frequency, retention policies, and verification steps.]
+
+## Setup (from original README)
 1. open a kubectl shell
 2. copy the right (dev,staging,prod) file to zookeeper.values.yaml (uses authentication)
    - Remember to replace the 'YOUR-ACCESS-TOKEN-HERE' text with your access token
@@ -33,7 +49,7 @@ Prod:
 
 
 ## Special Considerations
-We are using both the apoc and apoc extended libraries.</br>
+We are using both the apoc and apoc extended libraries.
 Setting them up is a hassle. (Will be documented later.)
 
 Rather than doing this "properly", I ended up doing the following:
@@ -86,3 +102,9 @@ Graphs are everywhere!
 
 WARNING: Passwords set using 'neo4j.password' will be stored in plain text in the Helm release ConfigMap.
 Please consider using 'neo4j.passwordFromSecret' for improved security.
+
+## Key Files
+- `fleet.yaml`: Fleet configuration for Neo4j deployment.
+- `neo4j.prod.values.yaml`: Helm values file for production environment. (Other environment-specific values files might exist).
+- `overlays/`: Directory potentially containing Kustomize overlays for further customization.
+- `README.md`: This documentation file.
