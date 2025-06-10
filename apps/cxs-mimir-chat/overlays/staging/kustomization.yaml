@@ -4,3 +4,4 @@ bases:
 resources:
   - mimir-chat-config.yaml
   - mimir-chat-ingress.yml
+  - mimir-chat-logreglan-ingress.yaml
