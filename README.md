@@ -170,17 +170,6 @@ This section was previously in the README, providing instructions for mounting S
  - `s3fs mybucket /path/to/mountpoint -o passwd_file=${HOME}/.passwd-s3fs -o url=https://url.to.s3/ -o use_path_request_style`
  - Add to `/etc/fstab`: `mybucket /path/to/mountpoint fuse.s3fs _netdev,allow_other,use_path_request_style,url=https://url.to.s3/ 0 0`
 
-# VPN Access to the Cluster
-This section was previously in the README. For current VPN information, please refer to the [Authentication](#authentication) section and the `VPN.md` file.
-
- - See [kubevpn](https://github.com/kubenetworks/kubevpn)
- - [Install client](https://github.com/kubenetworks/kubevpn/releases)
- - make the script executable: `chmod +x Download/kubevpn.sh`
- - Login and download KubeConfig from the [CxS Rancher](https://ops.quicklookup.com/)
- - connect: `kubevpn/bin/kubevpn connect -n data --kubeconfig Downloads/cxs-eu1.yaml`
- - disconnect: `kubevpn/bin/kubevpn disconnect`
-
-
 # Applications included in repo
 
 This section lists the high-level applications managed in this repository. More detailed information about each application, including its specific purpose, configuration, and Kubernetes resources, can be found in the `README.md` file within its respective directory under `apps/`.
