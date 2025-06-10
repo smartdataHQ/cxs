@@ -2,7 +2,18 @@ defaultNamespace: api
 namespace: api
 
 targetCustomizations:
-
+  - name: development
+    clusterSelector:
+      matchLabels:
+        role: development
+    kustomize:
+      dir: overlays/development
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        role: staging
+    kustomize:
+      dir: overlays/staging
   - name: production
     clusterSelector:
       matchLabels:

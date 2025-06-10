@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: contextapi-default
+  namespace: api # Assuming the namespace is 'api' as seen in fleet.yaml
+spec:
+  podSelector:
+    matchLabels:
+      app: contextapi # Selects the contextapi pods
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from NGINX ingress controller pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app: nginx # Placeholder: Label for NGINX ingress pods
+          namespaceSelector: {} # Allows from any namespace if NGINX is in a different one, adjust if NGINX is in the same namespace
+    # Allow traffic from other contextapi pods (for circular requests)
+    - from:
+        - podSelector:
+            matchLabels:
+              app: contextapi
+  egress:
+    # Allow all egress traffic by default
+    - {}
