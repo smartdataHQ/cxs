@@ -9,13 +9,13 @@ helmCharts:
     repo: oci://registry-1.docker.io/bitnamicharts
     namespace: data
     releaseName: kafka
+    # SRC: https://github.com/bitnami/charts/blob/main/bitnami/kafka/values.yaml
     valuesInline:
       zookeeperChrootPath: "kafka-staging"
-      broker:
       replicaCount: 3 # Increase the number of replicas to 3
-      heapOpts: -Xmx512m -Xms256m # Set heap to fit within 768Mi memory limit
-
-      resourcesPreset: large # Set a preset profile or define resources
+      
+      controller:
+        heapOpts: "-Xmx400m -Xms200m"
 
       externalZookeeper:
         servers: [zookeeper.data.svc.cluster.local]
