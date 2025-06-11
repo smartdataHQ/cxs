@@ -1,3 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
   - gpt-chat-deployment.yaml
   - gpt-chat-service.yaml
+  - gpt-chat-ingress.yaml
+
+configMapGenerator:
+  - name: gpt-chat-config
+    literals:
+      - API_ENDPOINT=http://chat.contextsuite.com
+      - WSS_ENDPOINT=wss://chat.contextsuite.com

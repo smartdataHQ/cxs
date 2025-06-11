@@ -17,4 +17,4 @@ spec:
   tls:
     - hosts:
         - chat.contextsuite.com
-      secretName: star-contextsuite-com
+      secretName: star-contextsuite-com 
