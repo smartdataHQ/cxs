@@ -16,7 +16,6 @@ helmCharts:
       heapOpts: -Xmx16048m -Xms2024m # Increase the max heap size to 8GB
 
       resourcesPreset: large # Set a preset profile or define resources
-      clusterDomain: kafka.data
 
       externalZookeeper:
         servers: [zookeeper.data.svc.cluster.local]
