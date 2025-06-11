@@ -7,7 +7,7 @@ This plan outlines the process for restructuring workloads to follow consistent 
 **Overall Progress**: 95% complete for existing apps structure, 4 new Helm workloads identified for migration
 
 **Apps with Base/Overlay Structure**: 21/21 completed  
-**Apps with Staging Overlays**: 12/21 completed  
+**Apps with Staging Overlays**: 13/21 completed  
 **Argo CD Applications Deployed**: 19 applications
 
 ## Restructuring Pattern
@@ -37,12 +37,12 @@ For workloads without a proper `base` directory (only `production`):
 - [x] **gpt-api** - Base ✅ | Production ✅ | Staging ✅ | Argo CD ⚠️ (Degraded)
 - [x] **gpt-chat** - Base ✅ | Production ✅ | Staging ✅ | ConfigMapGenerator ✅ | Modern Patterns ✅
 - [x] **ingress** - Base ✅ | Production ✅ | Staging ✅ | Argo CD ✅
+- [x] **playground** - Base ✅ | Production ✅ | Staging ✅ | ConfigMapGenerator ✅ | Modern Patterns ✅
 
 ### ⚠️ PARTIAL: Apps with Base + Production (Missing Staging)
 - [x] **isl-hotel-streaming-client** - Base ✅ | Production ✅ | Staging ❌ | Argo CD ❌
 - [x] **mimir-api** - Base ✅ | Production ✅ | Staging ❌ | Argo CD ❌
 - [x] **mimir-chat** - Base ✅ | Production ✅ | Staging ❌ | Argo CD ❌
-- [x] **playground** - Base ✅ | Production ✅ | Staging ❌ | Argo CD ❌
 - [x] **service-runner** - Base ✅ | Production ✅ | Staging ❌ | Argo CD ❌
 - [x] **ssp** - Base ✅ | Production ✅ | Staging ❌ | Argo CD ❌
 - [x] **translator-api** - Base ✅ | Production ✅ | Staging ❌ | Argo CD ❌
