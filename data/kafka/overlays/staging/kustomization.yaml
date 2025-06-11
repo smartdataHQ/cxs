@@ -13,7 +13,7 @@ helmCharts:
       zookeeperChrootPath: "kafka-staging"
       broker:
       replicaCount: 3 # Increase the number of replicas to 3
-      heapOpts: -Xmx16048m -Xms2024m # Increase the max heap size to 8GB
+      heapOpts: -Xmx512m -Xms256m # Set heap to fit within 768Mi memory limit
 
       resourcesPreset: large # Set a preset profile or define resources
 
