@@ -1,3 +1,4 @@
 namespace: data
 resources:
   - postgres.yaml
+  - backup-jobs

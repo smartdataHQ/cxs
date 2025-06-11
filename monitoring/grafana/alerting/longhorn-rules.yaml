@@ -1,0 +1,235 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: longhorn-storage
+      folder: storage
+      interval: 5m
+      rules:
+        - uid: demdytobesni8d
+          title: 'Longhorn: Disk space low on volume'
+          condition: Threshold
+          for: 15m
+          data:
+            - refId: usageBytes
+              relativeTimeRange:
+                from: 1800
+                to: 0
+              datasourceUid: fefbtw5xi6n0gd
+              model:
+                adhocFilters: []
+                datasource:
+                    type: prometheus
+                    uid: fefbtw5xi6n0gd
+                editorMode: code
+                exemplar: true
+                expr: max by (volume) (longhorn_volume_actual_size_bytes)
+                instant: false
+                interval: ""
+                intervalMs: 600000
+                legendFormat: ""
+                maxDataPoints: 43200
+                range: true
+                refId: usageBytes
+            - refId: capacityBytes
+              relativeTimeRange:
+                from: 600
+                to: 0
+              datasourceUid: fefbtw5xi6n0gd
+              model:
+                datasource:
+                    type: prometheus
+                    uid: fefbtw5xi6n0gd
+                editorMode: code
+                expr: avg by (volume) (longhorn_volume_capacity_bytes)
+                instant: true
+                intervalMs: 60000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: capacityBytes
+            - refId: usagePercent
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: []
+                      reducer:
+                        params: []
+                        type: avg
+                      type: query
+                datasource:
+                    name: Expression
+                    type: __expr__
+                    uid: __expr__
+                expression: round(($usageBytes / $capacityBytes) * 100)
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: usagePercent
+                type: math
+            - refId: usageGiB
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: []
+                      reducer:
+                        params: []
+                        type: avg
+                      type: query
+                datasource:
+                    name: Expression
+                    type: __expr__
+                    uid: __expr__
+                expression: round($usageBytes / 1024 / 1024 / 1024 *10) /10
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: usageGiB
+                type: math
+            - refId: capacityGiBLast
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: []
+                      reducer:
+                        params: []
+                        type: avg
+                      type: query
+                datasource:
+                    name: Expression
+                    type: __expr__
+                    uid: __expr__
+                expression: $capacityBytes / 1024 / 1024 / 1024
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: capacityGiBLast
+                type: math
+            - refId: usagePercentLast
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: []
+                      reducer:
+                        params: []
+                        type: avg
+                      type: query
+                datasource:
+                    name: Expression
+                    type: __expr__
+                    uid: __expr__
+                expression: usagePercent
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: usagePercentLast
+                settings:
+                    mode: ""
+                type: reduce
+            - refId: Threshold
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 85
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: []
+                      reducer:
+                        params: []
+                        type: avg
+                      type: query
+                datasource:
+                    name: Expression
+                    type: __expr__
+                    uid: __expr__
+                expression: usagePercentLast
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: Threshold
+                type: threshold
+            - refId: usageGiBLast
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: []
+                      reducer:
+                        params: []
+                        type: avg
+                      type: query
+                datasource:
+                    name: Expression
+                    type: __expr__
+                    uid: __expr__
+                expression: usageGiB
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: usageGiBLast
+                type: reduce
+          dashboardUid: ozk-lh-mon
+          panelId: 12
+          noDataState: NoData
+          execErrState: Error
+          annotations:
+            __dashboardUid__: ozk-lh-mon
+            __panelId__: "12"
+            description: |-
+                A Longhorn volume is nearing capacity limits, which may result in application failures if the volume becomes full.
+                - Volume name: {{ $labels.volume }} 
+                - Current usage: {{ $values.usageGiBLast }} GiB of {{ $values.capacityGiBLast }} GiB used.
+                - Percentage full: {{ $values.usagePercentLast }}%
+                What should you do?
+                1. Seek to understand why the volume is nearing capacity limits.
+                2. Consider whether it makes sense to Trim or Expand the Volume (this can be done via the Longhorn UI)
+                  - Expand: https://longhorn.io/docs/1.8.1/nodes-and-volumes/volumes/expansion/#expand-a-longhorn-volume
+                  - Trim: https://longhorn.io/docs/1.8.1/nodes-and-volumes/volumes/trim-filesystem/
+            summary: |-
+                Volume "{{ $labels.volume }}" is at or over {{ $values.usagePercentLast }}% capacity!
+                {{ $values.usageGiBLast }} GiB of {{ $values.capacityGiBLast }} GiB used.
+          labels:
+            app: longhorn
+            type: storage
+          isPaused: false
+          notification_settings:
+            receiver: Snjallgogn Teams

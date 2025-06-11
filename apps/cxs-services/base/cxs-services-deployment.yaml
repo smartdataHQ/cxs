@@ -15,15 +15,15 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-services:4ae0b43
+          image: quicklookup/cxs-services:a97c6a1
           ports:
             - containerPort: 8088
           livenessProbe:
             httpGet:
               port: 8088
               path: /api/status/alive
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 6
+            periodSeconds: 6
           readinessProbe:
             httpGet:
               port: 8088

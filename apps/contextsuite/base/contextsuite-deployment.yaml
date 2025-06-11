@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/contextsuite:05623f1
+          image: quicklookup/contextsuite:e8932cb
           resources:
             requests:
               cpu: 200m
@@ -119,6 +119,11 @@ spec:
                 configMapKeyRef:
                   name: contextsuite-config
                   key: NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL
+            - name: REACT_APP_GOOGLE_FONTS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: REACT_APP_GOOGLE_FONTS_API_KEY
           envFrom:
             - configMapRef:
                 name: contextsuite-config

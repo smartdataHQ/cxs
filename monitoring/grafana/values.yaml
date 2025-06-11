@@ -34,7 +34,15 @@ extraSecretMounts:
     readOnly: true
     optional: false
 
+
 service:
   annotations:
     tailscale.com/hostname: grafana
     tailscale.com/expose: "true"
+
+extraConfigmapMounts:
+  - name: grafana-longhorn-alerts
+    mountPath: /etc/grafana/provisioning/alerting/longhorn-rules.yaml
+    subPath: longhorn-rules.yaml
+    configMap: grafana-longhorn-alerts
+    readOnly: true

@@ -10,8 +10,6 @@ helm:
   #    helm repo update
   #    helm  search repo -l grafana
 
-
-
 #    
 #    #     #     #     ######   #     #  
 #    #  #  #    # #    #     #  ##    #  
@@ -27,3 +25,7 @@ helm:
   version: 8.8.6
   valuesFiles:
     - values.yaml
+
+kustomize:
+  dir: alerting
+

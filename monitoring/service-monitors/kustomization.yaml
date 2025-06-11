@@ -1,0 +1,2 @@
+resources:
+  - longhorn-service-monitor.yaml
