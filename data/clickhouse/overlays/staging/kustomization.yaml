@@ -3,6 +3,7 @@ namespace: data
 resources:
   - ../../base
   - clickhouse-nodeport-service.yaml
+  - clickhouse-ingress.yaml
 
 # Create patch that removes the nodeAffinity section from the StatefulSet
 patches:
