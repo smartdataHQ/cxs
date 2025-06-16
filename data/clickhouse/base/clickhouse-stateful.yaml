@@ -93,15 +93,22 @@ spec:
         - name: config-volume
           configMap:
             name: clickhouse-config
-        - name: clickhouse-data
-          hostPath:
-            path: /data/local/clickhouse
-        - name: clickhouse-elastic
-          hostPath:
-            path: /data/elastic/clickhouse
       dnsPolicy: ClusterFirstWithHostNet
       dnsConfig:
         searches:
           - clickhouse.data.svc.cluster.local
       imagePullSecrets:
         - name: dockerlock
+  volumeClaimTemplates:
+    - metadata:
+        name: clickhouse-data
+        labels:
+          app: clickhouse
+          tier: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 100Gi
