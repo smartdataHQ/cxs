@@ -13,14 +13,14 @@ helmCharts:
       crds:
         enabled: true
       webhook:
-        validatingAdmissionWebhook:
-          enabled: false
-        controller:
-          serviceAccount:
-            name: operators-cert-manager
-        webhook:
-          serviceAccount:
-            name: operators-cert-manager-webhook
-        cainjector:
-          serviceAccount:
-            name: operators-cert-manager-cainjector
+        # validatingAdmissionWebhook:
+        #   enabled: false
+      controller:
+        serviceAccount:
+          name: operators-cert-manager
+      webhook:
+        serviceAccount:
+          name: operators-cert-manager-webhook
+      cainjector:
+        serviceAccount:
+          name: operators-cert-manager-cainjector
