@@ -12,3 +12,6 @@ helmCharts:
     valuesInline:
       crds:
         enabled: true
+      webhook:
+        validatingAdmissionWebhook:
+          enabled: false
