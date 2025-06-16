@@ -15,3 +15,6 @@ helmCharts:
       webhook:
         validatingAdmissionWebhook:
           enabled: false
+      global:
+        leaderElection:
+          namespace: cert-manager
