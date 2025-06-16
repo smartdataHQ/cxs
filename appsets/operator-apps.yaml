@@ -1,0 +1,32 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: staging-operators
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
+  generators:
+    - git:
+        repoURL: https://github.com/skyvafnir/cxs.git
+        revision: staging
+        directories: # Target staging overlays
+          - path: operators/*/overlays/staging
+  template:
+    metadata:
+      name: "{{index .path.segments 1}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/skyvafnir/cxs.git
+        targetRevision: staging
+        path: "{{.path.path}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: ""  # this is left each application's to kustomization.yaml
+
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
