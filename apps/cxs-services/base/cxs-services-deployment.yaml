@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-services:44c1f00
+          image: quicklookup/cxs-services:d5fca5c
           ports:
             - containerPort: 8088
           livenessProbe:
