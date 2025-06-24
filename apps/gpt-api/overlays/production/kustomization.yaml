@@ -1,6 +1,6 @@
-images:
-  - name: quicklookup/gpt-api
-    newTag: 2998c0d  # Production tag
+# images:
+#   - name: quicklookup/gpt-api
+#     newTag: 2998c0d  # Production tag
 
 resources:
   - ../../base

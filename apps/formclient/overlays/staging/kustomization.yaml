@@ -1,6 +1,6 @@
-images:
-  - name: quicklookup/formclient
-    newTag: 23d6b04
+# images:
+#   - name: quicklookup/formclient
+#     newTag: 23d6b04
 
 resources:
   - ../../base
