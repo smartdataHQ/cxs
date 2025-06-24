@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-services:b8b8ae8
+          image: quicklookup/cxs-services:2fe5040
           ports:
             - containerPort: 8088
           livenessProbe:
@@ -92,11 +92,6 @@ spec:
               secretKeyRef:
                 name: contextsuite
                 key: TOKEN_SECRET_KEY
-          - name: FIRECRAWL_API_KEY
-            valueFrom:
-              secretKeyRef:
-                name: contextsuite
-                key: FIRECRAWL_API_KEY
           envFrom:
             - configMapRef:
                 name: cxs-services-config
