@@ -92,6 +92,11 @@ spec:
               secretKeyRef:
                 name: contextsuite
                 key: TOKEN_SECRET_KEY
+          - name: FIRECRAWL_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: FIRECRAWL_API_KEY
           envFrom:
             - configMapRef:
                 name: cxs-services-config
