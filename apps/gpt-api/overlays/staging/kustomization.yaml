@@ -85,4 +85,10 @@ patches:
         value:
           name: FONTCONFIG_PATH
           value: /usr/local/share/fonts
-          # Point fontconfig to the mounted fonts volume to avoid cache directory errors 
+          # Point fontconfig to the mounted fonts volume to avoid cache directory errors
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: FONTCONFIG_CACHE
+          value: /cache/fontconfig
+          # Set writable cache directory for fontconfig 
