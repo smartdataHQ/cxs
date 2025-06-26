@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: cxs-onenote-auth
+  namespace: api
 spec:
   rules:
     - host: onenote.contextsuite.com
