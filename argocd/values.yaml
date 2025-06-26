@@ -6,6 +6,51 @@ global:
 configs:
   params:
     server.insecure: true
+  cm:
+    # OIDC configuration
+    oidc.config: |
+      name: Microsoft Entra
+      issuer: https://login.microsoftonline.com/872900b8-f510-4931-8f01-ab9d34573149/v2.0
+      clientId:b8ab43e1-8bc4-491e-9663-1fc3daf5e00e
+      clientSecret: $oidc.microsoft.clientSecret
+      requestedScopes: ["openid", "profile", "email", "groups"]
+      requestedIDTokenClaims: {"groups": {"essential": true}}
+    # URL configuration
+    url: https://argocd.contextsuite.dev
+  rbac:
+    # RBAC policy configuration
+    policy.default: role:readonly
+    policy.csv: |
+      # Admin role for specific users/groups
+      p, role:admin, applications, *, */*, allow
+      p, role:admin, clusters, *, *, allow
+      p, role:admin, repositories, *, *, allow
+      p, role:admin, certificates, *, *, allow
+      p, role:admin, accounts, *, *, allow
+      p, role:admin, gpgkeys, *, *, allow
+      p, role:admin, logs, *, *, allow
+      p, role:admin, exec, *, *, allow
+      p, role:admin, extensions, *, *, allow
+      
+      # Developer role - can manage applications but not clusters
+      p, role:developer, applications, *, */*, allow
+      p, role:developer, repositories, *, *, allow
+      p, role:developer, logs, get, *, allow
+      
+      # Readonly role - default for all authenticated users
+      p, role:readonly, applications, get, */*, allow
+      p, role:readonly, applications, sync, */*, allow
+      p, role:readonly, clusters, get, *, allow
+      p, role:readonly, repositories, get, *, allow
+      p, role:readonly, logs, get, *, allow
+      
+      # Group mappings (you'll need to add your actual Entra group IDs)
+      # These are the Rancher group object IDs
+      g, e6ee664a-0a8c-4143-9392-0e2a8c1ee45d, role:admin
+      g, e6ee664a-0a8c-4143-9392-0e2a8c1ee45d, role:developer
+  
+  # Note: OIDC client secret is managed separately via create-oidc-secret.sh script
+  # or External Secrets Operator
 redis-ha:
   enabled: false
 server:
