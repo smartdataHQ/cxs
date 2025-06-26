@@ -2,28 +2,27 @@
 global:
     domain: argocd.contextsuite.dev
 
-argo-cd:
-  configs:
-    params:
-      server.insecure: true
-  redis-ha:
-    enabled: false
-  server:
-    replicas: 1
-    ingress:
-      enabled: true
-      ingressClassName: nginx
-      annotations:
-        cert-manager.io/cluster-issuer: "letsencrypt-staging"
-        nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
-        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
-      tls: true
-    
-  applicationSet:
-    enabled: true
 
-  repoServer:
-    replicas: 1
+configs:
+  params:
+    server.insecure: true
+redis-ha:
+  enabled: false
+server:
+  replicas: 1
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-staging"
+      nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    tls: true
+  
+applicationSet:
+  enabled: true
+
+repoServer:
+  replicas: 1
     # initContainers:
     # - name: download-tools
     #   image: registry.access.redhat.com/ubi8
