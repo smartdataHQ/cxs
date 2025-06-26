@@ -10,19 +10,6 @@ namespace: solutions
 # Staging-specific patches
 patches:
   - target:
-      kind: Deployment
-      name: gpt-api
-    patch: |
-      - op: replace
-        path: /spec/template/spec/containers/0/resources
-        value:
-          requests:
-            cpu: 100m
-            memory: 100Mi
-          limits:
-            cpu: 200m
-            memory: 200Mi
-  - target:
       kind: HorizontalPodAutoscaler
       name: gpt-api
     patch: |
