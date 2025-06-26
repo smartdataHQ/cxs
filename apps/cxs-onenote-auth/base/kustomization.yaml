@@ -1,3 +1,4 @@
+namespace: solutions
 resources:
   - cxs-onenote-auth-deployment.yaml
   - cxs-onenote-auth-service.yaml

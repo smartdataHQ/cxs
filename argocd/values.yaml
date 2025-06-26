@@ -11,9 +11,9 @@ configs:
     oidc.config: |
       name: Microsoft Entra
       issuer: https://login.microsoftonline.com/872900b8-f510-4931-8f01-ab9d34573149/v2.0
-      clientId:b8ab43e1-8bc4-491e-9663-1fc3daf5e00e
+      clientId: b8ab43e1-8bc4-491e-9663-1fc3daf5e00e
       clientSecret: $oidc.microsoft.clientSecret
-      requestedScopes: ["openid", "profile", "email", "groups"]
+      requestedScopes: ["openid", "profile", "email"]
       requestedIDTokenClaims: {"groups": {"essential": true}}
     # URL configuration
     url: https://argocd.contextsuite.dev
