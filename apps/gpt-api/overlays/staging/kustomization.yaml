@@ -66,4 +66,23 @@ patches:
         value: chat.contextsuite.dev
       - op: replace
         path: /spec/tls/0/secretName
-        value: star-contextsuite-dev 
+        value: star-contextsuite-dev
+  # Fix for matplotlib/fontconfig filesystem issues on Ubuntu 24.04 nodes
+  # The hurricane node (staging) has different filesystem permissions/AppArmor policies
+  # compared to production nodes (Ubuntu 22.04), causing cache directory creation failures
+  - target:
+      kind: Deployment
+      name: gpt-api
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: MPLCONFIGDIR
+          value: /cache/matplotlib
+          # Direct matplotlib to use the mounted /cache volume instead of /nonexistent/.config/matplotlib
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: FONTCONFIG_PATH
+          value: /usr/local/share/fonts
+          # Point fontconfig to the mounted fonts volume to avoid cache directory errors 
