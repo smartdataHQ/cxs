@@ -91,4 +91,10 @@ patches:
         value:
           name: FONTCONFIG_CACHE
           value: /cache/fontconfig
-          # Set writable cache directory for fontconfig 
+          # Set writable cache directory for fontconfig
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: XDG_CACHE_HOME
+          value: /cache
+          # Set XDG cache directory for applications to use writable cache 
