@@ -29,8 +29,7 @@ spec:
         server: https://kubernetes.default.svc
         namespace: ""  # this is left each application's to kustomization.yaml
 
-
-      # syncPolicy:
-      #   automated:
-      #     prune: true
-      #     selfHeal: true
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
