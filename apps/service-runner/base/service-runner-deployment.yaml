@@ -64,8 +64,8 @@ spec:
           - name: REDIS_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: llm
-                key: REDIS_PASSWORD
+                name: redis-auth
+                key: password
           - name: NOVA_ZENDESK_API_KEY
             valueFrom:
               secretKeyRef:

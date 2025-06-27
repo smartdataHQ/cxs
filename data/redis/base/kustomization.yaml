@@ -6,6 +6,14 @@ helmCharts:
     releaseName: redis
     version: 20.7.0
     namespace: data
+    valuesInline:
+      auth:
+        enabled: true
+        existingSecret: "redis-auth"
+        existingSecretPasswordKey: "password"
+      persistence:
+        enabled: true
+        size: 8Gi
 
 
 
