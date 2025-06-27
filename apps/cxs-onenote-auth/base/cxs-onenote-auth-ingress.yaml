@@ -4,7 +4,7 @@ metadata:
   name: cxs-onenote-auth
 spec:
   rules:
-    - host: onenote.contextsuite.dev
+    - host: onenote.contextsuite.com
       http:
         paths:
           - backend:
