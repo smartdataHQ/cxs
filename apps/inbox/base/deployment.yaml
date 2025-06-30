@@ -7,7 +7,7 @@ spec:
     matchLabels:
       app: inbox
       tier: api
-  replicas: 3
+  replicas: 1
   template:
     metadata:
       labels:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: inbox
-        image: quicklookup/inbox:v1.0.11
+        image: quicklookup/inbox:latest
         resources:
           requests:
             cpu: 100m
