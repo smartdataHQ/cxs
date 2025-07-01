@@ -18,3 +18,95 @@ spec:
         # Override Spring profile for staging
         - name: SPRING_PROFILES_ACTIVE
           value: staging
+        # Database and service credentials
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: POSTGRES_PASSWORD
+        - name: NEO4J_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: NEO4J_PASSWORD
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: REDIS_PASSWORD
+        - name: S3_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: S3_ACCESS_KEY
+        - name: S3_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: S3_SECRET_KEY
+        - name: KAFKA_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: KAFKA_USER_PASSWORD
+        - name: AIRFLOW_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: AIRFLOW_AUTH_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: JWT_SECRET
+        - name: VAULT_KV_BACKEND
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: VAULT_KV_BACKEND
+        # Database and service credentials
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: POSTGRES_PASSWORD
+        - name: NEO4J_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: NEO4J_PASSWORD
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: REDIS_PASSWORD
+        - name: S3_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: S3_ACCESS_KEY
+        - name: S3_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: S3_SECRET_KEY
+        - name: KAFKA_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: KAFKA_USER_PASSWORD
+        - name: AIRFLOW_AUTH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: AIRFLOW_AUTH_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: JWT_SECRET
+        - name: VAULT_KV_BACKEND
+          valueFrom:
+            secretKeyRef:
+              name: ingress-secrets
+              key: VAULT_KV_BACKEND
