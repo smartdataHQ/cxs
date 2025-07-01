@@ -8,3 +8,4 @@ resources:
   - service.yaml
   - configmap.yaml
   - autoscaler.yaml
+  - ingress.yaml

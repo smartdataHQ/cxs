@@ -7,7 +7,7 @@ spec:
     matchLabels:
       app: inbox
       tier: api
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: inbox
-        image: quicklookup/inbox:latest
+        image: quicklookup/inbox:v1.0.11
         resources:
           requests:
             cpu: 100m
@@ -26,7 +26,6 @@ spec:
           name: http
         - containerPort: 2222
           name: sftp
-        restartPolicy: Never
         env:
           - name: POSTGRES_PASSWORD
             valueFrom:

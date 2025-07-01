@@ -9,3 +9,11 @@ spec:
       containers:
       - name: inbox
         image: quicklookup/inbox:staging
+        env:
+        # Ubuntu 24.04 compatibility - writable cache directories
+        - name: MPLCONFIGDIR
+          value: /cache/matplotlib
+        - name: FONTCONFIG_CACHE
+          value: /cache/fontconfig
+        - name: XDG_CACHE_HOME
+          value: /cache

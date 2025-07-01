@@ -1,8 +1,0 @@
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: inbox
-spec:
-  maxReplicas: 6
-  minReplicas: 2
-  targetCPUUtilizationPercentage: 60
