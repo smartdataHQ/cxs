@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: staging-apps
+  name: staging-data-apps
   namespace: argocd
 spec:
   goTemplate: true
@@ -11,9 +11,8 @@ spec:
         repoURL: https://github.com/smartdataHQ/cxs.git
         revision: staging
         directories: # Target staging overlays
-          - path: apps/*/overlays/staging
-          - path: authentication/*/overlays/staging
-          - path: monitoring/*/overlays/staging
+          - path: data/*/overlays/staging
+          - path: data/postgres # This could go into another AppSet definition perhaps **shruggies**
   template:
     metadata:
       name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
