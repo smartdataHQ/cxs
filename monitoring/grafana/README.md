@@ -30,7 +30,7 @@ The user will receive the corresponding Grafana role on next login.
 >
 > _"This user's role is not editable because it is synchronized from your auth provider."_
 
-### ole Sync Notes
+### Role Sync Notes
 
 - Changes take effect on next login
 - Group claims must be included in the OIDC token — make sure the application is configured to emit them
