@@ -182,6 +182,6 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: gpt-api
-  maxReplicas: 4
+  maxReplicas: 1
   minReplicas: 1
   targetCPUUtilizationPercentage: 60
