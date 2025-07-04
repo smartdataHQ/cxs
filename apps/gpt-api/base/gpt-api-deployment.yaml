@@ -18,7 +18,7 @@ spec:
           image: quicklookup/gpt-api:fbb7a01
           resources:
             requests:
-              cpu: 200m
+              cpu: 1000m
               memory: 2000Mi
           volumeMounts:
           - name: ephemerala
