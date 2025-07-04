@@ -19,7 +19,7 @@ spec:
           resources:
             requests:
               cpu: 200m
-              memory: 200Mi
+              memory: 1200Mi
           volumeMounts:
           - name: ephemerala
             mountPath: /usr/local/share/fonts
