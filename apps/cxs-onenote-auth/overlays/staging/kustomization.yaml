@@ -19,3 +19,12 @@ patches:
       - op: replace
         path: /spec/tls/0/secretName
         value: onenote-contextsuite-dev-tls
+
+  - target:
+      kind: Service
+      name: cxs-onenote-auth
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          tailscale.com/hostname: solutions-cxs-onenote-auth-staging
