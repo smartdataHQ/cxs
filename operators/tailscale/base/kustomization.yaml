@@ -1,0 +1,12 @@
+namespace: tailscale
+
+resources:
+  - namespace.yaml
+
+helmCharts:
+  - name: tailscale-operator
+    repo: https://pkgs.tailscale.com/helmcharts
+    version: 1.70.0
+    releaseName: tailscale-operator
+    namespace: tailscale
+    valuesFile: values.yaml
