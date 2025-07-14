@@ -34,11 +34,11 @@ extraSecretMounts:
     readOnly: true
     optional: false
 
-
 service:
   annotations:
     tailscale.com/hostname: grafana
-    tailscale.com/expose: "true"
+    # TODO: Reducing blast radius of installing tailscale operator to staging
+    tailscale.com/expose: "false"
 
 extraConfigmapMounts:
   - name: grafana-longhorn-alerts

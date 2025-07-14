@@ -6,7 +6,8 @@ metadata:
     app: kafkaui
     tier: gui
   annotations:
-    tailscale.com/expose: "true"
+    # TODO: Reducing blast radius of installing tailscale operator to staging
+    tailscale.com/expose: "false"
 spec:
   type: NodePort
   ports:

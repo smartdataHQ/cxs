@@ -6,7 +6,8 @@ metadata:
     app: clickhouse
     tier: data
   annotations:
-    tailscale.com/expose: "true"
+    # TODO: Reducing blast radius of installing tailscale operator to staging
+    tailscale.com/expose: "false"
 spec:
   type: ClusterIP
   ports:

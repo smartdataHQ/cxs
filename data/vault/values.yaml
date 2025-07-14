@@ -1,4 +1,5 @@
 server:
   service:
     annotations:
-      tailscale.com/expose: "true"
+      # TODO: Reducing blast radius of installing tailscale operator to staging
+      tailscale.com/expose: "false"
