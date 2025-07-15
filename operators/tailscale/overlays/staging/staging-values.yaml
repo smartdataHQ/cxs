@@ -6,9 +6,17 @@ installCRDs: true
 
 # OAuth configuration - use separate staging OAuth secret
 # Note: You'll need to create a separate OAuth app in Tailscale for staging
+# The secret 'operator-oauth' must be created manually with:
+# kubectl create secret generic operator-oauth \
+#   --namespace=tailscale \
+#   --from-literal=client_id="YOUR_STAGING_CLIENT_ID" \
+#   --from-literal=client_secret="YOUR_STAGING_CLIENT_SECRET" \
+#   --context=cxs-staging
+
+# Use existing secret (same name as production, but different namespace and credentials)
 oauthSecretVolume:
   secret:
-    secretName: operator-oauth-staging
+    secretName: operator-oauth
 
 # Operator configuration
 operatorConfig:
