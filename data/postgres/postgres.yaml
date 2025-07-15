@@ -83,6 +83,10 @@ spec:
   image: percona/percona-postgresql-operator:2.3.1-ppg16-postgres
   imagePullPolicy: Always
   postgresVersion: 16
+  expose:
+    annotations:
+      tailscale.com/expose: "true"
+      tailscale.com/hostname: data-cxs-pg-ha-dev
   #  port: 5432
   #  expose:
   #    annotations:
@@ -159,7 +163,7 @@ spec:
       expose:
         annotations:
           tailscale.com/expose: "true"
-          tailscale.com/hostname: data-postgres-dev
+          tailscale.com/hostname: data-cxs-pg-pgbouncer 
 
 
       #          pool_mode: transaction
