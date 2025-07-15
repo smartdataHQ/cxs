@@ -2,6 +2,10 @@ apiVersion: pgv2.percona.com/v2
 kind: PerconaPGCluster
 metadata:
   name: cxs-pg
+  annotations:
+    # TODO: Need this overriden between tiers
+    tailscale.com/hostname: data-postgres-dev
+    tailscale.com/expose: "true"
 #  finalizers:
 #  - percona.com/delete-pvc
 #  - percona.com/delete-ssl
@@ -24,7 +28,7 @@ spec:
   users:
     - name: postgres
     - name: cxs-pg
-      options: "SUPERUSER"
+      options: SUPERUSER
       databases:
         - ssp
     - name: aiflow-db
