@@ -4,14 +4,11 @@ resources:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-helmCharts:
-  - name: redis
-    repo: oci://registry-1.docker.io/bitnamicharts
-    releaseName: redis
-    version: 20.7.0
-    namespace: data
-    valuesInline:
-      service:
-        annotations:
-          tailscale.com/expose: "true"
-          tailscale.com/hostname: data-redis-dev
+patches:
+  - target:
+      kind: HelmChart
+      name: redis
+    patch: |-
+      - op: replace
+        path: /spec/valuesInline/service/annotations/tailscale.com~1hostname
+        value: data-redis-dev
