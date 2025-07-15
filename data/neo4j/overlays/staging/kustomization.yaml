@@ -1,3 +1,5 @@
+namespace: data
+
 resources:
   - neo4j-stateful.yaml
   - neo4j-service.yaml
