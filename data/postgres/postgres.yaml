@@ -3,9 +3,6 @@ kind: PerconaPGCluster
 metadata:
   name: cxs-pg
   annotations:
-    # TODO: Need this overriden between tiers
-    tailscale.com/hostname: data-postgres-dev
-    tailscale.com/expose: "true"
 #  finalizers:
 #  - percona.com/delete-pvc
 #  - percona.com/delete-ssl
@@ -159,6 +156,10 @@ spec:
         global:
           max_client_conn: "200"
           default_pool_size: "50"
+      expose:
+        annotations:
+          tailscale.com/expose: "true"
+          tailscale.com/hostname: data-postgres-dev
 
 
       #          pool_mode: transaction
