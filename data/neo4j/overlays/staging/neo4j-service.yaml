@@ -4,6 +4,7 @@ metadata:
   name: neo4j
   annotations:
     tailscale.com/expose: "true"
+    tailscale.com/hostname: data-neo4j-dev
   labels:
     app: neo4j
     tier: data
