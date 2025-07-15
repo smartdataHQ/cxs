@@ -28,3 +28,4 @@ patches:
         path: /metadata/annotations
         value:
           tailscale.com/hostname: solutions-cxs-onenote-auth-staging
+          tailscale.com/expose: "true"
