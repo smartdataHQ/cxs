@@ -11,11 +11,11 @@ helmCharts:
     releaseName: kafka
     # SRC: https://github.com/bitnami/charts/blob/main/bitnami/kafka/values.yaml
     valuesInline:
-      zookeeperChrootPath: "kafka-staging"
+      zookeeperChrootPath: kafka-staging
       replicaCount: 3 # Increase the number of replicas to 3
       
       controller:
-        heapOpts: "-Xmx400m -Xms200m"
+        heapOpts: -Xmx400m -Xms200m
 
       externalZookeeper:
         servers: [zookeeper.data.svc.cluster.local]
@@ -25,5 +25,3 @@ helmCharts:
         tailscale.com/hostname: data-kafka-dev
 
 namespace: data
-
-
