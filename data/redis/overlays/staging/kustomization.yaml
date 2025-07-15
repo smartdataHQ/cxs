@@ -6,9 +6,9 @@ kind: Kustomization
 
 patches:
   - target:
-      kind: HelmChart
-      name: redis
+      kind: Service
+      name: redis-master
     patch: |-
-      - op: replace
-        path: /spec/valuesInline/service/annotations/tailscale.com~1hostname
+      - op: add
+        path: /metadata/annotations/tailscale.com~1hostname
         value: data-redis-dev
