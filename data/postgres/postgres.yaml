@@ -163,7 +163,7 @@ spec:
       expose:
         annotations:
           tailscale.com/expose: "true"
-          tailscale.com/hostname: data-cxs-pg-pgbouncer 
+          tailscale.com/hostname: data-cxs-pg-pgbouncer-dev
 
 
       #          pool_mode: transaction
