@@ -18,9 +18,10 @@ patches:
 
   - target:
       kind: Service
-      name: cxs-services
+      name: cxsservices
     patch: |-
       - op: add
         path: /metadata/annotations
         value:
+          tailscale.com/expose: "true"
           tailscale.com/hostname: solutions-cxs-services-dev
