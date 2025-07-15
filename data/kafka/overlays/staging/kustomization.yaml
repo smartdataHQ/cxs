@@ -20,6 +20,10 @@ helmCharts:
       externalZookeeper:
         servers: [zookeeper.data.svc.cluster.local]
 
+      commonAnnotations:
+        tailscale.com/expose: "true"
+        tailscale.com/hostname: data-kafka-dev
+
 namespace: data
 
 
