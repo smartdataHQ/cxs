@@ -1,5 +1,5 @@
 server:
   service:
     annotations:
-      # TODO: Reducing blast radius of installing tailscale operator to staging
-      tailscale.com/expose: "false"
+      tailscale.com/expose: "true"
+      tailscale.com/hostname: data-vault-dev

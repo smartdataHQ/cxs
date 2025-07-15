@@ -15,3 +15,12 @@ patches:
       - "op": replace
         "path": /spec/tls/0/hosts/0
         "value": *fqdn  # <- this is a YAML anchor
+
+  - target:
+      kind: Service
+      name: cxs-services
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          tailscale.com/hostname: solutions-cxs-services-dev

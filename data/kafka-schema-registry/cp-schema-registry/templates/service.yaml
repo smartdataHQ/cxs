@@ -8,8 +8,8 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    # TODO: Reducing blast radius of installing tailscale operator to staging
-    tailscale.com/expose: "false"
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: data-cp-schema-registry-dev
 spec:
   ports:
     - name: schema-registry

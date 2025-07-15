@@ -6,8 +6,7 @@ metadata:
     app: cxsservices
     tier: api
   annotations:
-    # TODO: Reducing blast radius of installing tailscale operator to staging
-    tailscale.com/expose: "false"
+    tailscale.com/expose: "true"
 spec:
   type: NodePort
   ports:

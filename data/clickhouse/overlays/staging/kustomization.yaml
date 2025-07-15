@@ -13,3 +13,12 @@ patches:
     patch: |
       - "op": remove
         "path": /spec/template/spec/affinity/nodeAffinity
+
+  - target:
+      kind: Service
+      name: clickhouse
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          tailscale.com/hostname: data-clickhouse-dev
