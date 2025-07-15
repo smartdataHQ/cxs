@@ -21,4 +21,5 @@ patches:
       - op: add
         path: /metadata/annotations
         value:
+          tailscale.com/expose: "true"
           tailscale.com/hostname: data-clickhouse-dev
