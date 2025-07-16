@@ -7,6 +7,7 @@ metadata:
     tier: api
 spec:
   type: NodePort
+  sessionAffinity: ClientIP # Added this line
   ports:
     - port: 4001
   selector:
