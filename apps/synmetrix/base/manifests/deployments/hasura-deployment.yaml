@@ -1,0 +1,61 @@
+---
+# Source: synmetrix/templates/hasura.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synmetrix-hasura
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: graphql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synmetrix
+      app.kubernetes.io/instance: synmetrix
+      app.kubernetes.io/component: graphql
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synmetrix
+        app.kubernetes.io/instance: synmetrix
+        app.kubernetes.io/component: graphql
+    spec:
+      serviceAccountName: synmetrix
+      containers:
+        - name: hasura
+          image: "hasura/graphql-engine:v2.33.4"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ENABLE_TELEMETRY
+              value: "false"
+            - name: HASURA_GRAPHQL_ADMIN_SECRET
+              value: "devsecret"
+            - name: HASURA_GRAPHQL_DATABASE_URL
+              value: "postgres://user:pg_pass@synmetrix-postgresql:5432/db"
+            - name: HASURA_GRAPHQL_DEV_MODE
+              value: "true"
+            - name: HASURA_GRAPHQL_ENABLE_CONSOLE
+              value: "true"
+          volumeMounts:
+            - name: migrations
+              mountPath: /hasura-migrations
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+      volumes:
+        - name: migrations
+          persistentVolumeClaim:
+            claimName: synmetrix-hasura-pvc

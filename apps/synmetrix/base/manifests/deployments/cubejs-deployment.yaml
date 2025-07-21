@@ -1,0 +1,69 @@
+---
+# Source: synmetrix/templates/cubejs.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synmetrix-cubejs
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synmetrix
+      app.kubernetes.io/instance: synmetrix
+      app.kubernetes.io/component: analytics
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synmetrix
+        app.kubernetes.io/instance: synmetrix
+        app.kubernetes.io/component: analytics
+    spec:
+      serviceAccountName: synmetrix
+      containers:
+        - name: cubejs
+          image: "quicklookup/synmetrix-cube:latest"
+          imagePullPolicy: 
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          env:
+            - name: CUBEJS_API_SECRET
+              value: "your-secret-key"
+            - name: CUBEJS_DB_HOST
+              value: "postgresql"
+            - name: CUBEJS_DB_NAME
+              value: "db"
+            - name: CUBEJS_DB_PASS
+              value: "pg_pass"
+            - name: CUBEJS_DB_PORT
+              value: "5432"
+            - name: CUBEJS_DB_TYPE
+              value: "postgres"
+            - name: CUBEJS_DB_USER
+              value: "user"
+            - name: CUBEJS_REDIS_URL
+              value: "redis://redis:6379"
+            - name: CUBEJS_SCHEDULED_REFRESH
+              value: "false"
+          volumeMounts:
+            - name: config
+              mountPath: /cube/conf
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: synmetrix-cubejs-pvc

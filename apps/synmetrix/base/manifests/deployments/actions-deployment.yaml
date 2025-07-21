@@ -1,0 +1,52 @@
+---
+# Source: synmetrix/templates/actions.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synmetrix-actions
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: actions
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synmetrix
+      app.kubernetes.io/instance: synmetrix
+      app.kubernetes.io/component: actions
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synmetrix
+        app.kubernetes.io/instance: synmetrix
+        app.kubernetes.io/component: actions
+    spec:
+      serviceAccountName: synmetrix
+      containers:
+        - name: actions
+          image: "quicklookup/synmetrix-actions:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: DATABASE_URL
+              value: "postgres://user:pg_pass@postgresql:5432/db"
+            - name: HASURA_GRAPHQL_ADMIN_SECRET
+              value: "devsecret"
+            - name: HASURA_GRAPHQL_ENDPOINT
+              value: "http://hasura:8080/v1/graphql"
+            - name: NODE_ENV
+              value: "production"
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi

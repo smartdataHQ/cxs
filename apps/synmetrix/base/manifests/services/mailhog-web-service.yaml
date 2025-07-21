@@ -1,0 +1,24 @@
+---
+# Source: synmetrix/templates/mailhog.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: synmetrix-mailhog-web
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: mailhog-web
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8025
+      targetPort: web
+      protocol: TCP
+      name: web
+  selector:
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/component: mailhog

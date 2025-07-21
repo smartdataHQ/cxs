@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: synmetrix
+
+resources:
+  # Core resources
+  - manifests/serviceaccount.yaml
+  - manifests/ingress.yaml
+
+  # Persistent Volume Claims
+  - manifests/pvcs/cubejs-pvc.yaml
+  - manifests/pvcs/cubestore-pvc.yaml
+  - manifests/pvcs/hasura-pvc.yaml
+  - manifests/pvcs/minio-pvc.yaml
+
+  # Services
+  - manifests/services/actions-service.yaml
+  - manifests/services/client-service.yaml
+  - manifests/services/cubejs-service.yaml
+  - manifests/services/cubestore-service.yaml
+  - manifests/services/hasura-service.yaml
+  - manifests/services/mailhog-service.yaml
+  - manifests/services/mailhog-web-service.yaml
+  - manifests/services/minio-service.yaml
+
+  # Deployments
+  - manifests/deployments/actions-deployment.yaml
+  - manifests/deployments/client-deployment.yaml
+  - manifests/deployments/cubejs-deployment.yaml
+  - manifests/deployments/cubestore-deployment.yaml
+  - manifests/deployments/hasura-deployment.yaml
+  - manifests/deployments/mailhog-deployment.yaml
+  - manifests/deployments/minio-deployment.yaml
+
+labels:
+- pairs:
+    app.kubernetes.io/part-of: synmetrix
+
+# Common annotations
+commonAnnotations:
+  kustomize.config.k8s.io/needs-hash-suffix: "true"

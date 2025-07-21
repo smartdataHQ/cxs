@@ -1,0 +1,59 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: synmetrix
+
+resources:
+  - ../../base
+
+# Production-specific patches (simplified)
+patches:
+  - path: patches/cubejs-resources.yaml
+    target:
+      kind: Deployment
+      name: synmetrix-cubejs
+  - path: patches/hasura-resources.yaml
+    target:
+      kind: Deployment
+      name: synmetrix-hasura
+  - path: patches/enable-ingress.yaml
+    target:
+      kind: Ingress
+      name: synmetrix
+  - path: patches/external-database-config.yaml
+
+# Production environment configuration
+configMapGenerator:
+  - name: synmetrix-config
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - CUBEJS_CACHE_TYPE=redis
+
+# External secret reference (create this secret manually)
+secretGenerator:
+  - name: synmetrix-secrets
+    literals:
+      # Database configuration
+      - POSTGRES_HOST=cxs-pg-primary.data.svc
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=REPLACE_WITH_ACTUAL_PASSWORD
+      - POSTGRES_DB=synmetrix
+      - DATABASE_URL=postgres://postgres:REPLACE_WITH_ACTUAL_PASSWORD@cxs-pg-primary.data.svc:5432/synmetrix
+
+      # Redis configuration
+      - REDIS_URL=redis://redis-master.data.svc.cluster.local:6379
+
+      # Application secrets
+      - HASURA_GRAPHQL_ADMIN_SECRET=REPLACE_WITH_ACTUAL_SECRET
+      - HASURA_GRAPHQL_JWT_SECRET={"type":"HS256","key":"REPLACE_WITH_ACTUAL_JWT_KEY"}
+      - CUBEJS_API_SECRET=REPLACE_WITH_ACTUAL_CUBEJS_SECRET
+
+# Use Docker Hub images
+images:
+  - name: quicklookup/synmetrix-client
+    newTag: latest
+  - name: quicklookup/synmetrix-actions
+    newTag: latest
+  - name: quicklookup/synmetrix-cube
+    newTag: latest 

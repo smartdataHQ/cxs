@@ -1,0 +1,52 @@
+---
+# Source: synmetrix/templates/client.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synmetrix-client
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synmetrix
+      app.kubernetes.io/instance: synmetrix
+      app.kubernetes.io/component: frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synmetrix
+        app.kubernetes.io/instance: synmetrix
+        app.kubernetes.io/component: frontend
+    spec:
+      serviceAccountName: synmetrix
+      containers:
+        - name: client
+          image: "quicklookup/synmetrix-client:latest"
+          imagePullPolicy: 
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+            - name: CUBEJS_REST_API_URL
+              value: "/api/v1/load"
+            - name: HASURA_GRAPHQL_ENDPOINT
+              value: "/v1/graphql"
+            - name: HASURA_WS_ENDPOINT
+              value: "/v1/graphql"
+            - name: NODE_ENV
+              value: "production"
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
