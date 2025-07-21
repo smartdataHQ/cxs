@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: synmetrix
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: synmetrix.contextsuite.dev
+      http:
+        paths:
+          - path: /v1/graphql
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-hasura
+                port:
+                  number: 8080
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-cubejs
+                port:
+                  number: 4000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-client
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - synmetrix.contextsuite.dev
+      secretName: synmetrix-tls

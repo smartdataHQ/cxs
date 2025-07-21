@@ -1,0 +1,46 @@
+---
+# Source: synmetrix/templates/mailhog.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synmetrix-mailhog
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: mailhog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synmetrix
+      app.kubernetes.io/instance: synmetrix
+      app.kubernetes.io/component: mailhog
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synmetrix
+        app.kubernetes.io/instance: synmetrix
+        app.kubernetes.io/component: mailhog
+    spec:
+      serviceAccountName: synmetrix
+      containers:
+        - name: mailhog
+          image: "mailhog/mailhog:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: smtp
+              containerPort: 1025
+              protocol: TCP
+            - name: web
+              containerPort: 8025
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 50m
+              memory: 64Mi

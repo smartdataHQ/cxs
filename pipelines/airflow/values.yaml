@@ -2,7 +2,7 @@ airflow:
   legacyCommands: false
   image:
     repository: quicklookup/airflow-pipelines
-    tag: 93afea3
+    tag: 7c55290
     pullPolicy: IfNotPresent
     pullSecret: "dockerlock"
 
@@ -53,7 +53,19 @@ airflow:
       host: file.festi.is
       port: 22
       login: snjallgogn
-      password: ${N1_SFTP_PASSWORD}      
+      password: ${N1_SFTP_PASSWORD}
+    - id: icelandic_tourist_board_azure_sql
+      type: mssql
+      description: "Icelandic tourist board azure sql db"
+      host: ferda-sql-mbferdathjonusta-prod-01.database.windows.net
+      schema: ferda-sqldb-mbftdatawarehouse-prod-01
+      login: snjallgogn
+      password: ${ICELANDIC_TOURIST_BOARD_AZURE_SQL_PASSWORD}
+      port: 1433
+      extra: |-
+        { 
+          "timeout": 10000
+        }  
   connectionsTemplates:
     BLUE_CAR_AZURE_SQL_PASSWORD:
       kind: secret
@@ -67,6 +79,10 @@ airflow:
       kind: secret
       name: airflow
       key: n1-sftp-password
+    ICELANDIC_TOURIST_BOARD_AZURE_SQL_PASSWORD:  
+      kind: secret
+      name: airflow
+      key: icelandic-toursit-board-azure-sql-password
   connectionsUpdate: false    
   variables: []
   pools: [] 

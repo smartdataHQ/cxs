@@ -1,0 +1,19 @@
+---
+# Source: synmetrix/templates/cubestore.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: synmetrix-cubestore-pvc
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: cache-store
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
