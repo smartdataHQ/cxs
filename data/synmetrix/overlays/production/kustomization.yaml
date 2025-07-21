@@ -20,7 +20,6 @@ patches:
     target:
       kind: Ingress
       name: synmetrix
-  - path: patches/external-database-config.yaml
 
 # Production environment configuration
 configMapGenerator:

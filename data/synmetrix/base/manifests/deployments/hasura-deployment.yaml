@@ -38,13 +38,24 @@ spec:
             - name: ENABLE_TELEMETRY
               value: "false"
             - name: HASURA_GRAPHQL_ADMIN_SECRET
-              value: "devsecret"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: HASURA_GRAPHQL_ADMIN_SECRET
             - name: HASURA_GRAPHQL_DATABASE_URL
-              value: "postgres://user:pg_pass@synmetrix-postgresql:5432/db"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: DATABASE_URL
             - name: HASURA_GRAPHQL_DEV_MODE
               value: "true"
             - name: HASURA_GRAPHQL_ENABLE_CONSOLE
               value: "true"
+            - name: HASURA_GRAPHQL_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: HASURA_GRAPHQL_JWT_SECRET
           volumeMounts:
             - name: migrations
               mountPath: /hasura-migrations

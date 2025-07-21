@@ -33,6 +33,24 @@ resources:
   - manifests/deployments/mailhog-deployment.yaml
   - manifests/deployments/minio-deployment.yaml
 
+configMapGenerator:
+  - name: synmetrix-config
+    literals:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+      - CUBEJS_CACHE_TYPE=redis
+
+secretGenerator:
+  - name: synmetrix-secrets
+    envs:
+      - synmetrix-secrets.env
+    literals:
+      # Database configuration
+      - POSTGRES_HOST=cxs-pg-primary.data.svc
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=synmetrix
+      - REDIS_URL=redis://redis-master.data.svc.cluster.local:6379
+
 labels:
 - pairs:
     app.kubernetes.io/part-of: synmetrix

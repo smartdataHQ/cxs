@@ -36,21 +36,39 @@ spec:
               protocol: TCP
           env:
             - name: CUBEJS_API_SECRET
-              value: "your-secret-key"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: CUBEJS_API_SECRET
             - name: CUBEJS_DB_HOST
-              value: "postgresql"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: POSTGRES_HOST
             - name: CUBEJS_DB_NAME
-              value: "db"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: POSTGRES_DB
             - name: CUBEJS_DB_PASS
-              value: "pg_pass"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: POSTGRES_PASSWORD
             - name: CUBEJS_DB_PORT
               value: "5432"
             - name: CUBEJS_DB_TYPE
               value: "postgres"
             - name: CUBEJS_DB_USER
-              value: "user"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: POSTGRES_USER
             - name: CUBEJS_REDIS_URL
-              value: "redis://redis:6379"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: REDIS_URL
             - name: CUBEJS_SCHEDULED_REFRESH
               value: "false"
           volumeMounts:

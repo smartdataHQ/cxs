@@ -36,11 +36,17 @@ spec:
               protocol: TCP
           env:
             - name: DATABASE_URL
-              value: "postgres://user:pg_pass@postgresql:5432/db"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: DATABASE_URL
             - name: HASURA_GRAPHQL_ADMIN_SECRET
-              value: "devsecret"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: HASURA_GRAPHQL_ADMIN_SECRET
             - name: HASURA_GRAPHQL_ENDPOINT
-              value: "http://hasura:8080/v1/graphql"
+              value: "http://synmetrix-hasura:8080/v1/graphql"
             - name: NODE_ENV
               value: "production"
           resources:
