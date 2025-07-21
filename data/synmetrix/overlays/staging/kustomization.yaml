@@ -5,6 +5,14 @@ namespace: synmetrix
 
 resources:
   - ../../base
+
+# Staging-specific configMap additions
+configMapGenerator:
+  - name: synmetrix-config
+    literals:
+      - HASURA_GRAPHQL_ENABLE_CONSOLE=true
+    behavior: merge
+
 #
 ## Production-specific patches (simplified)
 #patches:

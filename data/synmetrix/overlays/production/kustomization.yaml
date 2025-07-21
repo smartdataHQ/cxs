@@ -21,32 +21,14 @@ patches:
       kind: Ingress
       name: synmetrix
 
-# Production environment configuration
-configMapGenerator:
-  - name: synmetrix-config
-    literals:
-      - NODE_ENV=production
-      - LOG_LEVEL=info
-      - CUBEJS_CACHE_TYPE=redis
-
-# External secret reference (create this secret manually)
+# Production-specific secret values (mixing envs and literals)
 secretGenerator:
   - name: synmetrix-secrets
+    envs:
+      - synmetrix-secrets.env
     literals:
-      # Database configuration
-      - POSTGRES_HOST=cxs-pg-primary.data.svc
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=REPLACE_WITH_ACTUAL_PASSWORD
-      - POSTGRES_DB=synmetrix
-      - DATABASE_URL=postgres://postgres:REPLACE_WITH_ACTUAL_PASSWORD@cxs-pg-primary.data.svc:5432/synmetrix
-
-      # Redis configuration
-      - REDIS_URL=redis://redis-master.data.svc.cluster.local:6379
-
-      # Application secrets
-      - HASURA_GRAPHQL_ADMIN_SECRET=REPLACE_WITH_ACTUAL_SECRET
-      - HASURA_GRAPHQL_JWT_SECRET={"type":"HS256","key":"REPLACE_WITH_ACTUAL_JWT_KEY"}
-      - CUBEJS_API_SECRET=REPLACE_WITH_ACTUAL_CUBEJS_SECRET
+      - ENVIRONMENT=production
+    behavior: replace
 
 # Use Docker Hub images
 images:

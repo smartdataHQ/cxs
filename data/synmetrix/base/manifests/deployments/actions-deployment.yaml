@@ -26,6 +26,8 @@ spec:
         app.kubernetes.io/component: actions
     spec:
       serviceAccountName: synmetrix
+      imagePullSecrets:
+      - name: docker-hub-secret
       containers:
         - name: actions
           image: "quicklookup/synmetrix-actions:latest"
@@ -34,21 +36,13 @@ spec:
             - name: http
               containerPort: 3000
               protocol: TCP
-          env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: synmetrix-secrets
-                  key: DATABASE_URL
-            - name: HASURA_GRAPHQL_ADMIN_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: synmetrix-secrets
-                  key: HASURA_GRAPHQL_ADMIN_SECRET
-            - name: HASURA_GRAPHQL_ENDPOINT
-              value: "http://synmetrix-hasura:8080/v1/graphql"
-            - name: NODE_ENV
-              value: "production"
+          envFrom:
+            - configMapRef:
+                name: synmetrix-config
+            - secretRef:
+                name: synmetrix-secrets
+          
+            
           resources:
             limits:
               cpu: 500m

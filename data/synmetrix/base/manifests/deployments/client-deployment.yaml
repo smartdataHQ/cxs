@@ -26,23 +26,20 @@ spec:
         app.kubernetes.io/component: frontend
     spec:
       serviceAccountName: synmetrix
+      imagePullSecrets:
+      - name: docker-hub-secret
       containers:
         - name: client
           image: "quicklookup/synmetrix-client:latest"
-          imagePullPolicy: 
+          imagePullPolicy: IfNotPresent
+
           ports:
             - name: http
               containerPort: 80
               protocol: TCP
-          env:
-            - name: CUBEJS_REST_API_URL
-              value: "/api/v1/load"
-            - name: HASURA_GRAPHQL_ENDPOINT
-              value: "/v1/graphql"
-            - name: HASURA_WS_ENDPOINT
-              value: "/v1/graphql"
-            - name: NODE_ENV
-              value: "production"
+          envFrom:
+            - configMapRef:
+                name: synmetrix-config
           resources:
             limits:
               cpu: 500m

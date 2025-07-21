@@ -30,13 +30,13 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: synmetrix-client
+                name: synmetrix-hasura
                 port:
-                  number: 80
+                  number: 8080
           - path: /api
             pathType: Prefix
             backend:
               service:
-                name: synmetrix-client
+                name: synmetrix-cubejs
                 port:
-                  number: 80
+                  number: 4000
