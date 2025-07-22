@@ -44,6 +44,7 @@ spec:
       databases:
         - grafana
     - name: synmetrix
+      options: SUPERUSER
       databases:
          - synmetrix
 
