@@ -43,6 +43,10 @@ spec:
     - name: grafana
       databases:
         - grafana
+    - name: synmetrix
+      databases:
+         - synmetrix
+
   #  users:
   #    - name: rhino
   #      databases:
