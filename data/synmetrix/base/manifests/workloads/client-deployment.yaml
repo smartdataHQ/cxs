@@ -40,6 +40,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: synmetrix-config
+            - secretRef:
+                name: synmetrix-secrets
           resources:
             limits:
               cpu: 500m

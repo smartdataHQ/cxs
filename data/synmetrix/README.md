@@ -48,7 +48,6 @@ stringData:
   # Database Configuration
   POSTGRES_HOST: "cxs-pg-primary.data.svc"
   POSTGRES_USER: "postgres"
-  POSTGRES_PASSWORD: "your-actual-postgres-password"
   POSTGRES_DB: "synmetrix"
   DATABASE_URL: "postgres://postgres:your-actual-postgres-password@cxs-pg-primary.data.svc:5432/synmetrix"
   

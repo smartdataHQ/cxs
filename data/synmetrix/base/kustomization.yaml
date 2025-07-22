@@ -3,16 +3,49 @@ kind: Kustomization
 
 namespace: synmetrix
 
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [{ name: docker-hub-secret }]
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: StatefulSet
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [{ name: docker-hub-secret }]
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: Job
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [{ name: docker-hub-secret }]
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+
 resources:
   # Core resources
   - manifests/serviceaccount.yaml
   - manifests/ingress.yaml
+  
+  # ConfigMaps
+  - manifests/configmaps/hasura-migrations-config.yaml
 
   # Persistent Volume Claims
   - manifests/pvcs/cubejs-pvc.yaml
   - manifests/pvcs/cubestore-pvc.yaml
-  - manifests/pvcs/hasura-pvc.yaml
+
   - manifests/pvcs/minio-pvc.yaml
+  - manifests/pvcs/redis-pvc.yaml
 
   # Services
   - manifests/services/actions-service.yaml
@@ -23,15 +56,20 @@ resources:
   - manifests/services/mailhog-service.yaml
   - manifests/services/mailhog-web-service.yaml
   - manifests/services/minio-service.yaml
+  - manifests/services/hasura-plus-service.yaml
+  - manifests/services/redis-service.yaml
 
   # Deployments
-  - manifests/deployments/actions-deployment.yaml
-  - manifests/deployments/client-deployment.yaml
-  - manifests/deployments/cubejs-deployment.yaml
-  - manifests/deployments/cubestore-deployment.yaml
-  - manifests/deployments/hasura-deployment.yaml
-  - manifests/deployments/mailhog-deployment.yaml
-  - manifests/deployments/minio-deployment.yaml
+  - manifests/workloads/actions-deployment.yaml
+  - manifests/workloads/client-deployment.yaml
+  - manifests/workloads/cubejs-deployment.yaml
+  - manifests/workloads/cubestore-statefulset.yaml
+  - manifests/workloads/hasura-deployment.yaml
+  - manifests/workloads/hasura-migration-job.yaml
+  - manifests/workloads/hasura-plus-deploy.yaml
+  - manifests/workloads/mailhog-deployment.yaml
+  - manifests/workloads/minio-statefulset.yaml
+  - manifests/workloads/redis-deployment.yaml
 
 
 images:
@@ -45,6 +83,8 @@ images:
 configMapGenerator:
   - name: synmetrix-config
     literals:
+      - ACTIONS_URL=http://synmetrix-actions:3000
+      - REDIS_URL=redis://synmetrix-redis:6379
       - CUBEJS_CACHE_TYPE=redis
       - CUBEJS_CUBESTORE_HOST=cubestore
       - CUBEJS_CUBESTORE_PORT=3030
@@ -56,27 +96,25 @@ configMapGenerator:
       - CUBEJS_SQL_PORT=13306
       - CUBEJS_TELEMETRY=false
       - CUBEJS_URL=http://synmetrix-cubejs:4000
-
+      
       - CUBESQL_DEBUG_QTRACE=true
       - CUBESTORE_VERSION=v1.2.3
-      
-      - DEBUG_LOG=true
-      
+
+      - HASURA_GRAPHQL_ENABLE_TELEMETRY=false
       - HASURA_ENDPOINT=http://synmetrix-hasura:8080/v1/graphql
-      
-      - LOG_LEVEL=debug
+      - HASURA_WS_ENDPOINT=/v1/graphql
+      - DEBUG_LOG=true
+      - LOG_LEVEL=info
       - NODE_ENV=production
+      
       - SMTP_HOST=mailhog-smtp.mailhog.svc.cluster.local
       - SMTP_PORT=1025
 
-    
 
 secretGenerator:
-
   - name: synmetrix-secrets
     literals:
       - POSTGRES_DB=synmetrix
-      - REDIS_URL=redis://redis-master.data.svc.cluster.local:6379
     envs:
       - synmetrix-secrets.env
 

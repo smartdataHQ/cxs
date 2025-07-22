@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hasura-migration-job
+  namespace: synmetrix
+spec:
+  
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: hasura-migrate
+        image: quicklookup/synmetrix-hasura:latest
+        workingDir: /hasura-migrations
+        command:
+        - /bin/sh
+        - -c
+        - |
+          hasura-cli migrate apply --all-databases
+          hasura-cli metadata apply
+          hasura-cli seed apply
+
+        envFrom:
+          - configMapRef:
+              name: synmetrix-config
+        env:
+          - name: ENABLE_TELEMETRY
+            value: "false"
+          - name: HASURA_GRAPHQL_ADMIN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: synmetrix-secrets
+                key: HASURA_GRAPHQL_ADMIN_SECRET
+          - name: HASURA_GRAPHQL_DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: synmetrix-secrets
+                key: DATABASE_URL
+          - name: HASURA_GRAPHQL_JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: synmetrix-secrets
+                key: HASURA_GRAPHQL_JWT_SECRET
+
+        volumeMounts:
+          - name: hasura-migrations-config
+            mountPath: /hasura-migrations/config.yaml
+            subPath: config.yaml
+      volumes:
+        - name: hasura-migrations-config
+          configMap:
+            name: hasura-migrations-config

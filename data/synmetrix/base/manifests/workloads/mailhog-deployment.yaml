@@ -5,11 +5,8 @@ kind: Deployment
 metadata:
   name: synmetrix-mailhog
   labels:
-    helm.sh/chart: synmetrix-0.1.0
     app.kubernetes.io/name: synmetrix
     app.kubernetes.io/instance: synmetrix
-    app.kubernetes.io/version: "1.0.0"
-    app.kubernetes.io/managed-by: Helm
     app.kubernetes.io/component: mailhog
 spec:
   replicas: 1

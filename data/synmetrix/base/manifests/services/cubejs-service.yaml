@@ -5,12 +5,9 @@ kind: Service
 metadata:
   name: synmetrix-cubejs
   labels:
-    helm.sh/chart: synmetrix-0.1.0
-    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/name: synmetrix-cubejs
     app.kubernetes.io/instance: synmetrix
-    app.kubernetes.io/version: "1.0.0"
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/component: analytics
+
 spec:
   type: ClusterIP
   ports:
@@ -19,6 +16,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/name: synmetrix-cubejs
     app.kubernetes.io/instance: synmetrix
-    app.kubernetes.io/component: analytics

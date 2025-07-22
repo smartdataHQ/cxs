@@ -12,6 +12,7 @@ configMapGenerator:
     literals:
       - HASURA_GRAPHQL_ENABLE_CONSOLE=true
       - CUBEJS_LOG_LEVEL=debug
+      - NODE_ENV=development
     behavior: merge
 secretGenerator:
   - name: synmetrix-secrets

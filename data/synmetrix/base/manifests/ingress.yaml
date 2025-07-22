@@ -5,21 +5,27 @@ kind: Ingress
 metadata:
   name: synmetrix
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/server-snippets: |
+      location ~* /v1/graphql {
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+      }
 spec:
   ingressClassName: nginx
   rules:
     - host: synmetrix.contextsuite.dev
       http:
         paths:
-          - path: /
+          - path: /console
             pathType: Prefix
             backend:
               service:
-                name: synmetrix-client
+                name: synmetrix-hasura
                 port:
-                  number: 80
+                  number: 8080
           - path: /v1/graphql
             pathType: Prefix
             backend:
@@ -34,6 +40,27 @@ spec:
                 name: synmetrix-cubejs
                 port:
                   number: 4000
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-hasura-plus
+                port:
+                  number: 3000
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-hasura-plus
+                port:
+                  number: 3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-client
+                port:
+                  number: 80
   tls:
     - hosts:
         - synmetrix.contextsuite.dev

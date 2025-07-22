@@ -13,6 +13,8 @@ metadata:
     app.kubernetes.io/component: graphql
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app.kubernetes.io/name: synmetrix
@@ -26,17 +28,27 @@ spec:
         app.kubernetes.io/component: graphql
     spec:
       serviceAccountName: synmetrix
+      
       containers:
         - name: hasura
-          image: "hasura/graphql-engine:v2.33.4"
+          image: quicklookup/synmetrix-hasura:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: synmetrix-config
+            - secretRef:
+                name: synmetrix-secrets
           env:
             - name: ENABLE_TELEMETRY
               value: "false"
+            - name: HASURA_GRAPHQL_DEV_MODE
+              value: "true"
+            - name: HASURA_GRAPHQL_ENABLE_CONSOLE
+              value: "true"
             - name: HASURA_GRAPHQL_ADMIN_SECRET
               valueFrom:
                 secretKeyRef:
@@ -47,18 +59,12 @@ spec:
                 secretKeyRef:
                   name: synmetrix-secrets
                   key: DATABASE_URL
-            - name: HASURA_GRAPHQL_DEV_MODE
-              value: "true"
-            - name: HASURA_GRAPHQL_ENABLE_CONSOLE
-              value: "true"
             - name: HASURA_GRAPHQL_JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: synmetrix-secrets
                   key: HASURA_GRAPHQL_JWT_SECRET
-          volumeMounts:
-            - name: migrations
-              mountPath: /hasura-migrations
+
           resources:
             limits:
               cpu: 500m
@@ -66,7 +72,4 @@ spec:
             requests:
               cpu: 250m
               memory: 256Mi
-      volumes:
-        - name: migrations
-          persistentVolumeClaim:
-            claimName: synmetrix-hasura-pvc
+    
