@@ -5,6 +5,12 @@ real cluster using the Percona Postgres Operator.
 
 **NOTE**: This document **DOES NOT** cover how to restore a Database "in-place".
 
+## ⚠️ Important: Rancher Fleet Behavior
+
+**Fleet automatically deploys ALL `.yaml` files it finds in this repository.** To prevent accidental deployment of restore configurations, all YAML files in this directory use the `.txt` extension.
+
+**When using the templates, you MUST rename them back to `.yaml` before applying to kubectl.**
+
 ## Prequisites
 
 This guide assumes the following
@@ -58,7 +64,7 @@ The snapshot ID has a different format depending on the backup type, but in the 
 
 ## 2. Prepare the `PerconaPGCluster` YAML.
 
-Create a timestamped copy of [restore-db-template.yaml](./restore-db-template.yaml) and update:
+Create a timestamped copy of [restore-db-template.yaml.txt](./restore-db-template.yaml.txt) (rename to `.yaml`) and update:
 
 - `metadata.name`
     - Just append a date / timestamp
@@ -70,8 +76,10 @@ Create a timestamped copy of [restore-db-template.yaml](./restore-db-template.ya
 
 ## 3. Apply the YAML
 
+**Important**: Ensure your file has a `.yaml` extension before applying:
+
 ```.bash
-$ kubectl apply -ndata -f <path-to-you-yaml>
+$ kubectl apply -ndata -f <path-to-your-yaml-file>
 ```
 
 ### Now wait for the Operator to spin up your backup (takes a few minutes)
@@ -143,5 +151,5 @@ Having gathered the credentials and connection info, fire up your Database clien
 Once the restore has been used, delete the PerconaPGCluster resource the same way you created it:
 
 ```.bash
-$ kubectl delete -ndata -f <path-to-you-yaml>
+$ kubectl delete -ndata -f <path-to-your-yaml-file>
 ```
