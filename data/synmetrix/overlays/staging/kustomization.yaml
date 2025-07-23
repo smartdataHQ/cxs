@@ -10,9 +10,13 @@ resources:
 configMapGenerator:
   - name: synmetrix-config
     literals:
+      - APP_FRONTEND_URL=https://synmetrix.contextsuite.dev
       - HASURA_GRAPHQL_ENABLE_CONSOLE=true
       - CUBEJS_LOG_LEVEL=debug
       - NODE_ENV=development
+      # Override base config to match reference implementation
+      - HASURA_GRAPHQL_ENDPOINT=https://synmetrix.contextsuite.dev/v1/graphql
+      - HASURA_WS_ENDPOINT=wss://synmetrix.contextsuite.dev/v1/graphql
     behavior: merge
 secretGenerator:
   - name: synmetrix-secrets

@@ -59,11 +59,6 @@ spec:
                 secretKeyRef:
                   name: synmetrix-secrets
                   key: DATABASE_URL
-            - name: HASURA_GRAPHQL_JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: synmetrix-secrets
-                  key: HASURA_GRAPHQL_JWT_SECRET
 
           resources:
             limits:

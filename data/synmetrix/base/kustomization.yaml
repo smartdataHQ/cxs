@@ -86,7 +86,7 @@ configMapGenerator:
       - ACTIONS_URL=http://synmetrix-actions:3000
       - REDIS_URL=redis://synmetrix-redis:6379
       - CUBEJS_CACHE_TYPE=redis
-      - CUBEJS_CUBESTORE_HOST=cubestore
+      - CUBEJS_CUBESTORE_HOST=synmetrix-cubestore
       - CUBEJS_CUBESTORE_PORT=3030
       - CUBEJS_DB_CLICKHOUSE_READONLY="true"
       - CUBEJS_DB_PORT=5432
@@ -102,9 +102,14 @@ configMapGenerator:
 
       - HASURA_GRAPHQL_ENABLE_TELEMETRY=false
       - HASURA_ENDPOINT=http://synmetrix-hasura:8080/v1/graphql
-      - HASURA_WS_ENDPOINT=/v1/graphql
+      
+      # Default endpoints (can be overridden in overlays):
       - HASURA_GRAPHQL_ENDPOINT=/v1/graphql
+      - HASURA_WS_ENDPOINT=/v1/graphql
+
       - CUBEJS_REST_API_URL=/api/v1/load
+
+      - JWT_CLAIMS_NAMESPACE=hasura
 
       # This is for debugging purposes
       - CUBEJS_MYSQL_API_URL=cube.contextsuite.dev:13306
@@ -115,7 +120,7 @@ configMapGenerator:
       - DEBUG_LOG=true
       - LOG_LEVEL=info
       - NODE_ENV=production
-      
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
       - SMTP_HOST=mailhog-smtp.mailhog.svc.cluster.local
       - SMTP_PORT=1025
 

@@ -18,11 +18,11 @@ spec:
         - |
           hasura-cli migrate apply --all-databases
           hasura-cli metadata apply
-          hasura-cli seed apply
+          hasura-cli seed apply -f 1708465495269_demoSeed.sql
 
-        envFrom:
-          - configMapRef:
-              name: synmetrix-config
+        # envFrom:
+        #   - configMapRef:
+        #       name: synmetrix-config
         env:
           - name: ENABLE_TELEMETRY
             value: "false"

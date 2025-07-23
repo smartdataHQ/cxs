@@ -19,6 +19,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/name: synmetrix-cubestore
     app.kubernetes.io/instance: synmetrix
-    app.kubernetes.io/component: cache-store

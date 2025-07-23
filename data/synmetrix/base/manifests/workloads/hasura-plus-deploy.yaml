@@ -36,12 +36,13 @@ spec:
         - name: REDIRECT_URL_ERROR
           value: https://synmetrix.contextsuite.dev/callback
         - name: JWT_KEY
-          value: LGB6j3RkoVuOuqKzjgnCeq7vwfqBYJDw
+          valueFrom:
+            secretKeyRef:
+              name: synmetrix-secrets
+              key: JWT_KEY
         - name: JWT_ALGORITHM
           value: HS256
-        - name: NODE_TLS_REJECT_UNAUTHORIZED
-          value: "0"
-        
+
         envFrom:
         - configMapRef:
             name: synmetrix-config
