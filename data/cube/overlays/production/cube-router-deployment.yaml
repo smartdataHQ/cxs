@@ -16,7 +16,7 @@ spec:
         kubernetes.io/hostname: growing-mouse
       containers:
         - name: cubestore-router
-          image: cubejs/cubestore:latest
+          image: cubejs/cubestore:v1.3.42
           env:
             - name: NODE_OPTIONS
               value: '--max-old-space-size=6144'
