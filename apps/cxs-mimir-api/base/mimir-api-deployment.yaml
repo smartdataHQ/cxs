@@ -149,6 +149,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: GOOGLE_MAPS_API_KEY
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: HF_TOKEN
           envFrom:
             - configMapRef:
                 name: cxs-mimir-api-config
