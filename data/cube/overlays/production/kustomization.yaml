@@ -2,7 +2,7 @@ resources:
   - cube-config.yaml
   - cube-api-deployment.yaml
   - cube-api-service.yaml
-  - cube-ingress.yaml
+#  - cube-ingress.yaml
   - cube-router-deployment.yaml
   - cube-router-service.yaml
   - cube-worker1-deployment.yaml
