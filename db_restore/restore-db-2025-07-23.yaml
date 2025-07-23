@@ -1,9 +1,25 @@
 apiVersion: pgv2.percona.com/v2
 kind: PerconaPGCluster
 metadata:
-  name: cxs-pg-restore
+  # The restore name ALSO becomes the tailscale hostname through the magic of YAML anchors
+  name: &tailscale_hostname cxs-pg-restore-20250723  # <-- always update this
   namespace: data
 spec:
+  expose:
+    annotations:  # Expose theb restored cluster via tailscale:
+      tailscale.com/expose: "true"
+      tailscale.com/hostname: *tailscale_hostname  # <- Cunning use of yaml anchors
+  dataSource:
+    postgresCluster:
+      clusterName: cxs-pg
+      clusterNamespace: data
+      repoName: repo1
+      options:
+        - --type=immediate
+        - --db-include=ssp
+        - --set=20250721-060008F_20250723-060008D  # <-- always update this
+  
+  # Everything below this line can stay the same
   crVersion: 2.3.1
   users:
   - name: postgres
@@ -13,6 +29,7 @@ spec:
       - ssp
   postgresVersion: 16
   image: percona/percona-postgresql-operator:2.3.1-ppg16-postgres
+
   imagePullPolicy: Always
   instances:
     - name: instance2
@@ -32,8 +49,7 @@ spec:
         global:
           max_client_conn: "200"
     
-  
-  backups: 
+  backups:  # required cruft. CRD validation fails without this.
     pgbackrest:  
       image: percona/percona-postgresql-operator:2.3.1-ppg16-pgbackrest
       repos: 
@@ -45,13 +61,6 @@ spec:
             resources:
               requests:
                 storage: 10Gi
-  dataSource:
-    postgresCluster:
-      clusterName: cxs-pg
-      clusterNamespace: data
-      repoName: repo1
-      options:
-        - --type=immediate
-        - --db-include=ssp
+
         
         
