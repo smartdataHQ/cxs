@@ -9,9 +9,9 @@ data:
   CUBEJS_DB_TYPE: 'clickhouse'
   CUBEJS_DB_CLICKHOUSE_READONLY: 'true'
   CUBEJS_DEV_MODE: 'true'
-  # CUBEJS_CUBESTORE_HOST: 'cubestore-router.data'
-  # CUBEJS_REFRESH_WORKER: 'true'
-  # CUBEJS_CACHE_AND_QUEUE_DRIVER: "cubestore"
+  CUBEJS_CUBESTORE_HOST: 'cubestore-router.data'
+  CUBEJS_REFRESH_WORKER: 'true'
+  CUBEJS_CACHE_AND_QUEUE_DRIVER: "cubestore"
   CUBEJS_CACHE: "false"
   CUBEJS_PRE_AGGREGATIONS: "false"
   CUBESTORE_LOG_LEVEL: 'debug'
