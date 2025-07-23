@@ -110,6 +110,7 @@ configMapGenerator:
       - CUBEJS_REST_API_URL=/api/v1/load
 
       - JWT_CLAIMS_NAMESPACE=hasura
+      - JWT_ALGORITHM=HS256
 
       # This is for debugging purposes
       - CUBEJS_MYSQL_API_URL=cube.contextsuite.dev:13306
