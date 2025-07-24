@@ -44,6 +44,12 @@ patches:
       name: gpt-chat-web
     patch: |-
       - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "gpt-chat-web-tls"
+      - op: replace
         path: /spec/rules/0/host
         value: "chat.contextsuite.dev"
       - op: replace
