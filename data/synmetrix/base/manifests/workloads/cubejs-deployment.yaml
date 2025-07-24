@@ -30,6 +30,12 @@ spec:
             - name: http
               containerPort: 4000
               protocol: TCP
+            - name: pgsql
+              containerPort: 15432
+              protocol: TCP
+            - name: mysql
+              containerPort: 13306
+              protocol: TCP
           envFrom:
             - configMapRef:
                 name: synmetrix-config

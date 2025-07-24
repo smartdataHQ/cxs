@@ -15,6 +15,14 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    - port: 15432
+      targetPort: pgsql
+      protocol: TCP
+      name: pgsql
+    - port: 13306
+      targetPort: mysql
+      protocol: TCP
+      name: mysql
   selector:
     app.kubernetes.io/name: synmetrix-cubejs
     app.kubernetes.io/instance: synmetrix

@@ -71,6 +71,17 @@ stringData:
 - **Client**: Main web interface (via ingress `/`)
 - **Hasura**: GraphQL API (via ingress `/v1/graphql`)
 - **CubeJS**: Analytics API (via ingress `/api`)
+- **CubeJS SQL APIs**: PostgreSQL-compatible (port 15432) and MySQL-compatible (port 13306) APIs
+
+### Enabling CubeJS SQL API Access
+
+To enable external access to CubeJS SQL APIs, apply the cluster-level configuration:
+
+```bash
+kubectl apply -f data/synmetrix/cluster/
+```
+
+See `cluster/README.md` for details on direct database connections via `psql` and `mysql` clients.
 
 ## External Dependencies
 

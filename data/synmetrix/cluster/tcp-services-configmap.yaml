@@ -1,0 +1,11 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rke2-ingress-nginx-tcp
+  namespace: kube-system
+data:
+  # PostgreSQL-compatible API on port 15432
+  "15432": "synmetrix/synmetrix-cubejs:15432"
+  # MySQL-compatible API on port 13306  
+  "13306": "synmetrix/synmetrix-cubejs:13306"

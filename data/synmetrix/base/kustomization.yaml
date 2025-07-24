@@ -96,6 +96,7 @@ configMapGenerator:
       - CUBEJS_SQL_PORT=13306
       - CUBEJS_TELEMETRY=false
       - CUBEJS_URL=http://synmetrix-cubejs:4000
+      - CUBEJS_SQL_API=true
       
       - CUBESQL_DEBUG_QTRACE=true
       - CUBESTORE_VERSION=v1.2.3
@@ -112,11 +113,10 @@ configMapGenerator:
       - JWT_CLAIMS_NAMESPACE=hasura
       - JWT_ALGORITHM=HS256
 
-      # This is for debugging purposes
-      - CUBEJS_MYSQL_API_URL=cube.contextsuite.dev:13306
-      - CUBEJS_PG_API_URL=cube.contextsuite.dev:15432
-      - CUBEJS_API_DOCS_URL=http://cube.contextsuite.dev/docs
-      # debug end
+
+      - CUBEJS_MYSQL_API_URL=synmetrix.contextsuite.dev:13306
+      - CUBEJS_PG_API_URL=synmetrix.contextsuite.dev:15432
+      - CUBEJS_API_DOCS_URL=http://synmetrix.contextsuite.dev/docs
 
       - DEBUG_LOG=true
       - LOG_LEVEL=info
