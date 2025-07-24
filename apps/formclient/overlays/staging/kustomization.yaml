@@ -11,9 +11,15 @@ patches:
       kind: Ingress
       name: formclient
     patch: |
-      - "op": replace
-        "path": /spec/rules/0/host
-        "value": &fqdn forms.contextsuite.dev
-      - "op": replace
-        "path": /spec/tls/0/hosts/0
-        "value": *fqdn  # <- this is a YAML anchor
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "formclient-tls"
+      - op: replace
+        path: /spec/rules/0/host
+        value: &fqdn forms.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: *fqdn  # <- this is a YAML anchor
