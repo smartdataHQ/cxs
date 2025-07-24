@@ -30,6 +30,9 @@ patches:
       name: playground
     patch: |-
       - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
         path: /spec/rules/0/host
         value: "playground.contextsuite.dev"
       - op: replace

@@ -3,10 +3,11 @@ kind: Ingress
 metadata:
   name: cxs-mimir-api
   annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/proxy-body-size: "5m"
 spec:
   rules:
-    - host: agents.contextsuite.com
+    - host: agents.contextsuite.dev
       http:
         paths:
           - backend:
@@ -18,5 +19,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - agents.contextsuite.com
-      secretName: star-contextsuite-com
+        - agents.contextsuite.dev
+      secretName: agents-tls
