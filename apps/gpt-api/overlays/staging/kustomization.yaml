@@ -46,14 +46,18 @@ patches:
       name: gpt-api
     patch: |
       - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "gpt-api-tls"
+      - op: replace
         path: /spec/rules/0/host
         value: chat.contextsuite.dev
       - op: replace
         path: /spec/tls/0/hosts/0
         value: chat.contextsuite.dev
-      - op: replace
-        path: /spec/tls/0/secretName
-        value: star-contextsuite-dev
+        
   # Fix for matplotlib/fontconfig filesystem issues on Ubuntu 24.04 nodes
   # The hurricane node (staging) has different filesystem permissions/AppArmor policies
   # compared to production nodes (Ubuntu 22.04), causing cache directory creation failures
