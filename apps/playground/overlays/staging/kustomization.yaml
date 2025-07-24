@@ -33,6 +33,9 @@ patches:
         path: /metadata/annotations/cert-manager.io~1cluster-issuer
         value: "letsencrypt-prod"
       - op: replace
+        path: /spec/tls/0/secretName
+        value: "playground-tls"
+      - op: replace
         path: /spec/rules/0/host
         value: "playground.contextsuite.dev"
       - op: replace
