@@ -16,9 +16,9 @@ patches:
       - op: replace
         path: /spec/tls/0/secretName
         value: "formapi-tls"
-      - "op": replace
-        "path": /spec/rules/0/host
-        "value": &fqdn forms-api.contextsuite.dev
-      - "op": replace
-        "path": /spec/tls/0/hosts/0
-        "value": *fqdn  # <- this is a YAML anchor
+      - op: replace
+        path: /spec/rules/0/host
+        value: &fqdn forms-api.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: *fqdn  # <- this is a YAML anchor
