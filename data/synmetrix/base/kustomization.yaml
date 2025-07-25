@@ -43,6 +43,7 @@ resources:
   - manifests/cubejs-redis.yaml
   - manifests/cubestore.yaml
   - manifests/hasura.yaml
+  - manifests/hasura-migrations.yaml
   - manifests/hasura-plus.yaml
   - manifests/mailhog.yaml
   - manifests/minio.yaml
@@ -66,6 +67,7 @@ configMapGenerator:
       - DEFAULT_USER_ROLE=user
 
       - REDIS_URL=redis://synmetrix-redis:6379
+      - REDIS_ADDR=redis://synmetrix-redis:6379
       - CUBEJS_CACHE_TYPE=redis
       - CUBEJS_CUBESTORE_HOST=synmetrix-cubestore
       - CUBEJS_CUBESTORE_PORT=3030

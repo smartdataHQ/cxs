@@ -1,47 +1,6 @@
 ---
 # Source: synmetrix/templates/hasura.yaml
 apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: hasura-migrations-config
-data:
-  config.yaml: |
-    version: 2
-    endpoint: http://synmetrix-hasura:8080
-    metadata_directory: metadata
-    seeds_directory: seeds
-    actions:
-      kind: synchronous
-      handler_webhook_baseurl: http://synmetrix-actions:3000 
-  migrate.sh: |
-    #!/bin/sh
-    set -e
-    
-    # Wait for Hasura to be ready before running migrations.
-    echo "Waiting for Hasura to be ready..."
-    sleep 10
-    until curl -f http://localhost:8080/healthz; do
-      echo "Waiting for Hasura to be ready..."
-      sleep 2
-    done
-    
-    echo "Hasura is ready - running migrations"
-    
-    # Run migrations
-    cd /hasura-migrations
-    echo "Applying database migrations..."
-    hasura-cli migrate apply --all-databases --endpoint http://localhost:8080
-    
-    echo "Applying metadata..."
-    hasura-cli metadata apply --endpoint http://localhost:8080
-    
-    echo "Applying seeds..."
-    hasura-cli seed apply -f 1708465495269_demoSeed.sql --endpoint http://localhost:8080
-    
-    echo "Migrations completed successfully!"
----
-# Source: synmetrix/templates/hasura.yaml
-apiVersion: v1
 kind: Service
 metadata:
   name: synmetrix-hasura
@@ -91,28 +50,14 @@ spec:
       serviceAccountName: synmetrix
       containers:
         - name: hasura
-          image: quicklookup/synmetrix-hasura:latest
+          # image: quicklookup/synmetrix-hasura:latest
+          image: hasura/graphql-engine:v2.37.0
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
-          lifecycle:
-            postStart:
-              exec:
-                # run migrations as postStart hook, since they require hasura to be up and running.
-                command:  
-                  - /bin/sh
-                  - -c 
-                  - |
-                    /scripts/migrate.sh >> /proc/1/fd/1
-          volumeMounts:
-            - name: hasura-migrations-config
-              mountPath: /hasura-migrations/config.yaml
-              subPath: config.yaml
-            - name: hasura-migrations-config
-              mountPath: /scripts/migrate.sh
-              subPath: migrate.sh
+          
           envFrom:
             - configMapRef:
                 name: synmetrix-config
@@ -125,6 +70,10 @@ spec:
               value: "true"
             - name: HASURA_GRAPHQL_ENABLE_CONSOLE
               value: "true"
+            - name: HASURA_GRAPHQL_MIGRATIONS_DIR
+              value: /hasura-migrations
+            - name: HASURA_GRAPHQL_METADATA_DIR
+              value: /hasura-migrations
             - name: HASURA_GRAPHQL_ADMIN_SECRET
               valueFrom:
                 secretKeyRef:
@@ -143,9 +92,5 @@ spec:
             requests:
               cpu: 250m
               memory: 256Mi
-      volumes:
-        - name: hasura-migrations-config
-          configMap:
-            name: hasura-migrations-config
-            defaultMode: 0755
+
     
