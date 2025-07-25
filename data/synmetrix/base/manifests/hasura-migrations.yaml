@@ -1,7 +1,22 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hasura-migrations-config
+data:
+  config.yaml: |
+    version: 2
+    endpoint: http://synmetrix-hasura:8080
+    metadata_directory: metadata
+    seeds_directory: seeds
+    actions:
+      kind: synchronous
+      handler_webhook_baseurl: http://synmetrix-actions:3000 
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: hasura-migration-job
+  name: hasura-migrations-job
   namespace: synmetrix
 spec:
   

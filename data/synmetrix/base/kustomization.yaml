@@ -33,45 +33,21 @@ patches:
         value: Always
 
 resources:
-  # Core resources
+  - manifests/synmetrix-ingress.yaml
   - manifests/serviceaccount.yaml
-  - manifests/ingress.yaml
+
+  # Individual workloads
+  - manifests/actions.yaml
+  - manifests/client.yaml
+  - manifests/cubejs.yaml
+  - manifests/cubejs-redis.yaml
+  - manifests/cubestore.yaml
+  - manifests/hasura.yaml
+  - manifests/hasura-plus.yaml
+  - manifests/hasura-migrations.yaml
+  - manifests/mailhog.yaml
+  - manifests/minio.yaml
   
-  # ConfigMaps
-  - manifests/configmaps/hasura-migrations-config.yaml
-
-  # Persistent Volume Claims
-  - manifests/pvcs/cubejs-pvc.yaml
-  - manifests/pvcs/cubestore-pvc.yaml
-
-  - manifests/pvcs/minio-pvc.yaml
-  - manifests/pvcs/redis-pvc.yaml
-
-  # Services
-  - manifests/services/actions-service.yaml
-  - manifests/services/client-service.yaml
-  - manifests/services/cubejs-service.yaml
-  - manifests/services/cubestore-service.yaml
-  - manifests/services/hasura-service.yaml
-  - manifests/services/mailhog-service.yaml
-  - manifests/services/mailhog-web-service.yaml
-  - manifests/services/minio-service.yaml
-  - manifests/services/hasura-plus-service.yaml
-  - manifests/services/redis-service.yaml
-
-  # Deployments
-  - manifests/workloads/actions-deployment.yaml
-  - manifests/workloads/client-deployment.yaml
-  - manifests/workloads/cubejs-deployment.yaml
-  - manifests/workloads/cubestore-statefulset.yaml
-  - manifests/workloads/hasura-deployment.yaml
-  - manifests/workloads/hasura-migration-job.yaml
-  - manifests/workloads/hasura-plus-deploy.yaml
-  - manifests/workloads/mailhog-deployment.yaml
-  - manifests/workloads/minio-statefulset.yaml
-  - manifests/workloads/redis-deployment.yaml
-
-
 images:
   - name: quicklookup/synmetrix-client
     newTag: latest

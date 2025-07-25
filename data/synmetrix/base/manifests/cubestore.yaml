@@ -1,5 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: synmetrix-cubestore
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: cache-store
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3030
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: synmetrix-cubestore
+    app.kubernetes.io/instance: synmetrix
 ---
-# Source: synmetrix/templates/cubestore.yaml
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -46,3 +66,21 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: synmetrix-cubestore-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: synmetrix-cubestore-pvc
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: cache-store
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

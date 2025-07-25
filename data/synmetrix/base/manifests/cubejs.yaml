@@ -1,5 +1,31 @@
 ---
-# Source: synmetrix/templates/cubejs.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: synmetrix-cubejs
+  labels:
+    app.kubernetes.io/name: synmetrix-cubejs
+    app.kubernetes.io/instance: synmetrix
+
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: 15432
+      targetPort: pgsql
+      protocol: TCP
+      name: pgsql
+    - port: 13306
+      targetPort: mysql
+      protocol: TCP
+      name: mysql
+  selector:
+    app.kubernetes.io/name: synmetrix-cubejs
+    app.kubernetes.io/instance: synmetrix
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -61,3 +87,22 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: synmetrix-cubejs-pvc
+---
+# Source: synmetrix/templates/cubejs.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: synmetrix-cubejs-pvc
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: analytics
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
