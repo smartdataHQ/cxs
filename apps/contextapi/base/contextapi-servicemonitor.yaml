@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: contextapi
+  labels:
+    app: contextapi # Standard label for grouping
+    # Add any other labels your Prometheus Operator setup might require for discovery
+spec:
+  selector:
+    matchLabels:
+      app: contextapi # Selects the Service for contextapi
+  namespaceSelector:
+    matchNames:
+      - api # Assuming the service is in the 'api' namespace, as per fleet.yaml
+  endpoints:
+  - port: http # Matches the name given to the containerPort in the Deployment
+    path: /metrics # Standard path for Prometheus metrics
+    interval: 30s # How frequently to scrape
