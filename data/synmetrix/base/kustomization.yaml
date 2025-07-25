@@ -44,7 +44,6 @@ resources:
   - manifests/cubestore.yaml
   - manifests/hasura.yaml
   - manifests/hasura-plus.yaml
-  - manifests/hasura-migrations.yaml
   - manifests/mailhog.yaml
   - manifests/minio.yaml
   
@@ -61,6 +60,11 @@ configMapGenerator:
     literals:
       - ACTIONS_URL=http://synmetrix-actions:3000
       - HASURA_PLUS_ENDPOINT=http://synmetrix-hasura-plus:3000
+      - HASURA_PLUS_SERVER_URL=http://synmetrix-hasura-plus:3000
+      - AUTO_ACTIVATE_NEW_USERS=true
+      - AUTH_LOCAL_USERS_ENABLED=true
+      - DEFAULT_USER_ROLE=user
+
       - REDIS_URL=redis://synmetrix-redis:6379
       - CUBEJS_CACHE_TYPE=redis
       - CUBEJS_CUBESTORE_HOST=synmetrix-cubestore
@@ -99,7 +103,7 @@ configMapGenerator:
       - LOG_LEVEL=info
       - NODE_ENV=production
       - NODE_TLS_REJECT_UNAUTHORIZED=0
-      - SMTP_HOST=mailhog-smtp.mailhog.svc.cluster.local
+      - SMTP_HOST=synmetrix-mailhog-smtp
       - SMTP_PORT=1025
 
 
