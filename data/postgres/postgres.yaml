@@ -47,6 +47,10 @@ spec:
       options: SUPERUSER
       databases:
          - synmetrix
+    - name: synmetrix2
+      options: SUPERUSER
+      databases:
+         - synmetrix2
 
   #  users:
   #    - name: rhino
