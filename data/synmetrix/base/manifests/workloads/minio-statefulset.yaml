@@ -37,10 +37,16 @@ spec:
             - -c
             - minio server --console-address ":9001" /data
           env:
-            - name: MINIO_ROOT_PASSWORD
-              value: "minio123"
             - name: MINIO_ROOT_USER
-              value: "minio"
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: MINIO_ROOT_PASSWORD
           volumeMounts:
             - name: data
               mountPath: /data

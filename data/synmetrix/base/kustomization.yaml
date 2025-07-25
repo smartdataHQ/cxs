@@ -84,6 +84,7 @@ configMapGenerator:
   - name: synmetrix-config
     literals:
       - ACTIONS_URL=http://synmetrix-actions:3000
+      - HASURA_PLUS_ENDPOINT=http://synmetrix-hasura-plus:3000
       - REDIS_URL=redis://synmetrix-redis:6379
       - CUBEJS_CACHE_TYPE=redis
       - CUBEJS_CUBESTORE_HOST=synmetrix-cubestore
