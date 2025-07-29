@@ -255,8 +255,8 @@ validate_app() {
         return 1
     fi
     
-    # Skip if already completed (unless verbose mode)
-    if [[ "$MARK_COMPLETED" == "true" && "$VERBOSE" == "false" ]] && is_completed "$app_name"; then
+    # Skip if already completed
+    if is_completed "$app_name"; then
         log_info "$app_name: Already validated (skipped)"
         return 0
     fi
