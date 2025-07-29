@@ -284,6 +284,11 @@ spec:
               secretKeyRef:
                 name: cxs-services-kafka
                 key: KAFKA_PASSWORD
+          - name: NUM_WORKERS
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: NUM_WORKERS
 
           envFrom:
             - configMapRef:
