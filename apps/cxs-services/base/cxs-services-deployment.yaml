@@ -141,6 +141,16 @@ spec:
               secretKeyRef:
                 name: cxs-services-kafka
                 key: KAFKA_PASSWORD
+          - name: KAFKA_SCRAPE_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_SCRAPE_TOPIC
+          - name: KAFKA_REFRESH_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_REFRESH_TOPIC
 
           envFrom:
             - configMapRef:
@@ -284,6 +294,16 @@ spec:
               secretKeyRef:
                 name: cxs-services-kafka
                 key: KAFKA_PASSWORD
+          - name: KAFKA_SCRAPE_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_SCRAPE_TOPIC
+          - name: KAFKA_REFRESH_TOPIC
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_REFRESH_TOPIC
           - name: NUM_WORKERS
             valueFrom:
               secretKeyRef:
