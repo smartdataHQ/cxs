@@ -1,3 +1,5 @@
+# When updating the cxs-service deployment, ensure the cxs-services-rag-worker deployment
+# is also updated
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,7 +17,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-services:a3e3ee3
+          image: quicklookup/cxs-services:671df9d
           ports:
             - containerPort: 8088
           livenessProbe:
@@ -97,6 +99,49 @@ spec:
               secretKeyRef:
                 name: contextsuite
                 key: FIRECRAWL_API_KEY
+
+          - name: MINIO_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_ENDPOINT
+          - name: MINIO_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_ACCESS_KEY
+          - name: MINIO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_SECRET_KEY
+          - name: MINIO_BUCKET_NAME
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_BUCKET_NAME
+          - name: MINIO_SECURE
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_SECURE
+          
+          - name: KAFKA_HOSTS
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_HOSTS
+          - name: KAFKA_USER
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_USER
+          - name: KAFKA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_PASSWORD
+
           envFrom:
             - configMapRef:
                 name: cxs-services-config
@@ -109,7 +154,142 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: cxs-service-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxs-services-rag-worker
+spec:
+  selector:
+    matchLabels:
+      app: cxs-services-rag-worker
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: cxs-services-rag-worker
+        tier: api
+    spec:
+      containers:
+        - name: worker
+          image: quicklookup/cxs-services:671df9d
+          command: ["python", "cxs/services/components/jobs/consumer.py"]
+          env:
+          - name: PYTHONPATH
+            value: .
+          - name: CLICKHOUSE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: CLICKHOUSE_PASSWORD
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: DB_PASSWORD
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: OPENAI_API_KEY
+          - name: FERNET_KEY_PATTERN
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: FERNET_KEY_PATTERN
+          - name: NOVA_ZENDESK_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: NOVA_ZENDESK_EMAIL
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: REDIS_PASSWORD
+          - name: NOVA_ZENDESK_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: NOVA_ZENDESK_API_KEY
+          - name: DEFAULT_VECTOR_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: DEFAULT_VECTOR_API_KEY
+          - name: UNSTRUCTURED_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: UNSTRUCTURED_API_KEY
+          - name: VOYAGE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: VOYAGE_API_KEY
+          - name: NOVA_ZENDESK_SUBDOMAIN
+            valueFrom:
+              secretKeyRef:
+                name: llm
+                key: NOVA_ZENDESK_SUBDOMAIN
+          - name: SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: TOKEN_SECRET_KEY
+          - name: FIRECRAWL_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: contextsuite
+                key: FIRECRAWL_API_KEY
 
+          - name: MINIO_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_ENDPOINT
+          - name: MINIO_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_ACCESS_KEY
+          - name: MINIO_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_SECRET_KEY
+          - name: MINIO_BUCKET_NAME
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_BUCKET_NAME
+          - name: MINIO_SECURE
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-minio
+                key: MINIO_SECURE
+          
+          - name: KAFKA_HOSTS
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_HOSTS
+          - name: KAFKA_USER
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_USER
+          - name: KAFKA_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cxs-services-kafka
+                key: KAFKA_PASSWORD
+
+          envFrom:
+            - configMapRef:
+                name: cxs-services-config
+      imagePullSecrets:
+        - name: dockerlock
 ---
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
