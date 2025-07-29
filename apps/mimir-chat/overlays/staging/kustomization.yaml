@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: solutions
+
+resources:
+  - ../../base
+  - mimir-chat-config.yaml
+  - mimir-chat-ingress.yml
+
+patches:
+  - target:
+      kind: Deployment
+      name: mimir-chat-web
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: "100m"
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/memory
+        value: "128Mi"
