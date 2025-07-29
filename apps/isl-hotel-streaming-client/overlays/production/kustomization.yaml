@@ -2,6 +2,4 @@ namespace: ingestion
 bases:
   - ../../base
 
-resources:
-  - isl-hotel-streaming-client-configmap.yaml
-  - isl-hotel-streaming-client-persistentvolume.yaml
+
