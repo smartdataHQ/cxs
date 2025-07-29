@@ -8,16 +8,6 @@ resources:
 
 patches:
   - target:
-      kind: ConfigMap
-      name: translator-api-config
-    patch: |-
-      - op: replace
-        path: /data/ENVIRONMENT
-        value: "staging"
-      - op: replace
-        path: /data/BACKEND_URL
-        value: "https://translator.contextsuite.dev"
-  - target:
       kind: Ingress
       name: translator-api
     patch: |-
