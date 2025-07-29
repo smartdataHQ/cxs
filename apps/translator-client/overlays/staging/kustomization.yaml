@@ -8,19 +8,6 @@ resources:
 
 patches:
   - target:
-      kind: Deployment
-      name: translator-client
-    patch: |-
-      - op: replace
-        path: /spec/replicas
-        value: 1
-      - op: replace
-        path: /spec/template/spec/containers/0/resources/requests/cpu
-        value: "100m"
-      - op: replace
-        path: /spec/template/spec/containers/0/resources/requests/memory
-        value: "128Mi"
-  - target:
       kind: ConfigMap
       name: translator-client-config
     patch: |-
