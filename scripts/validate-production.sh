@@ -153,14 +153,9 @@ fi
 if [[ "$SAVE_DIFFS" == "true" ]]; then
     mkdir -p "$DIFF_OUTPUT_DIR"
     
-    # Clean up old diff files for the specific apps being validated to avoid confusion
-    if [[ -n "$SPECIFIC_APPS" ]]; then
-        IFS=',' read -ra app_list <<< "$SPECIFIC_APPS"
-        for app in "${app_list[@]}"; do
-            app=$(echo "$app" | xargs) # trim whitespace
-            old_diff="$DIFF_OUTPUT_DIR/${app}.diff"
-            [[ -f "$old_diff" ]] && rm -f "$old_diff"
-        done
+    # Clean up ALL old diff files at startup to prevent stale auto-open behavior
+    if [[ -d "$DIFF_OUTPUT_DIR" ]]; then
+        rm -f "$DIFF_OUTPUT_DIR"/*.diff 2>/dev/null || true
     fi
 fi
 
