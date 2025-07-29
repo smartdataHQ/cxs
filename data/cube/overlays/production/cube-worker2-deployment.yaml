@@ -16,7 +16,7 @@ spec:
         kubernetes.io/hostname: growing-mouse
       containers:
         - name: cubestore-worker-2
-          image: cubejs/cubestore:latest
+          image: cubejs/cubestore:v1.3.42
           ports:
             - containerPort: 10002
           env:

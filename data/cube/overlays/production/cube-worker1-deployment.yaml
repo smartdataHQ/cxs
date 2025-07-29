@@ -16,7 +16,7 @@ spec:
         kubernetes.io/hostname: growing-mouse
       containers:
         - name: cubestore-worker-1
-          image: cubejs/cubestore:latest
+          image: cubejs/cubestore:v1.3.41
           env:
             - name: CUBEJS_CACHE
               value: "false"
