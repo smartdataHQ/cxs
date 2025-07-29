@@ -10,6 +10,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Configuration
 APPS_DIR="apps"
+SEARCH_DIRS=("apps" "data" "monitoring" "operators")
 OVERLAY_NAME="production"
 COMPLETION_DIR=".validation-status"
 DIFF_OUTPUT_DIR=".validation-diffs"
@@ -21,6 +22,7 @@ SAVE_DIFFS=false
 AUTO_OPEN_DIFF=false
 DIFF_VIEWER="delta -s"
 NAMESPACE_OVERRIDE=""
+KUBE_CONTEXT=""
 
 # Colors for output
 RED='\033[0;31m'
@@ -43,10 +45,11 @@ Validates Kubernetes overlays against cluster state using kubectl diff.
 
 OPTIONS:
     -v, --verbose           Show detailed diff output
-    -a, --apps=APP1,APP2    Check specific apps only (comma-separated)
+    -a, --apps=APP1,APP2    Check specific components only (comma-separated)
     -o, --overlay=NAME      Overlay name to validate (default: production)
     -n, --namespace=NS      Override target namespace (detects from kustomization by default)
-    -m, --mark-completed    Create completion markers for in-sync apps
+    -k, --context=CONTEXT   Kubernetes context to use (default: current context)
+    -m, --mark-completed    Create completion markers for in-sync components
     -c, --continue-on-diff  Continue validation even if diffs are found
     -d, --save-diffs        Save diff output to files for inspection with diff tools
     --auto-open             Automatically open diff with viewer (first diff found)
@@ -54,15 +57,16 @@ OPTIONS:
     -h, --help             Show this help message
 
 EXAMPLES:
-    $0                                    # Validate all production overlays
-    $0 --apps=contextsuite,contextapi     # Validate specific apps only
-    $0 --overlay=staging                  # Validate staging overlays
-    $0 --namespace=api --apps=contextapi  # Override namespace for specific app
-    $0 --verbose --mark-completed         # Verbose mode with completion tracking
-    $0 --continue-on-diff --save-diffs    # Save diffs and don't exit on first diff
-    $0 --overlay=staging --save-diffs     # Validate staging with diff files
-    $0 --apps=contextapi --auto-open      # Validate single app and auto-open diff
-    $0 --apps=contextapi --auto-open --viewer=bat  # Use bat instead of delta
+    $0                                           # Validate all production overlays (apps, data, monitoring, operators)
+    $0 --apps=contextsuite,data/redis           # Validate specific components (supports directory paths)
+    $0 --overlay=staging                         # Validate staging overlays across all directories
+    $0 --context=cxs-staging                     # Use specific Kubernetes context
+    $0 --namespace=api --apps=contextapi         # Override namespace for specific component
+    $0 --verbose --mark-completed                # Verbose mode with completion tracking
+    $0 --continue-on-diff --save-diffs           # Save diffs and don't exit on first diff
+    $0 --overlay=staging --save-diffs --context=cxs-staging  # Validate staging with specific context
+    $0 --apps=data/synmetrix --auto-open         # Validate single component and auto-open diff
+    $0 --apps=monitoring/grafana --auto-open --viewer=bat    # Use bat instead of delta
 
 EXIT CODES:
     0    All apps in sync
@@ -101,6 +105,14 @@ while [[ $# -gt 0 ]]; do
             ;;
         --namespace=*)
             NAMESPACE_OVERRIDE="${1#*=}"
+            shift
+            ;;
+        -k|--context)
+            KUBE_CONTEXT="$2"
+            shift 2
+            ;;
+        --context=*)
+            KUBE_CONTEXT="${1#*=}"
             shift
             ;;
         -m|--mark-completed)
@@ -194,6 +206,31 @@ is_completed() {
     [[ -f "$completion_path/${app}.completed" ]]
 }
 
+# Function to get default namespace based on component directory
+get_default_namespace_for_directory() {
+    local component_path="$1"
+    local directory=$(echo "$component_path" | cut -d'/' -f1)
+    
+    case "$directory" in
+        "apps")
+            # Most apps are in solutions, but some are in api
+            echo "solutions"
+            ;;
+        "data")
+            echo "data"
+            ;;
+        "monitoring")
+            echo "monitoring"
+            ;;
+        "operators")
+            echo "operators"
+            ;;
+        *)
+            echo ""
+            ;;
+    esac
+}
+
 # Function to extract namespace from kustomization files
 get_app_namespace() {
     local app_path="$1"
@@ -221,9 +258,21 @@ get_app_namespace() {
     
     # If no namespace found in kustomization, try to detect from cluster
     # Look for a deployment with the app name across all namespaces
-    local cluster_ns=$(kubectl get deployments --all-namespaces -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name --no-headers 2>/dev/null | grep -E "\\s${app_name}\\s*$" | head -1 | awk '{print $1}')
+    local kubectl_cmd="kubectl"
+    if [[ -n "$KUBE_CONTEXT" ]]; then
+        kubectl_cmd="kubectl --context=$KUBE_CONTEXT"
+    fi
+    
+    local cluster_ns=$($kubectl_cmd get deployments --all-namespaces -o custom-columns=NAMESPACE:.metadata.namespace,NAME:.metadata.name --no-headers 2>/dev/null | grep -E "\\s${app_name}\\s*$" | head -1 | awk '{print $1}')
     if [[ -n "$cluster_ns" ]]; then
         echo "$cluster_ns"
+        return 0
+    fi
+    
+    # Fall back to directory-based default namespace
+    local default_ns=$(get_default_namespace_for_directory "$app_path")
+    if [[ -n "$default_ns" ]]; then
+        echo "$default_ns"
         return 0
     fi
     
@@ -277,13 +326,23 @@ validate_app() {
     local original_dir=$(pwd)
     local kubectl_cmd="kubectl diff -k overlays/$OVERLAY_NAME"
     
+    # Add context if specified
+    if [[ -n "$KUBE_CONTEXT" ]]; then
+        kubectl_cmd="kubectl --context=$KUBE_CONTEXT diff -k overlays/$OVERLAY_NAME"
+    fi
+    
     # Add explicit namespace if we found one
     if [[ -n "$target_namespace" ]]; then
         # Check if namespace exists and is accessible
-        if ! kubectl get namespace "$target_namespace" >/dev/null 2>&1; then
+        local ns_check_cmd="kubectl get namespace $target_namespace"
+        if [[ -n "$KUBE_CONTEXT" ]]; then
+            ns_check_cmd="kubectl --context=$KUBE_CONTEXT get namespace $target_namespace"
+        fi
+        
+        if ! $ns_check_cmd >/dev/null 2>&1; then
             log_warning "$app_name: Target namespace '$target_namespace' not accessible or doesn't exist"
         else
-            kubectl_cmd="kubectl diff -k overlays/$OVERLAY_NAME --namespace=$target_namespace"
+            kubectl_cmd="$kubectl_cmd --namespace=$target_namespace"
         fi
     fi
     
@@ -347,51 +406,72 @@ validate_app() {
 
 # Main execution
 main() {
-    log_info "Starting $OVERLAY_NAME overlay validation..."
+    # Show which context we're using
+    if [[ -n "$KUBE_CONTEXT" ]]; then
+        log_info "Starting $OVERLAY_NAME overlay validation (context: $KUBE_CONTEXT)..."
+    else
+        local current_context=$(kubectl config current-context 2>/dev/null || echo "unknown")
+        log_info "Starting $OVERLAY_NAME overlay validation (context: $current_context)..."
+    fi
     echo
     
-    # Check if apps directory exists
-    if [[ ! -d "$APPS_DIR" ]]; then
-        log_error "Apps directory '$APPS_DIR' not found"
-        exit 3
-    fi
-    
-    # Get list of apps to validate
-    local apps_to_check=()
+    # Get list of components to validate
+    local components_to_check=()
     
     if [[ -n "$SPECIFIC_APPS" ]]; then
-        # Parse comma-separated list
+        # Parse comma-separated list - support both short names and full paths
         IFS=',' read -ra app_list <<< "$SPECIFIC_APPS"
         for app in "${app_list[@]}"; do
             app=$(echo "$app" | xargs) # trim whitespace
-            if [[ -d "$APPS_DIR/$app" ]]; then
-                apps_to_check+=("$APPS_DIR/$app")
+            
+            # If app contains slash, treat as full path
+            if [[ "$app" == *"/"* ]]; then
+                if [[ -d "$app" && -d "$app/overlays/$OVERLAY_NAME" ]]; then
+                    components_to_check+=("$app")
+                else
+                    log_warning "Component '$app' not found or missing $OVERLAY_NAME overlay"
+                fi
             else
-                log_warning "App '$app' not found in $APPS_DIR"
+                # Search for component in all search directories
+                local found=false
+                for search_dir in "${SEARCH_DIRS[@]}"; do
+                    if [[ -d "$search_dir/$app" && -d "$search_dir/$app/overlays/$OVERLAY_NAME" ]]; then
+                        components_to_check+=("$search_dir/$app")
+                        found=true
+                        break
+                    fi
+                done
+                if [[ "$found" == "false" ]]; then
+                    log_warning "Component '$app' not found in any search directory or missing $OVERLAY_NAME overlay"
+                fi
             fi
         done
     else
-        # Find all apps with the specified overlay
-        while IFS= read -r -d '' app_dir; do
-            if [[ -d "$app_dir/overlays/$OVERLAY_NAME" ]]; then
-                apps_to_check+=("$app_dir")
+        # Find all components with the specified overlay across all search directories
+        for search_dir in "${SEARCH_DIRS[@]}"; do
+            if [[ -d "$search_dir" ]]; then
+                while IFS= read -r -d '' component_dir; do
+                    if [[ -d "$component_dir/overlays/$OVERLAY_NAME" ]]; then
+                        components_to_check+=("$component_dir")
+                    fi
+                done < <(find "$search_dir" -maxdepth 1 -type d -print0 | sort -z)
             fi
-        done < <(find "$APPS_DIR" -maxdepth 1 -type d -print0 | sort -z)
+        done
     fi
     
-    if [[ ${#apps_to_check[@]} -eq 0 ]]; then
-        log_error "No apps with $OVERLAY_NAME overlays found"
+    if [[ ${#components_to_check[@]} -eq 0 ]]; then
+        log_error "No components with $OVERLAY_NAME overlays found"
         exit 3
     fi
     
-    TOTAL_APPS=${#apps_to_check[@]}
-    log_info "Found $TOTAL_APPS apps with $OVERLAY_NAME overlays"
+    TOTAL_APPS=${#components_to_check[@]}
+    log_info "Found $TOTAL_APPS components with $OVERLAY_NAME overlays"
     echo
     
-    # Validate each app
+    # Validate each component
     local validation_failed=false
-    for app_path in "${apps_to_check[@]}"; do
-        if ! validate_app "$app_path"; then
+    for component_path in "${components_to_check[@]}"; do
+        if ! validate_app "$component_path"; then
             validation_failed=true
             if [[ "$EXIT_ON_DIFF" == "true" ]]; then
                 break
@@ -404,7 +484,7 @@ main() {
     echo "========================================="
     echo "           VALIDATION SUMMARY"
     echo "========================================="
-    echo "Total apps checked: $TOTAL_APPS"
+    echo "Total components checked: $TOTAL_APPS"
     echo "✅ In sync: $IN_SYNC"
     echo "❌ Out of sync: $OUT_OF_SYNC"
     echo "⚠️  Errors: $ERRORS"
@@ -505,7 +585,7 @@ main() {
         log_error "Configuration drift detected"
         exit 1
     else
-        log_success "All $OVERLAY_NAME overlays are in sync!"
+        log_success "All $OVERLAY_NAME components are in sync!"
         exit 0
     fi
 }
