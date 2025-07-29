@@ -7,6 +7,16 @@ resources:
 patches:
   - path: contextapi-config.yaml
   - target:
+      kind: Deployment
+      name: contextapi
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/env/12/valueFrom/secretKeyRef/name
+        value: redis-auth
+      - op: replace
+        path: /spec/template/spec/containers/0/env/12/valueFrom/secretKeyRef/key
+        value: password
+  - target:
       kind: Ingress
       name: contextapi
     patch: |

@@ -19,9 +19,7 @@ patches:
       - op: replace
         path: /data/BACKEND_BASE_URL
         value: https://chat.contextsuite.com
-      - op: replace
-        path: /data/EVENTS_ENDPOINT
-        value: https://in.contextsuite.com/api/s2s/track
+
   - target:
       kind: Ingress
       name: gpt-api
@@ -35,16 +33,3 @@ patches:
       - op: replace
         path: /spec/tls/0/secretName
         value: star-contextsuite-com
-  - target:
-      kind: HorizontalPodAutoscaler
-      name: gpt-api
-    patch: |
-      - op: replace
-        path: /spec/maxReplicas
-        value: 4
-      - op: replace
-        path: /spec/minReplicas
-        value: 2
-      - op: replace
-        path: /spec/targetCPUUtilizationPercentage
-        value: 60

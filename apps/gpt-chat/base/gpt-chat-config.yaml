@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gpt-chat-config
+  # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
+data:
+  API_ENDPOINT: "http://chat.contextsuite.com"
+  WSS_ENDPOINT: "wss://chat.contextsuite.com"

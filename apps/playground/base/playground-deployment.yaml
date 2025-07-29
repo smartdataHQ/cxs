@@ -41,7 +41,7 @@ spec:
       imagePullSecrets:
         - name: dockerlock
 ---
-apiVersion: autoscaling/v1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: playground
@@ -52,4 +52,10 @@ spec:
     name: playground
   maxReplicas: 2
   minReplicas: 1
-  targetCPUUtilizationPercentage: 60
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 60

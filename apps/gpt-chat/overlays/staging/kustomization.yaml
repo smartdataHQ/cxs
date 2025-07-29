@@ -6,14 +6,17 @@ resources:
 
 namespace: solutions
 
-configMapGenerator:
-  - name: gpt-chat-config
-    behavior: replace
-    literals:
-      - API_ENDPOINT=http://chat.contextsuite.dev
-      - WSS_ENDPOINT=wss://chat.contextsuite.dev
-
 patches:
+  - target:
+      kind: ConfigMap
+      name: gpt-chat-config
+    patch: |
+      - op: replace
+        path: /data/API_ENDPOINT
+        value: http://chat.contextsuite.dev
+      - op: replace
+        path: /data/WSS_ENDPOINT
+        value: wss://chat.contextsuite.dev
   - target:
       kind: Deployment
       name: gpt-chat-web

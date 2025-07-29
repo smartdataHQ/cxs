@@ -5,10 +5,4 @@ resources:
   - playground-deployment.yaml
   - playground-service.yaml
   - playground-ingress.yaml
-
-configMapGenerator:
-  - name: playground-config
-    literals:
-      - ENVIRONMENT=production
-      - DOMAIN=contextsuite.com
-      - GRAPH_ENDPOINT=https://app.contextsuite.com/context
+  - playground-config.yaml

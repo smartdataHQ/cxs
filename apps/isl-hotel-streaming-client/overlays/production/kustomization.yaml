@@ -1,3 +1,4 @@
+namespace: ingestion
 bases:
   - ../../base
 

@@ -97,8 +97,8 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: redis-auth
-                  key: password
+                  name: llm
+                  key: REDIS_PASSWORD
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:

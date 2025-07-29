@@ -6,6 +6,22 @@ resources:
   - ../../base
 patches:
   - path: contextsuite-config.yaml
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: contextsuite
+      spec:
+        template:
+          spec:
+            containers:
+            - name: node
+              env:
+              - name: REDIS_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: redis-auth
+                    key: password
   - target:
       kind: Ingress
       name: contextsuite

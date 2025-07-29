@@ -1,10 +1,18 @@
 images:
   - name: quicklookup/cxs-services
-    newTag: ae10154
+    newTag: a3e3ee3
 
 resources:
   - ../../base
 patches:
+  - target:
+      kind: ConfigMap
+      name: cxs-services-config
+    patch: |
+      - op: replace
+        path: /data/CLICKHOUSE_HOST
+        value: "clickhouse.data"
+
   - target:
       kind: Ingress
       name: cxsservices-services

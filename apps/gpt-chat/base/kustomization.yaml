@@ -5,9 +5,4 @@ resources:
   - gpt-chat-deployment.yaml
   - gpt-chat-service.yaml
   - gpt-chat-ingress.yaml
-
-configMapGenerator:
-  - name: gpt-chat-config
-    literals:
-      - API_ENDPOINT=http://chat.contextsuite.com
-      - WSS_ENDPOINT=wss://chat.contextsuite.com
+  - gpt-chat-config.yaml

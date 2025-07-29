@@ -47,8 +47,8 @@ spec:
           - name: REDIS_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: redis-auth
-                key: password
+                name: contextsuite
+                key: REDIS_PASSWORD
           - name: NEO4J_PASSWORD
             valueFrom:
               secretKeyRef:

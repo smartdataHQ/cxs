@@ -34,7 +34,7 @@ patches:
         value: https://chat.contextsuite.dev
       - op: replace
         path: /data/EVENTS_ENDPOINT
-        value: https://in.contextsuite.dev/api/s2s/track
+        value: https://in.contextsuite.dev/api/s/s2s/track
       - op: add
         path: /data/RATE_LIMIT_REQUESTS
         value: "20"
@@ -103,17 +103,17 @@ patches:
         value: 45
         # Increased from 15s to 45s to ensure application is fully ready
   # Debug configuration: disable probes and use sleep infinity for manual testing
-  - target:
-      kind: Deployment
-      name: gpt-api
-    patch: |
-      - op: add
-        path: /spec/template/spec/containers/0/command
-        value: ["sleep", "infinity"]
-        # Set sleep infinity for debugging
-      - op: remove
-        path: /spec/template/spec/containers/0/livenessProbe
-        # Disable liveness probe to prevent restarts during debugging
-      - op: remove
-        path: /spec/template/spec/containers/0/readinessProbe
-        # Disable readiness probe to prevent restart loops 
+  # - target:
+  #     kind: Deployment
+  #     name: gpt-api
+  #   patch: |
+  #     - op: add
+  #       path: /spec/template/spec/containers/0/command
+  #       value: ["sleep", "infinity"]
+  #       # Set sleep infinity for debugging
+  #     - op: remove
+  #       path: /spec/template/spec/containers/0/livenessProbe
+  #       # Disable liveness probe to prevent restarts during debugging
+  #     - op: remove
+  #       path: /spec/template/spec/containers/0/readinessProbe
+  #       # Disable readiness probe to prevent restart loops 

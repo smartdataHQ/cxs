@@ -5,4 +5,4 @@ resources:
   - cxs-services-service.yaml
   - cxs-services-volumes.yaml
   - cxs-services-config.yaml
-  - cxs-services-ingress.yaml
+#  - cxs-services-ingress.yaml
