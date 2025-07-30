@@ -10,7 +10,7 @@ helmCharts:
       auth:
         enabled: true
         existingSecret: "redis-auth"
-        existingSecretPasswordKey: "password"
+        existingSecretPasswordKey: "redis-password"
       persistence:
         enabled: true
         size: 8Gi
