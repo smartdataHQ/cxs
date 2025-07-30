@@ -43,14 +43,7 @@ spec:
     - name: grafana
       databases:
         - grafana
-    - name: synmetrix
-      options: SUPERUSER
-      databases:
-         - synmetrix
-    - name: synmetrix2
-      options: SUPERUSER
-      databases:
-         - synmetrix2
+    
 
   #  users:
   #    - name: rhino
@@ -92,10 +85,7 @@ spec:
   image: percona/percona-postgresql-operator:2.3.1-ppg16-postgres
   imagePullPolicy: Always
   postgresVersion: 16
-  expose:
-    annotations:
-      tailscale.com/expose: "true"
-      tailscale.com/hostname: data-cxs-pg-ha-dev
+
   #  port: 5432
   #  expose:
   #    annotations:
@@ -109,6 +99,7 @@ spec:
   instances:
     - name: instance1
       replicas: 3
+      resources : {}
 
       affinity:
         podAntiAffinity:
@@ -158,7 +149,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 64Gi
+            storage: 200Gi
 
   proxy:
     pgBouncer:
@@ -169,10 +160,10 @@ spec:
         global:
           max_client_conn: "200"
           default_pool_size: "50"
-      expose:
-        annotations:
-          tailscale.com/expose: "true"
-          tailscale.com/hostname: data-cxs-pg-pgbouncer-dev
+      # expose:
+      #   annotations:
+      #     tailscale.com/expose: "true"
+      #     tailscale.com/hostname: data-cxs-pg-pgbouncer-dev
 
 
       #          pool_mode: transaction
@@ -278,7 +269,8 @@ spec:
       manual:
         repoName: repo1
         options:
-          - --type=full
+          - '--type=diff'
+          - '--log-level-stderr=debug'
       repos:
         - name: repo1
           schedules:

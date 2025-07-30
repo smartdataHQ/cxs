@@ -1,0 +1,53 @@
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: PerconaPGCluster
+      name: cxs-pg
+    patch: |-
+      # Change storage size from 200Gi to 64Gi
+      - op: replace
+        path: /spec/instances/0/dataVolumeClaimSpec/resources/requests/storage
+        value: "64Gi"
+      
+      # Add expose annotations for main cluster
+      - op: add
+        path: /spec/expose
+        value:
+          annotations:
+            tailscale.com/expose: "true"
+            tailscale.com/hostname: "data-cxs-pg-ha-dev"
+      
+      # Add pgBouncer expose annotations
+      - op: add
+        path: /spec/proxy/pgBouncer/expose
+        value:
+          annotations:
+            tailscale.com/expose: "true"
+            tailscale.com/hostname: "data-cxs-pg-pgbouncer-dev"
+      
+      # Replace manual backup options:
+      - op: replace
+        path: /spec/backups/pgbackrest/manual/options
+        value:
+          - '--type=full'
+          
+
+      # Add synmetrix user
+      - op: add
+        path: /spec/users/-
+        value:
+          name: synmetrix
+          options: SUPERUSER
+          databases:
+            - synmetrix
+      
+      # Add synmetrix2 user
+      - op: add
+        path: /spec/users/-
+        value:
+          name: synmetrix2
+          options: SUPERUSER
+          databases:
+            - synmetrix2
