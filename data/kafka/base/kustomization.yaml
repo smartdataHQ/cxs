@@ -23,6 +23,6 @@ helmCharts:
       externalZookeeper:
         servers: [zookeeper.data.svc.cluster.local]
 
-      # sasl:
-      #   existingSecret: "kafka-user-passwords"
+      sasl:  # prevent the regeneration of kafka passwords
+        existingSecret: "kafka-user-passwords"
 
