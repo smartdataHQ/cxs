@@ -21,7 +21,7 @@ CLIENT_SECRET="$2"
 
 # Variables
 NAMESPACE="tailscale"
-SECRET_NAME="operator-oauth-staging"
+SECRET_NAME="operator-oauth"
 CONTEXT="cxs-staging"
 
 echo "Creating Tailscale OAuth secret for staging environment..."

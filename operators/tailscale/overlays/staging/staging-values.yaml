@@ -22,7 +22,7 @@ oauthSecretVolume:
 operatorConfig:
   # Staging ACL tags with dev prefix
   defaultTags:
-    - tag:dev-k8s-operator
+    - tag:k8s-operator
   
   # Staging operator hostname with dev prefix
   hostname: dev-tailscale-operator
