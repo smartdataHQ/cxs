@@ -53,9 +53,7 @@ operatorConfig:
 # Proxy configuration
 proxyConfig:
   # Staging proxy tags with dev prefix
-  defaultTags:
-    - tag:dev-k8s
-    - dev-k8s
+  defaultTags: dev-k8s
   
   # Staging firewall mode
   firewallMode: auto
