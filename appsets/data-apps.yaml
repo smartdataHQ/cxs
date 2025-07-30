@@ -12,7 +12,6 @@ spec:
         revision: staging
         directories: # Target staging overlays
           - path: data/*/overlays/staging
-          - path: data/postgres # This could go into another AppSet definition perhaps **shruggies**
   template:
     metadata:
       name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
