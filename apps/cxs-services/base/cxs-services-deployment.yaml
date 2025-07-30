@@ -164,6 +164,10 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: cxs-service-pvc
+        - name: cache
+          hostPath:
+            path: /cache
+            type: DirectoryOrCreate
 ---
 apiVersion: apps/v1
 kind: Deployment
