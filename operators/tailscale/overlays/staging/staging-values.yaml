@@ -23,7 +23,7 @@ operatorConfig:
   # Staging ACL tags with dev prefix
   defaultTags:
     - tag:dev-k8s-operator
-    - dev-k8s-operator
+    - tag:dev-k8s
   
   # Staging operator hostname with dev prefix
   hostname: dev-tailscale-operator
@@ -53,7 +53,7 @@ operatorConfig:
 # Proxy configuration
 proxyConfig:
   # Staging proxy tags with dev prefix
-  defaultTags: dev-k8s
+  defaultTags: tag:dev-k8s
   
   # Staging firewall mode
   firewallMode: auto
