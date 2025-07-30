@@ -14,7 +14,7 @@ spec:
           - path: operators/*/overlays/staging
   template:
     metadata:
-      name: "{{index .path.segments 1}}"
+      name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
     spec:
       project: default
       source:
