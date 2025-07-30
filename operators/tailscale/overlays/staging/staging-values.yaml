@@ -34,7 +34,7 @@ operatorConfig:
     pullPolicy: Always
   
   # Logging level
-  logging: info
+  logging: debug
   
   # Node selector for Linux nodes
   nodeSelector:
