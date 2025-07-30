@@ -23,6 +23,7 @@ AUTO_OPEN_DIFF=false
 DIFF_VIEWER="delta -s"
 NAMESPACE_OVERRIDE=""
 KUBE_CONTEXT=""
+IGNORE_ANNOTATIONS="argocd.argoproj.io/tracking-id,tailscale.com/hostname"
 
 # Colors for output
 RED='\033[0;31m'
@@ -54,6 +55,7 @@ OPTIONS:
     -d, --save-diffs        Save diff output to files for inspection with diff tools
     --auto-open             Automatically open diff with viewer (first diff found)
     --viewer=TOOL           Diff viewer tool (default: delta -s)
+    --ignore-annotations=LIST  Comma-separated list of annotations to ignore (default: argocd.argoproj.io/tracking-id,tailscale.com/hostname)
     -h, --help             Show this help message
 
 EXAMPLES:
@@ -67,6 +69,8 @@ EXAMPLES:
     $0 --overlay=staging --save-diffs --context=cxs-staging  # Validate staging with specific context
     $0 --apps=data/synmetrix --auto-open         # Validate single component and auto-open diff
     $0 --apps=monitoring/grafana --auto-open --viewer=bat    # Use bat instead of delta
+    $0 --ignore-annotations=""                   # Disable annotation filtering
+    $0 --ignore-annotations="custom.io/tag,other/annotation"  # Custom ignore list
 
 EXIT CODES:
     0    All apps in sync
@@ -138,6 +142,14 @@ while [[ $# -gt 0 ]]; do
             ;;
         --viewer=*)
             DIFF_VIEWER="${1#*=}"
+            shift
+            ;;
+        --ignore-annotations)
+            IGNORE_ANNOTATIONS="$2"
+            shift 2
+            ;;
+        --ignore-annotations=*)
+            IGNORE_ANNOTATIONS="${1#*=}"
             shift
             ;;
         -h|--help)
@@ -229,6 +241,39 @@ get_default_namespace_for_directory() {
             echo ""
             ;;
     esac
+}
+
+# Function to filter out ignored annotations from kubectl diff output
+filter_annotations() {
+    local diff_content="$1"
+    local annotations_to_ignore="$2"
+    
+    if [[ -z "$annotations_to_ignore" ]]; then
+        echo "$diff_content"
+        return
+    fi
+    
+    # Convert comma-separated list to array
+    IFS=',' read -ra ignore_list <<< "$annotations_to_ignore"
+    
+    # Build sed pattern to remove annotation diff lines
+    local sed_pattern=""
+    for annotation in "${ignore_list[@]}"; do
+        annotation=$(echo "$annotation" | xargs) # trim whitespace
+        # Escape special regex characters
+        annotation_escaped=$(echo "$annotation" | sed 's/[[\.*^$()+?{|]/\\&/g')
+        
+        # Add pattern to remove lines showing annotation changes
+        # This removes lines like: +    argocd.argoproj.io/tracking-id: xyz
+        # and: -    argocd.argoproj.io/tracking-id: abc
+        if [[ -n "$sed_pattern" ]]; then
+            sed_pattern="${sed_pattern};"
+        fi
+        sed_pattern="${sed_pattern}/^[+-].*${annotation_escaped}:/d"
+    done
+    
+    # Apply the filter
+    echo "$diff_content" | sed "$sed_pattern"
 }
 
 # Function to extract namespace from kustomization files
@@ -356,34 +401,49 @@ validate_app() {
         
         if [[ $exit_code -eq 1 ]]; then
             # Differences found (exit code 1 is expected for diffs)
-            log_error "$app_name: DRIFT DETECTED"
-            ((OUT_OF_SYNC++))
+            # Apply annotation filtering to check if differences remain after filtering
+            local original_diff=$(cat "$temp_file")
+            local filtered_diff=$(filter_annotations "$original_diff" "$IGNORE_ANNOTATIONS")
             
-            # Save diff to file if requested
-            if [[ "$SAVE_DIFFS" == "true" ]]; then
-                local diff_file="$SCRIPT_DIR/../$DIFF_OUTPUT_DIR/${app_name}.diff"
+            # Check if filtered diff has meaningful content (more than just headers)
+            local meaningful_lines=$(echo "$filtered_diff" | grep -E "^[+-]" | grep -v -E "^[+-]{3}" | wc -l)
+            
+            if [[ $meaningful_lines -eq 0 ]]; then
+                # Only ignored annotations were different
+                log_success "$app_name: IN SYNC (ignored annotation differences)"
+                ((IN_SYNC++))
+                mark_completed "$app_name"
+            else
+                # Real differences remain after filtering
+                log_error "$app_name: DRIFT DETECTED"
+                ((OUT_OF_SYNC++))
                 
-                # Create a more readable diff by replacing temp file paths
-                sed -E "
-                    s|^diff -u -N .*/LIVE-[0-9]+/(.*) .*/MERGED-[0-9]+/(.*)$|diff --git a/CLUSTER:\1 b/OVERLAY:\2|g;
-                    s|^--- .*/LIVE-[0-9]+/(.*)$|--- a/CLUSTER: \1|g;
-                    s|^\+\+\+ .*/MERGED-[0-9]+/(.*)$|+++ b/OVERLAY: \1|g
-                " "$temp_file" > "$diff_file"
+                # Save filtered diff to file if requested
+                if [[ "$SAVE_DIFFS" == "true" ]]; then
+                    local diff_file="$SCRIPT_DIR/../$DIFF_OUTPUT_DIR/${app_name}.diff"
+                    
+                    # Create a more readable diff by replacing temp file paths and apply filtering
+                    echo "$filtered_diff" | sed -E "
+                        s|^diff -u -N .*/LIVE-[0-9]+/(.*) .*/MERGED-[0-9]+/(.*)$|diff --git a/CLUSTER:\1 b/OVERLAY:\2|g;
+                        s|^--- .*/LIVE-[0-9]+/(.*)$|--- a/CLUSTER: \1|g;
+                        s|^\+\+\+ .*/MERGED-[0-9]+/(.*)$|+++ b/OVERLAY: \1|g
+                    " > "$diff_file"
+                    
+                    log_info "Diff saved to: $diff_file (filtered)"
+                fi
                 
-                log_info "Diff saved to: $diff_file"
-            fi
-            
-            if [[ "$VERBOSE" == "true" ]]; then
-                echo "--- Diff for $app_name ---"
-                cat "$temp_file"
-                echo "--- End diff for $app_name ---"
-                echo
-            fi
-            
-            if [[ "$EXIT_ON_DIFF" == "true" ]]; then
-                rm -f "$temp_file"
-                cd - > /dev/null
-                return 1
+                if [[ "$VERBOSE" == "true" ]]; then
+                    echo "--- Filtered diff for $app_name ---"
+                    echo "$filtered_diff"
+                    echo "--- End filtered diff for $app_name ---"
+                    echo
+                fi
+                
+                if [[ "$EXIT_ON_DIFF" == "true" ]]; then
+                    rm -f "$temp_file"
+                    cd - > /dev/null
+                    return 1
+                fi
             fi
         else
             # Other error (connection, permissions, etc.)
@@ -412,6 +472,13 @@ main() {
     else
         local current_context=$(kubectl config current-context 2>/dev/null || echo "unknown")
         log_info "Starting $OVERLAY_NAME overlay validation (context: $current_context)..."
+    fi
+    
+    # Show annotation filtering configuration
+    if [[ -n "$IGNORE_ANNOTATIONS" ]]; then
+        log_info "Ignoring annotations: $IGNORE_ANNOTATIONS"
+    else
+        log_info "No annotation filtering applied"
     fi
     echo
     
