@@ -7,7 +7,7 @@ spec:
   configuration:
     name: minio-tenant-config
   pools:
-  - servers: 3
+  - servers: 1
     name: pool-0
     volumesPerServer: 1
     volumeClaimTemplate:
@@ -29,22 +29,13 @@ spec:
     console: true
     minio: true
 
-serviceMetadata:
-  minioServiceAnnotations: 
-    tailscale.com/expose: "true"
-    tailscale.com/hostname: "data-minio-dev"
-  
-  consoleServiceAnnotations:
-    tailscale.com/expose: "true"
-    tailscale.com/hostname: "data-minio-console-dev"
-  minioServiceType: ClusterIP
-  consoleServiceType: ClusterIP
-  
-  # Resource limits
-  resources:
-    requests:
-      cpu: 250m
-      memory: 512Mi
-    limits:
-      cpu: 500m
-      memory: 1Gi
+  serviceMetadata:
+    minioServiceAnnotations: 
+      tailscale.com/expose: "true"
+      tailscale.com/hostname: "data-minio-dev"
+    
+    consoleServiceAnnotations:
+      tailscale.com/expose: "true"
+      tailscale.com/hostname: "data-minio-console-dev"
+  # minioServiceType: ClusterIP
+  # consoleServiceType: ClusterIP
