@@ -5,6 +5,7 @@ images:
 resources:
   - ../../base
 patches:
+  - path: database-migration.yaml
   - target:
       kind: ConfigMap
       name: cxs-services-config
