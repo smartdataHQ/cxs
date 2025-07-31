@@ -1,6 +1,6 @@
-images:
-  - name: quicklookup/cxs-services
-    newTag: a3e3ee3
+# images:
+#   - name: quicklookup/cxs-services
+#     newTag: a3e3ee3
 
 resources:
   - ../../base
