@@ -24,14 +24,3 @@ spec:
             secretKeyRef:
               name: clickhouse              # Dedicated ClickHouse secret
               key: admin-password
-        # Keep external API credentials from flat secret (unchanged)
-        - name: NEO4J_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: contextsuite            # External credential - keep flat secret
-              key: NEO4J_PASSWORD
-        - name: SOLR_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: contextsuite            # External credential - keep flat secret
-              key: SOLR_PASSWORD

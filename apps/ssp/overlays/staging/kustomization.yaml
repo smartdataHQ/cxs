@@ -7,3 +7,6 @@ resources:
   - ../../base
   - ssp-config.yaml
   - ssp-ingress.yml
+
+patches:
+  - path: database-migration.yaml

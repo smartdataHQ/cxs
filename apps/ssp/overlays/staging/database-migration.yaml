@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ssp
+spec:
+  template:
+    spec:
+      containers:
+      - name: node
+        env:
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cxs-pg-pguser-cxs-pg    # Matches DB_USER: 'cxs-pg' from config
+              key: password
