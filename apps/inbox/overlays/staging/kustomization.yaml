@@ -6,6 +6,5 @@ resources:
 
 patches:
   - path: ingress-patch.yaml
-  - path: deployment-patch.yaml
+  - path: data-credentials.yaml
   - path: configmap-patch.yaml
-  - path: autoscaler-patch.yaml
