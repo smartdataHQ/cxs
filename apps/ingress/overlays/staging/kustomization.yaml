@@ -6,3 +6,4 @@ resources:
 
 patches:
   - path: ingress-patch.yaml
+  - path: data-credentials.yaml
