@@ -24,10 +24,6 @@ spec:
   # Disable S3 API TLS for internal cluster communication
   externalCaCertSecret: []
   externalCertSecret: []
-  # exposeServices
-  exposeServices:
-    console: true
-    minio: true
 
   serviceMetadata:
     minioServiceAnnotations: 
