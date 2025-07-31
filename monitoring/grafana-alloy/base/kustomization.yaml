@@ -1,0 +1,4 @@
+namespace: grafana
+
+# Base only provides namespace - Helm configuration moved to overlays
+# due to Kustomize Helm limitations preventing values override
