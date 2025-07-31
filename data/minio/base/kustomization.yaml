@@ -4,5 +4,5 @@ kind: Kustomization
 namespace: data
 
 resources:
-  - minio-credentials-job.yaml
+  - minio-generate-admin-credentials-job.yaml
   - minio-tenant.yaml
