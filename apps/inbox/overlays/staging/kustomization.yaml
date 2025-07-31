@@ -8,3 +8,4 @@ patches:
   - path: ingress-patch.yaml
   - path: data-credentials.yaml
   - path: configmap-patch.yaml
+  - path: autoscaler-patch.yaml
