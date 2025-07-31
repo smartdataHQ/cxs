@@ -8,6 +8,7 @@ resources:
 
 secretGenerator:
   - name: cxs-services-kafka
+    namespace: solutions
     literals:
       - KAFKA_HOSTS=kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092
       - KAFKA_REFRESH_TOPIC=content_refresh_jobs
