@@ -46,18 +46,3 @@ serviceMetadata:
     limits:
       cpu: 500m
       memory: 1Gi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: minio
-  namespace: data
-spec:
-  selector:
-    v1.min.io/tenant: minio
-  ports:
-  - name: minio
-    port: 80
-    targetPort: 9000
-    protocol: TCP
-  type: ClusterIP
