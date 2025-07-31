@@ -5,7 +5,7 @@ metadata:
   namespace: data
 spec:
   credsSecret:
-    name: minio-creds
+    name: minio-admin-credentials
   pools:
   - servers: 3
     name: pool-0
