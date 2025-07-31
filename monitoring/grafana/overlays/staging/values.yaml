@@ -1,0 +1,47 @@
+grafana.ini:
+  paths:
+    data: /var/lib/grafana/
+    logs: /var/log/grafana
+    plugins: /var/lib/grafana/plugins
+    provisioning: /etc/grafana/provisioning
+  analytics:
+    check_for_updates: true
+  log:
+    mode: console
+  grafana_net:
+    url: https://grafana.net
+  server:
+    domain: grafana.contextsuite.dev
+    root_url: https://grafana.contextsuite.dev
+  database:
+    type: postgres
+    url: $__file{/etc/secrets/csx-secrets/db-url}
+    ssl_mode: require
+
+ingress:
+  enabled: true
+  hosts:
+    - grafana.contextsuite.dev
+  tls:
+    - hosts:
+        - grafana.contextsuite.dev
+      secretName: star-contextsuite-dev
+
+extraSecretMounts:
+  - name: csx-secrets
+    mountPath: /etc/secrets/csx-secrets
+    secretName: csx-secrets
+    readOnly: true
+    optional: false
+
+service:
+  annotations:
+    tailscale.com/hostname: grafana-staging
+    tailscale.com/expose: "true"
+
+extraConfigmapMounts:
+  - name: grafana-longhorn-alerts
+    mountPath: /etc/grafana/provisioning/alerting/longhorn-rules.yaml
+    subPath: longhorn-rules.yaml
+    configMap: grafana-longhorn-alerts
+    readOnly: true
