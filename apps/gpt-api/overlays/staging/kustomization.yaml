@@ -17,6 +17,7 @@ patches:
       spec:
         template:
           spec:
+            replicas: 0
             containers:
             - name: node
               env:
@@ -25,19 +26,6 @@ patches:
                   secretKeyRef:
                     name: redis-auth
                     key: redis-password
-  - target:
-      kind: HorizontalPodAutoscaler
-      name: gpt-api
-    patch: |
-      - op: replace
-        path: /spec/maxReplicas
-        value: 2
-      - op: replace
-        path: /spec/minReplicas
-        value: 1
-      - op: replace
-        path: /spec/targetCPUUtilizationPercentage
-        value: 80
   - target:
       kind: Ingress
       name: gpt-api
