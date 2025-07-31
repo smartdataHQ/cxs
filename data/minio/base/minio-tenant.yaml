@@ -4,8 +4,8 @@ metadata:
   name: minio
   namespace: data
 spec:
-  credsSecret:
-    name: minio-admin-credentials
+  configuration:
+    name: minio-tenant-config
   pools:
   - servers: 3
     name: pool-0
