@@ -1,4 +1,3 @@
 resources:
   - isl-hotel-streaming-client-deployment.yaml
   - isl-hotel-streaming-client-configmap.yaml
-  - isl-hotel-streaming-client-persistentvolume.yaml
