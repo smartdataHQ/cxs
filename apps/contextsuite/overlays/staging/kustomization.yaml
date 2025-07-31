@@ -21,7 +21,7 @@ patches:
                 valueFrom:
                   secretKeyRef:
                     name: redis-auth
-                    key: password
+                    key: redis-password
   - target:
       kind: Ingress
       name: contextsuite

@@ -63,7 +63,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: redis-auth
-                  key: password
+                  key: redis-password
             - name: CLICKHOUSE_PASSWORD_LLM
               valueFrom:
                 secretKeyRef:
