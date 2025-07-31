@@ -1,0 +1,63 @@
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: minio
+  namespace: data
+spec:
+  pools:
+  - servers: 3
+    name: pool-0
+    volumesPerServer: 1
+    volumeClaimTemplate:
+      metadata:
+        name: data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: longhorn
+  requestAutoCert: false
+  # Disable S3 API TLS for internal cluster communication
+  externalCaCertSecret: []
+  externalCertSecret: []
+  # exposeServices
+  exposeServices:
+    console: true
+    minio: true
+
+serviceMetadata:
+  minioServiceAnnotations: 
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: "data-minio-dev"
+  
+  consoleServiceAnnotations:
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: "data-minio-console-dev"
+  minioServiceType: ClusterIP
+  consoleServiceType: ClusterIP
+  
+  # Resource limits
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: data
+spec:
+  selector:
+    v1.min.io/tenant: minio
+  ports:
+  - name: minio
+    port: 80
+    targetPort: 9000
+    protocol: TCP
+  type: ClusterIP
