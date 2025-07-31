@@ -6,6 +6,8 @@ metadata:
 spec:
   configuration:
     name: minio-tenant-config
+  buckets:
+    - name: rag-content-processing
   pools:
   - servers: 1
     name: pool-0
