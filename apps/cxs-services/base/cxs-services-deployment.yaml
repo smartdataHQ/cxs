@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-services:671df9d
+          image: quicklookup/cxs-services:b34856f
           ports:
             - containerPort: 8088
           livenessProbe:
@@ -182,7 +182,7 @@ spec:
     spec:
       containers:
         - name: worker
-          image: quicklookup/cxs-services:671df9d
+          image: quicklookup/cxs-services:b34856f
           command: ["python", "cxs/services/components/jobs/consumer.py"]
           env:
           - name: PYTHONPATH
