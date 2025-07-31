@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gpt-api-config
+  # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
+data:
+  # Staging-specific values
+  ENV: 'staging'
+  BACKEND_BASE_URL: 'https://chat.contextsuite.dev'
+  EVENTS_ENDPOINT: 'https://in.contextsuite.dev/api/s/s2s/track'
+  CLICKHOUSE_HOST: 'clickhouse.data'
+  SERVICES_BACKEND_URL: 'http://cxsservices.solutions:8088'
