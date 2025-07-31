@@ -190,5 +190,5 @@ spec:
     kind: Deployment
     name: gpt-api
   maxReplicas: 1
-  minReplicas: 0
+  minReplicas: 1
   targetCPUUtilizationPercentage: 60
