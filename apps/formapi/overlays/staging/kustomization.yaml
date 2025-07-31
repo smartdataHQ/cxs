@@ -6,6 +6,7 @@ resources:
   - ../../base
 patches:
   - path: formapi-config.yaml
+  - path: database-migration.yaml
   - target:
       kind: Ingress
       name: formapi

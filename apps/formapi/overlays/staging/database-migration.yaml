@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: formapi
+spec:
+  template:
+    spec:
+      containers:
+      - name: node
+        env:
+        # Database credentials - migrate Redis password to dedicated database secret
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-auth              # Dedicated Redis secret
+              key: redis-password
