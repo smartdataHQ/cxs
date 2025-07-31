@@ -6,22 +6,7 @@ resources:
   - ../../base
 patches:
   - path: contextapi-config.yaml
-  - patch: |
-      apiVersion: apps/v1
-      kind: Deployment
-      metadata:
-        name: contextapi
-      spec:
-        template:
-          spec:
-            containers:
-            - name: node
-              env:
-              - name: REDIS_PASSWORD
-                valueFrom:
-                  secretKeyRef:
-                    name: redis-auth
-                    key: password
+  - path: database-migration.yaml
   - target:
       kind: Ingress
       name: contextapi

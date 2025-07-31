@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: contextapi
+spec:
+  template:
+    spec:
+      containers:
+      - name: node
+        env:
+        # Database credentials - migrate from flat 'contextsuite' secret to dedicated database secrets
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cxs-pg-pguser-cxs-pg    # Matches DB_USER: 'cxs-pg' from config
+              key: password
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redis-auth              # Dedicated Redis secret
+              key: redis-password
+        - name: CLICKHOUSE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: clickhouse              # Dedicated ClickHouse secret
+              key: admin-password
+        # Keep external API credentials from flat secret (unchanged)
+        - name: NEO4J_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: contextsuite            # External credential - keep flat secret
+              key: NEO4J_PASSWORD
+        - name: SOLR_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: contextsuite            # External credential - keep flat secret
+              key: SOLR_PASSWORD
