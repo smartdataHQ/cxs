@@ -4,8 +4,19 @@ images:
 
 resources:
   - ../../base
+
+
+secretGenerator:
+  - name: cxs-services-kafka
+    literals:
+      - KAFKA_HOSTS=kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092
+      - KAFKA_REFRESH_TOPIC=content_refresh_jobs
+      - KAFKA_SCRAPE_TOPIC=content_processing_jobs
+      - KAFKA_USER=user1
+      - NUM_WORKERS=20
+
 patches:
-  - path: database-migration.yaml
+  - path: data-credentials.yaml
   - target:
       kind: ConfigMap
       name: cxs-services-config
