@@ -5,4 +5,7 @@ namespace: ingestion
 
 resources:
   - ../../base
-  - isl-hotel-streaming-client-pv-override-staging.yaml
+  - override-pvc.yaml
+
+patches:
+  - path: override-data-credentials.yaml
