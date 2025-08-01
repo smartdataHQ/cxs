@@ -71,6 +71,9 @@ EXAMPLES:
     $0 --apps=monitoring/grafana --auto-open --viewer=bat    # Use bat instead of delta
     $0 --ignore-annotations=""                   # Disable annotation filtering
     $0 --ignore-annotations="custom.io/tag,other/annotation"  # Custom ignore list
+    
+NOTE:
+    The script automatically detects if kustomizations require --enable-helm and applies it when needed.
 
 EXIT CODES:
     0    All apps in sync
@@ -234,6 +237,9 @@ get_default_namespace_for_directory() {
         "monitoring")
             echo "monitoring"
             ;;
+        "storage")
+            echo "storage"
+            ;;
         "operators")
             echo "operators"
             ;;
@@ -242,6 +248,7 @@ get_default_namespace_for_directory() {
             ;;
     esac
 }
+
 
 # Function to filter out ignored annotations from kubectl diff output
 filter_annotations() {
@@ -371,7 +378,7 @@ validate_app() {
     local original_dir=$(pwd)
     local kubectl_cmd="kubectl diff -k overlays/$OVERLAY_NAME"
     
-    # Add context if specified
+    # Add context if specified  
     if [[ -n "$KUBE_CONTEXT" ]]; then
         kubectl_cmd="kubectl --context=$KUBE_CONTEXT diff -k overlays/$OVERLAY_NAME"
     fi
@@ -398,6 +405,35 @@ validate_app() {
         mark_completed "$app_name"
     else
         exit_code=$?
+        
+        # Check if error is due to missing --enable-helm flag
+        if [[ $exit_code -eq 2 ]] && grep -q "must specify --enable-helm" "$temp_file"; then
+            log_info "$app_name: Retrying with Helm support (kustomize build --enable-helm)"
+            
+            # Retry with kustomize build --enable-helm | kubectl diff
+            local kustomize_cmd="kustomize build --enable-helm overlays/$OVERLAY_NAME"
+            local kubectl_diff_cmd="kubectl diff -f -"
+            
+            # Add context if specified
+            if [[ -n "$KUBE_CONTEXT" ]]; then
+                kubectl_diff_cmd="kubectl --context=$KUBE_CONTEXT diff -f -"
+            fi
+            
+            # Add namespace if specified
+            if [[ -n "$target_namespace" ]]; then
+                kubectl_diff_cmd="$kubectl_diff_cmd --namespace=$target_namespace"
+            fi
+            
+            # Run the combined command
+            if $kustomize_cmd | $kubectl_diff_cmd > "$temp_file" 2>&1; then
+                # No differences found
+                log_success "$app_name: IN SYNC"
+                ((IN_SYNC++))
+                mark_completed "$app_name"
+            else
+                exit_code=$?
+            fi
+        fi
         
         if [[ $exit_code -eq 1 ]]; then
             # Differences found (exit code 1 is expected for diffs)
