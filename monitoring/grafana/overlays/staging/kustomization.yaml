@@ -1,5 +1,5 @@
-resources:
-  - ../../base/
+# resources:  # disabled, since Snjallgogn team does not exist during provisioning
+#   - ../../base/
 
 namespace: grafana
 
