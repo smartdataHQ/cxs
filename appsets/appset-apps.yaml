@@ -12,8 +12,6 @@ spec:
         revision: staging
         directories: # Target staging overlays
           - path: apps/*/overlays/staging
-          - path: authentication/*/overlays/staging
-          - path: monitoring/*/overlays/staging
   template:
     metadata:
       name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
