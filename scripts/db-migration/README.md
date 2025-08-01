@@ -7,23 +7,23 @@ Simple script to migrate individual databases from production to staging using `
 1. **kubectl access** to both production and staging clusters
 2. **Tailscale connectivity** to access database hosts
 3. **PostgreSQL client tools** (`pg_dump`, `psql`) installed locally
-4. **kubectl contexts** configured for both clusters
 
 ## Usage
 
-### Basic Migration
+### Dry Run (Test Only)
+Validates connectivity and credentials to both databases.
 ```bash
-./migrate-database.sh --database=ssp --production-context=prod --staging-context=staging
+./migrate-database.sh --database=grafana --production-context=cxs-eu1 --staging-context=cxs-staging --dry-run
 ```
 
-### Dry Run (Test Only)
+### Basic Migration
 ```bash
-./migrate-database.sh --database=grafana --production-context=prod --staging-context=staging --dry-run
+./migrate-database.sh --database=ssp --production-context=cxs-eu1 --staging-context=cxs-staging
 ```
+
 
 ## Supported Databases
 
-Based on your PostgreSQL cluster configuration:
 
 | Database  | User        | Description                    |
 |-----------|-------------|--------------------------------|
