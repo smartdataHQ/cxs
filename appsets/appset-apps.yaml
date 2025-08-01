@@ -17,6 +17,8 @@ spec:
   template:
     metadata:
       name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
+      labels:
+        part-of: cxs-apps
     spec:
       project: default
       source:
