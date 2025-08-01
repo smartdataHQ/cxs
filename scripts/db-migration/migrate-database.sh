@@ -145,8 +145,8 @@ if [[ -z "$DB_USER" ]]; then
 fi
 
 # Set up logging
-mkdir -p logs
-LOG_FILE="logs/database-migration-${DATABASE}-$(date +%Y%m%d-%H%M%S).log"
+mkdir -p .logs/db-migrations
+LOG_FILE=".logs/db-migrations/database-migration-${DATABASE}-$(date +%Y%m%d-%H%M%S).log"
 
 log_info "Starting database migration for: $DATABASE"
 log_info "Production context: $PRODUCTION_CONTEXT"
@@ -258,10 +258,10 @@ get_table_count() {
 
 # Function to export database
 export_database() {
-    local backup_file="backups/${DATABASE}-$(date +%Y%m%d-%H%M%S).sql"
+    local backup_file=".backups/${DATABASE}-$(date +%Y%m%d-%H%M%S).sql"
     
     log_info "Exporting production database to: $backup_file"
-    mkdir -p backups
+    mkdir -p .backups
     
     export PGPASSWORD="$PROD_DB_PASSWORD"
     log_info "Running: pg_dump --clean --if-exists --no-owner --no-privileges -h $PROD_DB_HOST -p $PROD_DB_PORT -U $PROD_DB_USER -d $PROD_DB_NAME -f $backup_file"

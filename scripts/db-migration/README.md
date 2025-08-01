@@ -64,14 +64,14 @@ Validates connectivity and credentials to both databases.
 ## Output Files
 
 ### Backup Files
-- Location: `backups/`
+- Location: `.backups/`
 - Format: `{database}-YYYYMMDD-HHMMSS.sql`
-- Example: `backups/ssp-20250801-143022.sql`
+- Example: `.backups/ssp-20250801-143022.sql`
 
 ### Log Files
-- Location: `logs/`
+- Location: `.logs/db-migrations/`
 - Format: `database-migration-{database}-YYYYMMDD-HHMMSS.log`
-- Example: `logs/database-migration-ssp-20250801-143022.log`
+- Example: `.logs/db-migrations/database-migration-ssp-20250801-143022.log`
 
 ## Connection Details
 
