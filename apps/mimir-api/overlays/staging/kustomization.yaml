@@ -9,6 +9,7 @@ resources:
   - mimir-api-ingress.yml
 
 patches:
+  - path: data-credentials.yaml
   - target:
       kind: Deployment
       name: mimir-api
