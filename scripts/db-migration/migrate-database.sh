@@ -18,20 +18,24 @@ DATABASE=""
 PRODUCTION_CONTEXT=""
 STAGING_CONTEXT=""
 DRY_RUN=false
+BACKUP_FILE=""
 LOG_FILE=""
 
-# Database to user mapping (based on your PostgreSQL cluster config)
-declare -A DB_USERS=(
-    ["ssp"]="cxs-pg"
-    ["grafana"]="grafana"
-    ["n8n"]="n8n-db"
-    ["airflow"]="aiflow-db"
-    ["convoy"]="convoy-db"
-)
+# Function to get database user
+get_db_user() {
+    case "$1" in
+        "ssp") echo "cxs-pg" ;;
+        "grafana") echo "grafana" ;;
+        "n8n") echo "n8n-db" ;;
+        "airflow") echo "aiflow-db" ;;
+        "convoy") echo "convoy-db" ;;
+        *) echo "" ;;
+    esac
+}
 
 # Tailscale hostnames
-PRODUCTION_HOST="data-cxs-pg-pgbouncer.com"
-STAGING_HOST="data-cxs-pg-pgbouncer-dev.com"
+PRODUCTION_HOST="data-cxs-pg-pgbouncer"
+STAGING_HOST="data-cxs-pg-pgbouncer-dev"
 DB_PORT="5432"
 
 usage() {
@@ -44,19 +48,21 @@ Required:
   --staging-context=CTX     kubectl context for staging cluster
 
 Options:
+  --backup-file=PATH        Use existing backup file instead of creating new export
   --dry-run                 Test connections only, no actual migration
   --help                    Show this help message
 
 Examples:
   $0 --database=ssp --production-context=prod --staging-context=staging
   $0 --database=grafana --production-context=prod --staging-context=staging --dry-run
+  $0 --database=ssp --staging-context=staging --backup-file=backups/ssp-20250801-133222.sql
 EOF
     exit 1
 }
 
 log() {
     local message="$(date '+%Y-%m-%d %H:%M:%S'): $1"
-    echo -e "$message" | tee -a "$LOG_FILE"
+    echo -e "$message" | tee -a "$LOG_FILE" >&2
 }
 
 log_error() {
@@ -90,6 +96,10 @@ while [[ $# -gt 0 ]]; do
             STAGING_CONTEXT="${1#*=}"
             shift
             ;;
+        --backup-file=*)
+            BACKUP_FILE="${1#*=}"
+            shift
+            ;;
         --dry-run)
             DRY_RUN=true
             shift
@@ -105,14 +115,32 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Validate required arguments
-if [[ -z "$DATABASE" || -z "$PRODUCTION_CONTEXT" || -z "$STAGING_CONTEXT" ]]; then
-    echo "Error: Missing required arguments"
+if [[ -z "$DATABASE" ]]; then
+    echo "Error: --database is required"
     usage
 fi
 
+if [[ -z "$STAGING_CONTEXT" ]]; then
+    echo "Error: --staging-context is required"
+    usage
+fi
+
+# Production context only required if no backup file provided
+if [[ -z "$BACKUP_FILE" && -z "$PRODUCTION_CONTEXT" ]]; then
+    echo "Error: --production-context is required (unless using --backup-file)"
+    usage
+fi
+
+# Validate backup file exists if provided
+if [[ -n "$BACKUP_FILE" && ! -f "$BACKUP_FILE" ]]; then
+    echo "Error: Backup file '$BACKUP_FILE' not found"
+    exit 1
+fi
+
 # Validate database name
-if [[ ! -v DB_USERS[$DATABASE] ]]; then
-    echo "Error: Unknown database '$DATABASE'. Supported databases: ${!DB_USERS[*]}"
+DB_USER=$(get_db_user "$DATABASE")
+if [[ -z "$DB_USER" ]]; then
+    echo "Error: Unknown database '$DATABASE'. Supported databases: ssp, grafana, n8n, airflow, convoy"
     exit 1
 fi
 
@@ -126,8 +154,6 @@ log_info "Staging context: $STAGING_CONTEXT"
 log_info "Dry run: $DRY_RUN"
 log_info "Log file: $LOG_FILE"
 
-# Get database user
-DB_USER=${DB_USERS[$DATABASE]}
 log_info "Database user: $DB_USER"
 
 # Function to validate kubectl context
@@ -142,7 +168,7 @@ validate_context() {
         exit 1
     fi
     
-    kubectl config use-context "$context" >/dev/null
+    kubectl config use-context "$context"
     if ! kubectl cluster-info >/dev/null 2>&1; then
         log_error "Cannot connect to cluster using context '$context'"
         exit 1
@@ -202,11 +228,18 @@ test_connection() {
     log_info "Testing $context_type database connection (host: $host, db: $dbname)"
     
     export PGPASSWORD="$password"
-    if psql -h "$host" -p "$port" -U "$user" -d "$dbname" -c "SELECT version();" >/dev/null 2>&1; then
+    local psql_error
+    psql_error=$(psql -h "$host" -p "$port" -U "$user" -d "$dbname" -c "SELECT version();" 2>&1)
+    if [[ $? -eq 0 ]]; then
         log_success "$context_type database connection successful"
         return 0
     else
         log_error "$context_type database connection failed"
+        log_error "host: $host"
+        log_error "port: $port"
+        log_error "user: $user"
+        log_error "dbname: $dbname"
+        log_error "psql error: $psql_error"
         return 1
     fi
 }
@@ -231,7 +264,8 @@ export_database() {
     mkdir -p backups
     
     export PGPASSWORD="$PROD_DB_PASSWORD"
-    if pg_dump -h "$PROD_DB_HOST" -p "$PROD_DB_PORT" -U "$PROD_DB_USER" -d "$PROD_DB_NAME" -f "$backup_file"; then
+    log_info "Running: pg_dump --clean --if-exists --no-owner --no-privileges -h $PROD_DB_HOST -p $PROD_DB_PORT -U $PROD_DB_USER -d $PROD_DB_NAME -f $backup_file"
+    if pg_dump --clean --if-exists --no-owner --no-privileges -h "$PROD_DB_HOST" -p "$PROD_DB_PORT" -U "$PROD_DB_USER" -d "$PROD_DB_NAME" -f "$backup_file"; then
         log_success "Database export completed: $backup_file"
         local file_size=$(ls -lh "$backup_file" | awk '{print $5}')
         log_info "Backup file size: $file_size"
@@ -261,7 +295,10 @@ import_database() {
     log_info "Importing database from: $backup_file"
     
     export PGPASSWORD="$STAGING_DB_PASSWORD"
-    if psql -h "$STAGING_DB_HOST" -p "$STAGING_DB_PORT" -U "$STAGING_DB_USER" -d "$STAGING_DB_NAME" -f "$backup_file"; then
+    log_info "Running: psql -h $STAGING_DB_HOST -p $STAGING_DB_PORT -U $STAGING_DB_USER -d $STAGING_DB_NAME -f $backup_file"
+    
+    # Capture both stdout and stderr, and tee to log file
+    if psql -h "$STAGING_DB_HOST" -p "$STAGING_DB_PORT" -U "$STAGING_DB_USER" -d "$STAGING_DB_NAME" -f "$backup_file" 2>&1 | tee -a "$LOG_FILE" >&2; then
         log_success "Database import completed"
     else
         log_error "Database import failed"
@@ -273,40 +310,68 @@ import_database() {
 main() {
     log_info "=== Database Migration Started ==="
     
-    # Step 1: Extract credentials
-    log_info "Step 1: Extracting credentials"
-    extract_credentials "$PRODUCTION_CONTEXT" "production"
-    extract_credentials "$STAGING_CONTEXT" "staging"
-    
-    # Step 2: Test connections
-    log_info "Step 2: Testing database connections"
-    if ! test_connection "$PROD_DB_HOST" "$PROD_DB_PORT" "$PROD_DB_USER" "$PROD_DB_PASSWORD" "$PROD_DB_NAME" "production"; then
-        exit 1
+    # Step 1: Extract credentials and test connections
+    if [[ -z "$BACKUP_FILE" ]]; then
+        # Full migration - need production credentials
+        log_info "Step 1: Extracting credentials"
+        extract_credentials "$PRODUCTION_CONTEXT" "production"
+        extract_credentials "$STAGING_CONTEXT" "staging"
+        
+        # Step 2: Test connections
+        log_info "Step 2: Testing database connections"
+        if ! test_connection "$PROD_DB_HOST" "$PROD_DB_PORT" "$PROD_DB_USER" "$PROD_DB_PASSWORD" "$PROD_DB_NAME" "production"; then
+            exit 1
+        fi
+        
+        if ! test_connection "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_USER" "$STAGING_DB_PASSWORD" "$STAGING_DB_NAME" "staging"; then
+            exit 1
+        fi
+        
+        # Get initial table counts
+        local prod_tables staging_tables_before
+        prod_tables=$(get_table_count "$PROD_DB_HOST" "$PROD_DB_PORT" "$PROD_DB_USER" "$PROD_DB_PASSWORD" "$PROD_DB_NAME")
+        staging_tables_before=$(get_table_count "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_USER" "$STAGING_DB_PASSWORD" "$STAGING_DB_NAME")
+        
+        log_info "Production database tables: $prod_tables"
+        log_info "Staging database tables (before): $staging_tables_before"
+        
+        if [[ "$DRY_RUN" == "true" ]]; then
+            log_success "Dry run completed successfully - all connections working"
+            log_info "=== Dry Run Completed ==="
+            return 0
+        fi
+    else
+        # Import-only mode - only need staging credentials
+        log_info "Step 1: Using existing backup file: $BACKUP_FILE"
+        extract_credentials "$STAGING_CONTEXT" "staging"
+        
+        # Step 2: Test staging connection only
+        log_info "Step 2: Testing staging database connection"
+        if ! test_connection "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_USER" "$STAGING_DB_PASSWORD" "$STAGING_DB_NAME" "staging"; then
+            exit 1
+        fi
+        
+        local staging_tables_before
+        staging_tables_before=$(get_table_count "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_USER" "$STAGING_DB_PASSWORD" "$STAGING_DB_NAME")
+        log_info "Staging database tables (before): $staging_tables_before"
+        
+        if [[ "$DRY_RUN" == "true" ]]; then
+            log_success "Dry run completed successfully - staging connection working"
+            log_info "=== Dry Run Completed ==="
+            return 0
+        fi
     fi
     
-    if ! test_connection "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_USER" "$STAGING_DB_PASSWORD" "$STAGING_DB_NAME" "staging"; then
-        exit 1
-    fi
-    
-    # Get initial table counts
-    local prod_tables staging_tables_before
-    prod_tables=$(get_table_count "$PROD_DB_HOST" "$PROD_DB_PORT" "$PROD_DB_USER" "$PROD_DB_PASSWORD" "$PROD_DB_NAME")
-    staging_tables_before=$(get_table_count "$STAGING_DB_HOST" "$STAGING_DB_PORT" "$STAGING_DB_USER" "$STAGING_DB_PASSWORD" "$STAGING_DB_NAME")
-    
-    log_info "Production database tables: $prod_tables"
-    log_info "Staging database tables (before): $staging_tables_before"
-    
-    if [[ "$DRY_RUN" == "true" ]]; then
-        log_success "Dry run completed successfully - all connections working"
-        log_info "=== Dry Run Completed ==="
-        return 0
-    fi
-    
-    # Step 3: Export database
-    log_info "Step 3: Exporting production database"
-    validate_context "$PRODUCTION_CONTEXT" "production"
+    # Step 3: Export database (skip if backup file provided)
     local backup_file
-    backup_file=$(export_database)
+    if [[ -z "$BACKUP_FILE" ]]; then
+        log_info "Step 3: Exporting production database"
+        validate_context "$PRODUCTION_CONTEXT" "production"
+        backup_file=$(export_database)
+    else
+        log_info "Step 3: Using provided backup file"
+        backup_file="$BACKUP_FILE"
+    fi
     
     # Step 4: Import database  
     log_info "Step 4: Importing to staging database"
@@ -320,10 +385,15 @@ main() {
     
     log_info "Staging database tables (after): $staging_tables_after"
     
-    if [[ "$prod_tables" == "$staging_tables_after" ]]; then
-        log_success "Table count validation passed: $staging_tables_after tables"
+    if [[ -n "$prod_tables" ]]; then
+        # Only validate table count if we had production data
+        if [[ "$prod_tables" == "$staging_tables_after" ]]; then
+            log_success "Table count validation passed: $staging_tables_after tables"
+        else
+            log_warning "Table count mismatch - Production: $prod_tables, Staging: $staging_tables_after"
+        fi
     else
-        log_warning "Table count mismatch - Production: $prod_tables, Staging: $staging_tables_after"
+        log_info "Import completed with $staging_tables_after tables"
     fi
     
     log_success "=== Database Migration Completed Successfully ==="
