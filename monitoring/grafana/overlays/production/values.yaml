@@ -36,7 +36,7 @@ extraSecretMounts:
 
 service:
   annotations:
-    tailscale.com/hostname: grafana-prod
+    tailscale.com/hostname: grafana
     tailscale.com/expose: "true"
 
 extraConfigmapMounts:
@@ -45,3 +45,6 @@ extraConfigmapMounts:
     subPath: longhorn-rules.yaml
     configMap: grafana-longhorn-alerts
     readOnly: true
+
+testFramework:
+  enabled: false

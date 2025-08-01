@@ -1,13 +1,14 @@
 resources:
   - ../../base/
-  - ../../alerting/
 
 namespace: grafana
 
 helmCharts:
   - name: grafana
     repo: https://grafana.github.io/helm-charts
-    releaseName: grafana
+    # This release name is for backwards compatibility with the
+    # grafana Helm release deployed by rancher/fleet
+    releaseName: csx-deployment-monitoring-grafana
     # Before upgrading, check if the following issue is fixed, pinned to 8.8.6 for now
     # https://github.com/grafana/grafana/issues/99774
     version: 8.8.6

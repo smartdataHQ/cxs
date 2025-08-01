@@ -1,4 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Base only provides namespace and alerts
+# Helm configuration moved to overlays due to Kustomize Helm
+# limitations preventing values override
+
 namespace: grafana
 
-# Base only provides namespace - Helm configuration moved to overlays
-# due to Kustomize Helm limitations preventing values override
+configMapGenerator:
+  - name: grafana-longhorn-alerts
+    files:
+      - longhorn-rules.yaml=longhorn-rules.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_alert: "1"
+
