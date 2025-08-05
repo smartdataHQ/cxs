@@ -27,10 +27,3 @@ data:
 
   N8N_RUNNERS_ENABLED: "true"
   OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS: "true"
-  
-  # Allow iframe embedding
-  N8N_FRAME_ANCESTORS: "https://flows.contextsuite.com https://app.contextsuite.com http://localhost:3000"
-  # Disable X-Frame-Options header to allow iframe embedding
-  N8N_DISABLE_FRAME_OPTIONS: "true"
-  # Set Cross-Origin-Resource-Policy to allow cross-origin embedding
-  N8N_CORS_ORIGIN: "https://flows.contextsuite.com https://app.contextsuite.com http://localhost:3000"

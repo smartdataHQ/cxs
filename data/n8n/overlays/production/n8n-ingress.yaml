@@ -2,14 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: n8n
-  annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      more_set_headers "Cross-Origin-Resource-Policy: cross-origin";
-      more_set_headers "X-Frame-Options: ALLOWALL";
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://flows.contextsuite.com,https://app.contextsuite.com,http://localhost:3000"
-    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
 spec:
   rules:
     - host: flows.contextsuite.com
