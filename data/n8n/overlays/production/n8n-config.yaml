@@ -27,3 +27,6 @@ data:
 
   N8N_RUNNERS_ENABLED: "true"
   OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS: "true"
+  
+  # Allow iframe embedding
+  N8N_FRAME_ANCESTORS: "https://flows.contextsuite.com https://app.contextsuite.com http://localhost:3000"
