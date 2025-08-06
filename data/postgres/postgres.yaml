@@ -42,6 +42,10 @@ spec:
     - name: grafana
       databases:
         - grafana
+    - name: synmetrix
+      options: SUPERUSER
+      databases:
+        - synmetrix
   #  users:
   #    - name: rhino
   #      databases:
