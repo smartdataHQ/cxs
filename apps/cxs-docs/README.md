@@ -40,8 +40,8 @@ This application is deployed automatically by Fleet when changes are pushed to t
 
 ## Kubernetes Resources
 The base configuration defines the following Kubernetes resources:
-- `cxs-docs-deployment.yaml`: Manages the deployment of the documentation pods, including the HorizontalPodAutoscaler for automatic scaling.
-- `cxs-docs-service.yaml`: Exposes the documentation service internally within the cluster.
+- `cxs-docs-deployment.yaml`: Manages the deployment of the documentation pods, including the HorizontalPodAutoscaler for automatic scaling. The application runs on port 3000 within the container.
+- `cxs-docs-service.yaml`: Exposes the documentation service internally within the cluster. The service maps external port 80 to the container's port 3000.
 - `kustomization.yaml`: Defines the Kustomize configuration for the base layer.
 
 The production overlay adds the following resources:
