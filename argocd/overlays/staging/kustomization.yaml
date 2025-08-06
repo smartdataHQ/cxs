@@ -1,0 +1,53 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: argocd
+
+resources:
+  - ../../base
+
+patches:
+  # Change ingress hostname for staging
+  - target:
+      kind: Ingress
+      name: argocd-server
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: argocd.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: argocd.contextsuite.dev
+      - op: replace
+        path: /metadata/annotations
+        value:
+          cert-manager.io/cluster-issuer: "letsencrypt-staging"
+          nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+  
+  # Update argocd-cm ConfigMap with staging URL
+  - target:
+      kind: ConfigMap
+      name: argocd-cm
+    patch: |-
+      - op: add
+        path: /data/url
+        value: https://argocd.contextsuite.dev
+      - op: add
+        path: /data/oidc.config
+        value: |
+          name: Microsoft Entra
+          issuer: https://login.microsoftonline.com/872900b8-f510-4931-8f01-ab9d34573149/v2.0
+          clientId: b8ab43e1-8bc4-491e-9663-1fc3daf5e00e
+          clientSecret: $oidc.microsoft.clientSecret
+          requestedScopes: ["openid", "profile", "email"]
+          requestedIDTokenClaims: {"groups": {"essential": true}}
+  
+  # Update argocd-notifications-cm ConfigMap with staging URL references
+  - target:
+      kind: ConfigMap
+      name: argocd-notifications-cm
+    patch: |-
+      - op: add
+        path: /data/context
+        value: |-
+          argocdUrl: https://argocd.contextsuite.dev

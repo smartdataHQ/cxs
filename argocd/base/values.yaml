@@ -1,6 +1,6 @@
 
 global:
-    domain: argocd.contextsuite.dev
+    domain: argocd.contextsuite.com
 
 
 configs:
@@ -16,7 +16,7 @@ configs:
       requestedScopes: ["openid", "profile", "email"]
       requestedIDTokenClaims: {"groups": {"essential": true}}
     # URL configuration
-    url: https://argocd.contextsuite.dev
+    url: https://argocd.contextsuite.com
   rbac:
     # RBAC policy configuration
     policy.default: role:readonly
@@ -59,7 +59,7 @@ server:
     enabled: true
     ingressClassName: nginx
     annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-staging"
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
       nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
     tls: true
   
@@ -68,35 +68,3 @@ applicationSet:
 
 repoServer:
   replicas: 1
-    # initContainers:
-    # - name: download-tools
-    #   image: registry.access.redhat.com/ubi8
-    #   env:
-    #     - name: AVP_VERSION
-    #       value: 1.17.0
-    #     - name: KUSTOMIZE_VERSION
-    #       value: 5.2.1
-    #     - name: HELM_VERSION
-    #       value: 3.13.1
-    #   command: [sh, -c]
-    #   args:
-    #     - >-
-    #       curl -L https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v$(AVP_VERSION)/argocd-vault-plugin_$(AVP_VERSION)_linux_amd64 -o argocd-vault-plugin
-    #       && chmod +x argocd-vault-plugin
-    #       && mv argocd-vault-plugin /custom-tools/ &&
-
-    #       curl -L https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv$(KUSTOMIZE_VERSION)/kustomize_v$(KUSTOMIZE_VERSION)_linux_amd64.tar.gz -o kustomize.tar.gz
-    #       && tar -xvzf kustomize.tar.gz
-    #       && chmod +x kustomize
-    #       && mv kustomize /custom-tools/ &&
-
-    #       curl -L https://get.helm.sh/helm-v$(HELM_VERSION)-linux-amd64.tar.gz -o helm.tar.gz
-    #       && tar -xvzf helm.tar.gz
-    #       && chmod +x linux-amd64/helm
-    #       && mv linux-amd64/helm /custom-tools/ &&
-
-    #       yum -y install gettext
-    #       && cp /usr/bin/envsubst /custom-tools/
-    #   volumeMounts:
-    #     - mountPath: /custom-tools
-    #       name: custom-tools
