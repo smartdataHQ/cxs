@@ -9,7 +9,7 @@ patches:
     patch: |-
       - op: add
         path: /spec/template/spec/imagePullSecrets
-        value: [{ name: docker-hub-secret }]
+        value: [{ name: dockerlock }]
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
@@ -18,7 +18,7 @@ patches:
     patch: |-
       - op: add
         path: /spec/template/spec/imagePullSecrets
-        value: [{ name: docker-hub-secret }]
+        value: [{ name: dockerlock }]
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
@@ -27,7 +27,7 @@ patches:
     patch: |-
       - op: add
         path: /spec/template/spec/imagePullSecrets
-        value: [{ name: docker-hub-secret }]
+        value: [{ name: dockerlock }]
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always

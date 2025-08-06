@@ -72,8 +72,6 @@ spec:
           readOnly: true
           subPath: postgres-ca.crt
       dnsPolicy: ClusterFirst
-      imagePullSecrets:
-      - name: docker-hub-secret
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
