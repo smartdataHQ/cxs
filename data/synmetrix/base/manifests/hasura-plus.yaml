@@ -13,8 +13,6 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    deployment.kubernetes.io/revision: "41"
   name: synmetrix-hasura-plus
   namespace: synmetrix
 spec:
