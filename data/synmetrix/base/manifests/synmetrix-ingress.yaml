@@ -1,0 +1,70 @@
+---
+# Source: synmetrix/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: synmetrix
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+    nginx.ingress.kubernetes.io/server-snippets: |
+      location ~ ^/v1 {
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+      }
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: synmetrix.contextsuite.dev
+      http:
+        paths:
+          - path: /console
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-hasura
+                port:
+                  number: 8080
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-hasura
+                port:
+                  number: 8080
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-cubejs
+                port:
+                  number: 4000
+          - path: /docs
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-cubejs
+                port:
+                  number: 4000
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-hasura-plus
+                port:
+                  number: 3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: synmetrix-client
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - synmetrix.contextsuite.dev
+      secretName: synmetrix-tls
+---

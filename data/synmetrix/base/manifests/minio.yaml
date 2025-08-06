@@ -1,0 +1,110 @@
+---
+# Source: synmetrix/templates/minio.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: synmetrix-minio
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: storage
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: api
+      protocol: TCP
+      name: api
+    - port: 9001
+      targetPort: console
+      protocol: TCP
+      name: console
+  selector:
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/component: storage
+---
+# Source: synmetrix/templates/minio.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: synmetrix-minio
+  labels:
+    app.kubernetes.io/name: synmetrix-minio
+    app.kubernetes.io/instance: synmetrix
+spec:
+  replicas: 1
+  serviceName: synmetrix-minio
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synmetrix-minio
+      app.kubernetes.io/instance: synmetrix
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synmetrix-minio
+        app.kubernetes.io/instance: synmetrix
+    spec:
+      serviceAccountName: synmetrix
+      containers:
+        - name: minio
+          image: "minio/minio:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: api
+              containerPort: 9000
+              protocol: TCP
+            - name: console
+              containerPort: 9001
+              protocol: TCP
+          command:
+            - /bin/sh
+            - -c
+            - minio server --console-address ":9001" /data
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: MINIO_ROOT_PASSWORD
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: synmetrix-minio-pvc
+---
+# Source: synmetrix/templates/minio.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: synmetrix-minio-pvc
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: storage
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi

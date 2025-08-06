@@ -1,0 +1,71 @@
+---
+# Source: synmetrix/templates/client.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: synmetrix-client
+  labels:
+    helm.sh/chart: synmetrix-0.1.0
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: frontend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/component: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synmetrix-client
+  labels:
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/component: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synmetrix
+      app.kubernetes.io/instance: synmetrix
+      app.kubernetes.io/component: frontend
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synmetrix
+        app.kubernetes.io/instance: synmetrix
+        app.kubernetes.io/component: frontend
+    spec:
+      serviceAccountName: synmetrix
+      imagePullSecrets:
+      - name: docker-hub-secret
+      containers:
+        - name: client
+          image: "quicklookup/synmetrix-client:latest"
+          imagePullPolicy: IfNotPresent
+
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: synmetrix-config
+            - secretRef:
+                name: synmetrix-secrets
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi

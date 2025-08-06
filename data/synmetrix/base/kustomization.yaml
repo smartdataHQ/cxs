@@ -1,0 +1,119 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: synmetrix
+
+patches:
+  - target:
+      kind: Deployment
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [{ name: docker-hub-secret }]
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: StatefulSet
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [{ name: docker-hub-secret }]
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+  - target:
+      kind: Job
+    patch: |-
+      - op: add
+        path: /spec/template/spec/imagePullSecrets
+        value: [{ name: docker-hub-secret }]
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+
+resources:
+  - manifests/synmetrix-ingress.yaml
+  - manifests/serviceaccount.yaml
+
+  # Individual workloads
+  - manifests/actions.yaml
+  - manifests/client.yaml
+  - manifests/cubejs.yaml
+  - manifests/cubejs-redis.yaml
+  - manifests/cubestore.yaml
+  - manifests/hasura.yaml
+  - manifests/hasura-migrations.yaml
+  - manifests/hasura-plus.yaml
+  - manifests/mailhog.yaml
+  - manifests/minio.yaml
+  
+images:
+  - name: quicklookup/synmetrix-client
+    newTag: latest
+  - name: quicklookup/synmetrix-actions
+    newTag: latest
+  - name: quicklookup/synmetrix-cube
+    newTag: latest 
+
+configMapGenerator:
+  - name: synmetrix-config
+    literals:
+      - ACTIONS_URL=http://synmetrix-actions:3000
+      - HASURA_PLUS_ENDPOINT=http://synmetrix-hasura-plus:3000
+      - HASURA_PLUS_SERVER_URL=http://synmetrix-hasura-plus:3000
+      - AUTO_ACTIVATE_NEW_USERS=true
+      - AUTH_LOCAL_USERS_ENABLED=true
+      - DEFAULT_USER_ROLE=user
+
+      - REDIS_URL=redis://synmetrix-redis:6379
+      - REDIS_ADDR=redis://synmetrix-redis:6379
+      - CUBEJS_CACHE_TYPE=redis
+      - CUBEJS_CUBESTORE_HOST=synmetrix-cubestore
+      - CUBEJS_CUBESTORE_PORT=3030
+      - CUBEJS_DB_CLICKHOUSE_READONLY="true"
+      - CUBEJS_DB_PORT=5432
+      - CUBEJS_DB_TYPE=postgres
+      - CUBEJS_NATIVE_INTERNAL_DEBUG=true
+      - CUBEJS_PG_SQL_PORT=15432
+      - CUBEJS_SQL_PORT=13306
+      - CUBEJS_TELEMETRY=false
+      - CUBEJS_URL=http://synmetrix-cubejs:4000
+      - CUBEJS_SQL_API=true
+      
+      - CUBESQL_DEBUG_QTRACE=true
+      - CUBESTORE_VERSION=v1.2.3
+
+      - HASURA_GRAPHQL_ENABLE_TELEMETRY=false
+      - HASURA_ENDPOINT=http://synmetrix-hasura:8080/v1/graphql
+      
+      # Default endpoints (can be overridden in overlays):
+      - HASURA_GRAPHQL_ENDPOINT=/v1/graphql
+      - HASURA_WS_ENDPOINT=/v1/graphql
+
+      - CUBEJS_REST_API_URL=/api/v1/load
+
+      - JWT_CLAIMS_NAMESPACE=hasura
+      - JWT_ALGORITHM=HS256
+
+
+      - CUBEJS_MYSQL_API_URL=synmetrix.contextsuite.dev:13306
+      - CUBEJS_PG_API_URL=synmetrix.contextsuite.dev:15432
+      - CUBEJS_API_DOCS_URL=http://synmetrix.contextsuite.dev/docs
+
+      - DEBUG_LOG=true
+      - LOG_LEVEL=info
+      - NODE_ENV=production
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - SMTP_HOST=synmetrix-mailhog-smtp
+      - SMTP_PORT=1025
+
+
+
+labels:
+- pairs:
+    app.kubernetes.io/part-of: synmetrix
+
+# Common annotations
+commonAnnotations:
+  kustomize.config.k8s.io/needs-hash-suffix: "true"

@@ -1,0 +1,96 @@
+---
+# Source: synmetrix/templates/hasura.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: synmetrix-hasura
+  labels:
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/component: graphql
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/component: graphql
+
+---
+# Source: synmetrix/templates/hasura.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: synmetrix-hasura
+  labels:
+    
+    app.kubernetes.io/name: synmetrix
+    app.kubernetes.io/instance: synmetrix
+    app.kubernetes.io/component: graphql
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: synmetrix
+      app.kubernetes.io/instance: synmetrix
+      app.kubernetes.io/component: graphql
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: synmetrix
+        app.kubernetes.io/instance: synmetrix
+        app.kubernetes.io/component: graphql
+    spec:
+      serviceAccountName: synmetrix
+      containers:
+        - name: hasura
+          # image: quicklookup/synmetrix-hasura:latest
+          image: hasura/graphql-engine:v2.37.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          
+          envFrom:
+            - configMapRef:
+                name: synmetrix-config
+            - secretRef:
+                name: synmetrix-secrets
+          env:
+            - name: ENABLE_TELEMETRY
+              value: "false"
+            - name: HASURA_GRAPHQL_DEV_MODE
+              value: "true"
+            - name: HASURA_GRAPHQL_ENABLE_CONSOLE
+              value: "true"
+            - name: HASURA_GRAPHQL_MIGRATIONS_DIR
+              value: /hasura-migrations
+            - name: HASURA_GRAPHQL_METADATA_DIR
+              value: /hasura-migrations
+            - name: HASURA_GRAPHQL_ADMIN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: HASURA_GRAPHQL_ADMIN_SECRET
+            - name: HASURA_GRAPHQL_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: synmetrix-secrets
+                  key: DATABASE_URL
+
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 250m
+              memory: 256Mi
+
+    
