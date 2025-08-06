@@ -10,7 +10,7 @@ namespace: synmetrix
 secretGenerator:
   - name: synmetrix-secrets
     envs:
-      - synmetrix-secrets.env
+      - synmetrix-staging-secrets.env
 
 # Generate secrets without hash suffix to ensure consistent naming
 generatorOptions:

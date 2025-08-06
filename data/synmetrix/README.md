@@ -22,41 +22,44 @@ The application consists of:
   - `quicklookup/synmetrix-actions:latest`
   - `quicklookup/synmetrix-cube:latest`
 
-## Simplified Patch Structure
-
-Only **4 patches** are used (reduced from 12):
-
-1. **`cubejs-resources.yaml`** - CPU/memory limits for CubeJS
-2. **`hasura-resources.yaml`** - CPU/memory limits for Hasura
-3. **`enable-ingress.yaml`** - Complete ingress configuration
-4. **`external-database-config.yaml`** - All external database and environment configs
-
 ## Secret Management
 
-Secrets are managed separately from ArgoCD deployments using dedicated secret overlays.
-
-### Secret Overlays
-
+Secrets are managed separately from ArgoCD deployments using dedicated secret overlays, located at:
 - **Staging**: `overlays/staging-secrets/`
 - **Production**: `overlays/production-secrets/`
 
 ### Deploy Secrets
+#### 1. Populate the secret-overlay .env file with proper values:
+Current example:
+   ```env
+   # Generate JWT Key with `openssl rand -hex 48 | tr -dc 'A-Za-z0-9' | head -c 64`
+   JWT_KEY=<JWT Secret key>
+   HASURA_GRAPHQL_JWT_SECRET={"type":"HS256","key":"<JWT Secret key>","claims_namespace":"hasura"}
+   
+   # Generate with `openssl rand -hex 48 | tr -dc 'A-Za-z0-9' | head -c 32`
+   HASURA_GRAPHQL_ADMIN_SECRET=f873ff9a59810597d4436990ff74058c
+   # Generate with `openssl rand -hex 48 | tr -dc 'A-Za-z0-9' | head -c 32`
+   CUBEJS_SECRET=ef3c1104e930cf977ae99561869a1b2f
 
-**Staging**:
-```bash
-kubectl apply -k data/synmetrix/overlays/staging-secrets/
-```
+   # Sourced from cxs-pg-pguser-cxs-pg Secret in data namespace
+   SSP_DB_URL=postgresql://cxs-pg:L%2F6B%40%3F%7Db%5BQT_iM.nG5s5I%7Cht@cxs-pg-primary.data.svc:5432/ssp
 
-**Production**:
-1. Copy production template and add real values from 1Password:
-   ```bash
-   cp overlays/production-secrets/synmetrix-secrets.env production-real.env
-   # Edit production-real.env with actual values
+   POSTGRES_HOST=cxs-pg-primary.data.svc
+   POSTGRES_PORT=5432
+
+   POSTGRES_DB=synmetrix
+   POSTGRES_USER=synmetrix
+   POSTGRES_PASSWORD=<password from cxs-pg-pguser-synmetrix secret in data namespace>;
+
+   DATABASE_URL=postgresql://synmetrix:<url encoded password from synmetrix pguser>;@cxs-pg-primary.data.svc:5432/synmetrix?sslmode=prefer
+               
+   MINIO_ROOT_USER=<minio admin user from minio instance>
+   MINIO_ROOT_PASSWORD=<minio admin password from minio instance>
    ```
-2. Update `overlays/production-secrets/kustomization.yaml` to reference the real env file
-3. Deploy:
+
+#### 2. Deploy:
    ```bash
-   kubectl apply -k data/synmetrix/overlays/production-secrets/
+   kubectl apply -k data/synmetrix/overlays/staging-secrets/
    ```
 
 ### Important Notes
