@@ -72,6 +72,8 @@ spec:
           readOnly: true
           subPath: postgres-ca.crt
       dnsPolicy: ClusterFirst
+      imagePullSecrets:
+      - name: dockerlock
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
