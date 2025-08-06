@@ -15,9 +15,3 @@ configMapGenerator:
       - CUBEJS_LOG_LEVEL=debug
       - NODE_ENV=development
     behavior: merge
-secretGenerator:
-  - name: synmetrix-secrets
-    envs:
-      - synmetrix-secrets.env
-    behavior: merge
-

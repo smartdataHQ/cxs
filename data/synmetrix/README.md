@@ -33,32 +33,38 @@ Only **4 patches** are used (reduced from 12):
 
 ## Secret Management
 
-### Required Secrets
+Secrets are managed separately from ArgoCD deployments using dedicated secret overlays.
 
-Replace the generated secret with actual values. Create this manually:
+### Secret Overlays
 
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: synmetrix-secrets
-  namespace: synmetrix
-type: Opaque
-stringData:
-  # Database Configuration
-  POSTGRES_HOST: "cxs-pg-primary.data.svc"
-  POSTGRES_USER: "postgres"
-  POSTGRES_DB: "synmetrix"
-  DATABASE_URL: "postgres://postgres:your-actual-postgres-password@cxs-pg-primary.data.svc:5432/synmetrix"
-  
-  # Redis Configuration
-  REDIS_URL: "redis://redis-master.data.svc.cluster.local:6379"
-  
-  # Application Secrets
-  HASURA_GRAPHQL_ADMIN_SECRET: "your-secure-hasura-admin-secret"
-  HASURA_GRAPHQL_JWT_SECRET: '{"type":"HS256","key":"your-32-character-jwt-secret-key"}'
-  CUBEJS_API_SECRET: "your-secure-cubejs-api-secret"
+- **Staging**: `overlays/staging-secrets/`
+- **Production**: `overlays/production-secrets/`
+
+### Deploy Secrets
+
+**Staging**:
+```bash
+kubectl apply -k data/synmetrix/overlays/staging-secrets/
 ```
+
+**Production**:
+1. Copy production template and add real values from 1Password:
+   ```bash
+   cp overlays/production-secrets/synmetrix-secrets.env production-real.env
+   # Edit production-real.env with actual values
+   ```
+2. Update `overlays/production-secrets/kustomization.yaml` to reference the real env file
+3. Deploy:
+   ```bash
+   kubectl apply -k data/synmetrix/overlays/production-secrets/
+   ```
+
+### Important Notes
+
+- **Deploy secrets BEFORE ArgoCD deploys the application**
+- Store production env files in 1Password, never commit to git
+- Secrets use `disableNameSuffixHash: true` for consistent naming
+- ArgoCD applications expect `synmetrix-secrets` to exist
 
 ### Deployment Steps
 
