@@ -96,10 +96,12 @@ configMapGenerator:
       - JWT_CLAIMS_NAMESPACE=hasura
       - JWT_ALGORITHM=HS256
 
-
-      - CUBEJS_MYSQL_API_URL=synmetrix.contextsuite.dev:13306
-      - CUBEJS_PG_API_URL=synmetrix.contextsuite.dev:15432
-      - CUBEJS_API_DOCS_URL=http://synmetrix.contextsuite.dev/docs
+      # FQDN-based URLs - to be overridden in overlays
+      - APP_FRONTEND_URL=https://PLACEHOLDER_FQDN
+      - APP_REDIRECT_URL=https://PLACEHOLDER_FQDN/callback
+      - CUBEJS_MYSQL_API_URL=PLACEHOLDER_FQDN:13306
+      - CUBEJS_PG_API_URL=PLACEHOLDER_FQDN:15432
+      - CUBEJS_API_DOCS_URL=http://PLACEHOLDER_FQDN/docs
 
       - DEBUG_LOG=true
       - LOG_LEVEL=info

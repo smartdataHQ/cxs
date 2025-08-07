@@ -18,7 +18,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: synmetrix.contextsuite.dev
+    - host: PLACEHOLDER_FQDN
       http:
         paths:
           - path: /console
@@ -65,6 +65,6 @@ spec:
                   number: 80
   tls:
     - hosts:
-        - synmetrix.contextsuite.dev
+        - PLACEHOLDER_FQDN
       secretName: synmetrix-tls
 ---

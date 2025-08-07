@@ -42,11 +42,20 @@ spec:
         - name: EMAILS_ENABLED
           value: "true"
         - name: SERVER_URL
-          value: https://synmetrix.contextsuite.dev
+          valueFrom:
+            configMapKeyRef:
+              name: synmetrix-config
+              key: APP_FRONTEND_URL
         - name: REDIRECT_URL_SUCCESS
-          value: https://synmetrix.contextsuite.dev/callback
+          valueFrom:
+            configMapKeyRef:
+              name: synmetrix-config
+              key: APP_REDIRECT_URL
         - name: REDIRECT_URL_ERROR
-          value: https://synmetrix.contextsuite.dev/callback
+          valueFrom:
+            configMapKeyRef:
+              name: synmetrix-config
+              key: APP_REDIRECT_URL
         - name: JWT_KEY
           valueFrom:
             secretKeyRef:
