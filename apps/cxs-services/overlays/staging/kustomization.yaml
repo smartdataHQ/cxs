@@ -24,7 +24,7 @@ patches:
     patch: |
       - op: replace
         path: /data/CLICKHOUSE_HOST
-        value: "clickhouse.data"
+        value: "clickhouse.data.svc.cluster.local"
 
   - target:
       kind: Ingress

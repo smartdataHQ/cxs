@@ -8,5 +8,5 @@ data:
   ENV: 'staging'
   BACKEND_BASE_URL: 'https://chat.contextsuite.dev'
   EVENTS_ENDPOINT: 'https://in.contextsuite.dev/api/s/s2s/track'
-  CLICKHOUSE_HOST: 'clickhouse.data'
+  CLICKHOUSE_HOST: 'clickhouse.data.svc.cluster.local'
   SERVICES_BACKEND_URL: 'http://cxsservices.solutions:8088'

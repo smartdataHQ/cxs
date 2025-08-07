@@ -16,7 +16,7 @@ data:
 
   EVENTS_ENDPOINT: "https://in.contextsuite.dev/api/s/s2s/track"
 
-  CLICKHOUSE_HOST: "10.180.122.32"
+  CLICKHOUSE_HOST: "clickhouse.data.svc.cluster.local"
   CLICKHOUSE_PORT: "8123"
   CLICKHOUSE_USER: "default"
 

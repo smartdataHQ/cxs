@@ -32,7 +32,7 @@ data:
   EMBEDDINGS_MODEL: "text-embedding-3-small"
   AWS_ACCESS_KEY_ID: "AKIAXXAZOWGCOUZT3DMM"
 
-  CLICKHOUSE_HOST: "10.180.122.32"
+  CLICKHOUSE_HOST: "clickhouse.data.svc.cluster.local"
   CLICKHOUSE_PORT: "8123"
   CLICKHOUSE_USER: "default"
 
