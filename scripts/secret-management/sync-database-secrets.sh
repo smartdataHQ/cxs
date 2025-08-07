@@ -178,7 +178,7 @@ copy_secret() {
     
     # Get source secret and copy to target namespace
     local temp_file=$(mktemp)
-    
+    log_info "Migrating secret $source_secret to $target_namespace/$target_secret"
     if kubectl --context=$KUBE_CONTEXT get secret "$source_secret" -n "$SOURCE_NAMESPACE" -o yaml > "$temp_file"; then
         # Update namespace and name in the secret YAML
         sed -i.bak -e "s/namespace: $SOURCE_NAMESPACE/namespace: $target_namespace/" \
