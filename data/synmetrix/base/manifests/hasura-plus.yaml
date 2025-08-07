@@ -72,11 +72,6 @@ spec:
           protocol: TCP
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
-        volumeMounts:
-        - mountPath: /etc/ssl/certs/postgres-ca.crt
-          name: postgres-ca-cert
-          readOnly: true
-          subPath: postgres-ca.crt
       dnsPolicy: ClusterFirst
       imagePullSecrets:
       - name: dockerlock
