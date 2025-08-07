@@ -33,16 +33,6 @@ patches:
         value:
           - '--type=full'
           
-
-      # Add synmetrix user
-      - op: add
-        path: /spec/users/-
-        value:
-          name: synmetrix
-          options: SUPERUSER
-          databases:
-            - synmetrix
-      
       # Add synmetrix2 user
       - op: add
         path: /spec/users/-
