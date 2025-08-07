@@ -96,7 +96,7 @@ metadata:
     app.kubernetes.io/component: analytics
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi

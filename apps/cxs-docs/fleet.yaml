@@ -1,0 +1,4 @@
+namespace: solutions
+
+kustomize:
+  dir: ""

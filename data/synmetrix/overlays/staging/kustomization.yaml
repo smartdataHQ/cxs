@@ -6,11 +6,28 @@ namespace: synmetrix
 resources:
   - ../../base
 
+
+patches:
+  - target:
+      kind: Ingress
+      name: synmetrix
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: synmetrix.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: synmetrix.contextsuite.dev
+
 # Staging-specific configMap additions
 configMapGenerator:
   - name: synmetrix-config
     literals:
       - APP_FRONTEND_URL=https://synmetrix.contextsuite.dev
+      - APP_REDIRECT_URL=https://synmetrix.contextsuite.dev/callback
+      - CUBEJS_MYSQL_API_URL=synmetrix.contextsuite.dev:13306
+      - CUBEJS_PG_API_URL=synmetrix.contextsuite.dev:15432
+      - CUBEJS_API_DOCS_URL=http://synmetrix.contextsuite.dev/docs
       - HASURA_GRAPHQL_ENABLE_CONSOLE=true
       - CUBEJS_LOG_LEVEL=debug
       - NODE_ENV=development

@@ -48,8 +48,6 @@ spec:
         app.kubernetes.io/component: actions
     spec:
       serviceAccountName: synmetrix
-      imagePullSecrets:
-      - name: docker-hub-secret
       containers:
         - name: actions
           image: "quicklookup/synmetrix-actions:latest"

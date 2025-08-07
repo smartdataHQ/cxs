@@ -2,7 +2,6 @@ apiVersion: pgv2.percona.com/v2
 kind: PerconaPGCluster
 metadata:
   name: cxs-pg
-  annotations:
 #  finalizers:
 #  - percona.com/delete-pvc
 #  - percona.com/delete-ssl
@@ -43,8 +42,10 @@ spec:
     - name: grafana
       databases:
         - grafana
-    
-
+    - name: synmetrix
+      options: SUPERUSER
+      databases:
+        - synmetrix
   #  users:
   #    - name: rhino
   #      databases:
@@ -163,7 +164,7 @@ spec:
       # expose:
       #   annotations:
       #     tailscale.com/expose: "true"
-      #     tailscale.com/hostname: data-cxs-pg-pgbouncer-dev
+      #     tailscale.com/hostname: data-cxs-pg-pgbouncer
 
 
       #          pool_mode: transaction
@@ -269,8 +270,7 @@ spec:
       manual:
         repoName: repo1
         options:
-          - '--type=diff'
-          - '--log-level-stderr=debug'
+          - --type=full
       repos:
         - name: repo1
           schedules:

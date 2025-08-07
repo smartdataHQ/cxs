@@ -7,14 +7,6 @@ resources:
   - ../../base
 
 # Production-specific configMap additions
-configMapGenerator:
-  - name: synmetrix-config
-    literals:
-      - APP_FRONTEND_URL=https://db.contextsuite.com
-      - HASURA_GRAPHQL_ENABLE_CONSOLE=false
-      - CUBEJS_LOG_LEVEL=warn
-      - NODE_ENV=production
-    behavior: merge
 
 # Production ingress hostname override
 patches:
@@ -24,7 +16,21 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: db.contextsuite.com
+        value: dbx.contextsuite.com
       - op: replace
         path: /spec/tls/0/hosts/0
-        value: db.contextsuite.com
+        value: dbx.contextsuite.com
+configMapGenerator:
+  - name: synmetrix-config
+    literals:
+      - APP_FRONTEND_URL=https://dbx.contextsuite.com
+      - APP_REDIRECT_URL=https://dbx.contextsuite.com/callback
+      - CUBEJS_MYSQL_API_URL=dbx.contextsuite.com:13306
+      - CUBEJS_PG_API_URL=dbx.contextsuite.com:15432
+      - CUBEJS_API_DOCS_URL=http://dbx.contextsuite.com/docs
+      - HASURA_GRAPHQL_ENABLE_CONSOLE=false
+      - CUBEJS_LOG_LEVEL=warn
+      - NODE_ENV=production
+    behavior: merge # Production ingress hostname override
+
+

@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxs-docs
+spec:
+  selector:
+    matchLabels:
+      app: cxs-docs
+      tier: web
+  template:
+    metadata:
+      labels:
+        app: cxs-docs
+        tier: web
+    spec:
+      containers:
+        - name: docs
+          image: quicklookup/cxs-utils:91df8784d7cfc2079c3048267a3db20c9cfecc0c
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 300m
+              memory: 256Mi
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+          env:
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cxs-docs
+                key: OPENAI_API_KEY
+          - name: GEMINI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cxs-docs
+                key: GEMINI_API_KEY
+          - name: AIRTABLE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cxs-docs
+                key: AIRTABLE_API_KEY
+          envFrom:
+            - configMapRef:
+                name: cxs-docs-config
+      imagePullSecrets:
+        - name: dockerlock
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cxs-docs
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cxs-docs
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
