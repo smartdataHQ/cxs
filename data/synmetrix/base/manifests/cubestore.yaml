@@ -80,7 +80,7 @@ metadata:
     app.kubernetes.io/component: cache-store
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi
