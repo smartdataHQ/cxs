@@ -11,6 +11,7 @@ metadata:
     app.kubernetes.io/version: "7.0"
 spec:
   type: ClusterIP
+  clusterIP: None
   ports:
     - name: redis
       port: 6379
@@ -21,7 +22,7 @@ spec:
     app.kubernetes.io/instance: synmetrix
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: synmetrix-redis
   labels:
@@ -31,6 +32,7 @@ metadata:
     app.kubernetes.io/part-of: synmetrix
     app.kubernetes.io/version: "7.0"
 spec:
+  serviceName: synmetrix-redis
   replicas: 1
   selector:
     matchLabels:
@@ -86,24 +88,18 @@ spec:
           volumeMounts:
             - name: redis-data
               mountPath: /data
-      volumes:
-        - name: redis-data
-          persistentVolumeClaim:
-            claimName: synmetrix-redis-pvc
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: synmetrix-redis-pvc
-  labels:
-    app.kubernetes.io/name: redis
-    app.kubernetes.io/instance: synmetrix
-    app.kubernetes.io/component: cache
-    app.kubernetes.io/part-of: synmetrix
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-  storageClassName: longhorn
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-data
+        labels:
+          app.kubernetes.io/name: redis
+          app.kubernetes.io/instance: synmetrix
+          app.kubernetes.io/component: cache
+          app.kubernetes.io/part-of: synmetrix
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: longhorn
