@@ -241,6 +241,7 @@ spec:
         # Configuration for "repo1"
         repo1-retention-full: "4"        # store 4 full backups 
         repo1-retention-full-type: count # expire backups based on backup count
+        repo1-retention-diff: "7"        # store 7 differential backups
       repoHost:
         affinity:
           podAntiAffinity:
