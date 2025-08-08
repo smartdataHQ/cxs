@@ -18,6 +18,16 @@ data:
   N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
   N8N_DISABLE_PRODUCTION_MAIN_PROCESS: "true"
 
+
+  # Allow iframe embedding
+  N8N_FRAME_ANCESTORS: "https://flows.contextsuite.com https://app.contextsuite.com http://localhost:3000"
+  N8N_SECURITY_CSP: "default-src 'self'; frame-ancestors 'self' https://app.contextsuite.com http://localhost:3000"
+  # Disable X-Frame-Options header to allow iframe embedding
+  N8N_DISABLE_FRAME_OPTIONS: "true"
+  # Set Cross-Origin-Resource-Policy to allow cross-origin embedding
+  N8N_CORS_ORIGIN: "https://flows.contextsuite.com https://app.contextsuite.com http://localhost:3000"
+
+
   WEBHOOK_URL: "https://flows.contextsuite.com"
   CODE_DISABLE_STDOUT: "true"
   SKIP_STATISTICS_EVENTS: "true"
