@@ -49,6 +49,36 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: AUTH_SECRET
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: GOOGLE_CLIENT_SECRET
+            - name: LINKEDIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: LINKEDIN_KEY
+            - name: LINKEDIN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: LINKEDIN_SECRET
+            - name: GITHUB_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: GITHUB_KEY
+            - name: GITHUB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: GITHUB_SECRET
           envFrom:
             - configMapRef:
                 name: mimir-chat-config
