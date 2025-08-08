@@ -13,8 +13,21 @@ spec:
         app: cxs-docs
         tier: web
     spec:
+      initContainers:
+        - name: fix-permissions
+          image: busybox
+          command: ['chown', '-R', '1001:65533', '/app/data']
+          volumeMounts:
+            - name: docs-data
+              mountPath: /app/data
+          securityContext:
+            runAsUser: 0
       containers:
         - name: docs
+          command:
+            - sh
+            - -c
+            - /app/init-data.sh && node /app/server.js --hostname 0.0.0.0
           image: quicklookup/cxs-utils:4224
           resources:
             requests:
