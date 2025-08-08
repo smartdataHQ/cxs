@@ -12,5 +12,5 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  # Removed explicit storageClassName to use the default storage class
-  # This makes the PVC more flexible across different Kubernetes environments
+  storageClassName: longhorn
+  # Using the longhorn storage class which is used by other applications in the cluster
