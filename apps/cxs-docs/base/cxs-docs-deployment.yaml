@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: docs
-          image: quicklookup/cxs-utils:91df8784d7cfc2079c3048267a3db20c9cfecc0c
+          image: quicklookup/cxs-utils:4224
           resources:
             requests:
               cpu: 100m
