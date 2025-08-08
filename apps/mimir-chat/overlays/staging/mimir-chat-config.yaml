@@ -6,3 +6,4 @@ metadata:
 data:
   API_ENDPOINT: "https://agents.contextsuite.com"
   WSS_ENDPOINT: "wss://agents.contextsuite.com"
+  BOT_IDENTIFIER: "bonus_tester"
