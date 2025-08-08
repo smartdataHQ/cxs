@@ -44,6 +44,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: CONTEXT_SUITE_JWT_SECRET_KEY
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: AUTH_SECRET
           envFrom:
             - configMapRef:
                 name: mimir-chat-config
