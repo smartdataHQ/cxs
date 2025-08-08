@@ -57,6 +57,14 @@ spec:
           envFrom:
             - configMapRef:
                 name: cxs-docs-config
+          # Mount the persistent volume to /app/data
+          volumeMounts:
+          - name: docs-data
+            mountPath: /app/data
+      volumes:
+      - name: docs-data
+        persistentVolumeClaim:
+          claimName: cxs-docs-pvc
       imagePullSecrets:
         - name: dockerlock
 

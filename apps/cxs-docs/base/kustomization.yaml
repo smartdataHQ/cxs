@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - cxs-docs-deployment.yaml
   - cxs-docs-service.yaml
+  - cxs-docs-pvc.yaml
