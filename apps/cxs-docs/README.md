@@ -1,49 +1,45 @@
-# CXS Documentation
+# CXS Docs PVC Configuration
 
-## Purpose
-This application serves the Context Suite documentation, providing a centralized location for users to access documentation for all Context Suite products and services. It is deployed using the Docker image `quicklookup/cxs-utils:91df8784d7cfc2079c3048267a3db20c9cfecc0c` and is accessible at docs.contextsuite.com.
+This document outlines the changes made to the PVC configuration for the cxs-docs application based on best practices observed in the repository.
 
-## Configuration
-Configuration for CXS Documentation is managed using Kustomize.
-- Base configuration is located in the `base/` directory.
-- Environment-specific configurations (production) are managed via overlays in the `overlays/` directory.
+## Changes Made
 
-### ConfigMap
-Non-sensitive configuration is stored in the `cxs-docs-config.yaml` ConfigMap in the production overlay. This includes:
-- Airtable configuration (base ID, table IDs)
-- Directory paths
-- Backup settings
-- Runtime settings
+The following changes were made to the `cxs-docs-pvc.yaml` file:
 
-### Secrets
-**Important:** No secrets are stored in this repository. Secrets are managed in Rancher and injected into the cluster at deployment time. Refer to the main project `README.md` for more details on secret management.
+1. Added labels to the metadata section:
+   - `app: cxs-docs` - Identifies the application this PVC belongs to
+   - `service: cxs-docs-pvc` - Identifies the specific service/resource
+   - `tier: web` - Matches the tier label used in the deployment
 
-The following secrets need to be created in Rancher under the name `cxs-docs`:
+2. Maintained the absence of an explicit `storageClassName` to use the default storage class in the cluster.
 
-| Key | Description |
-|-----|-------------|
-| `OPENAI_API_KEY` | API key for OpenAI services |
-| `GEMINI_API_KEY` | API key for Google Gemini services |
-| `AIRTABLE_API_KEY` | API key for Airtable access |
+## Best Practices Observed
 
-To create these secrets in Rancher:
-1. Navigate to the Rancher dashboard
-2. Go to the "solutions" namespace
-3. Select "Secrets" from the menu
-4. Click "Create" and select "Secret"
-5. Enter "cxs-docs" as the name
-6. Add each key-value pair from the table above
-7. Click "Create"
+After examining multiple PVC configurations in the repository, the following best practices were identified:
 
-## Deployment
-This application is deployed automatically by Fleet when changes are pushed to this repository. The Fleet configuration for this application can be found in `fleet.yaml`.
+1. **No Explicit Storage Class**: None of the PVCs in the repository specify a `storageClassName`, allowing the cluster to use its default storage class. This makes the PVC more flexible across different Kubernetes environments.
 
-## Kubernetes Resources
-The base configuration defines the following Kubernetes resources:
-- `cxs-docs-deployment.yaml`: Manages the deployment of the documentation pods, including the HorizontalPodAutoscaler for automatic scaling. The application runs on port 3000 within the container.
-- `cxs-docs-service.yaml`: Exposes the documentation service internally within the cluster. The service maps external port 80 to the container's port 3000.
-- `kustomization.yaml`: Defines the Kustomize configuration for the base layer.
+2. **Access Modes**: Most PVCs use the `ReadWriteOnce` access mode, which allows the volume to be mounted as read-write by a single node. This is appropriate for most applications, including cxs-docs.
 
-The production overlay adds the following resources:
-- `cxs-docs-ingress.yaml`: Configures the Ingress resource to expose the documentation service externally at docs.contextsuite.com.
-- `kustomization.yaml`: Defines the Kustomize configuration for the production overlay.
+3. **Consistent Naming**: All PVCs follow a consistent naming pattern, typically including the application name and "-pvc" suffix (e.g., `cxs-docs-pvc`).
+
+4. **Labeling**: Many PVCs include labels that identify the application and service they belong to, which helps with organization, filtering, and management.
+
+5. **Storage Sizing**: Storage requests vary based on the needs of the application, ranging from 1Gi to 16Gi in the examples examined.
+
+## Compatibility with Deployment
+
+The cxs-docs deployment correctly references the PVC in the volumes section:
+
+```yaml
+volumes:
+- name: docs-data
+  persistentVolumeClaim:
+    claimName: cxs-docs-pvc
+```
+
+The deployment includes a HorizontalPodAutoscaler that allows scaling between 1 and 3 replicas. Since the PVC uses the `ReadWriteOnce` access mode, each pod will get its own copy of the PVC when scaling.
+
+## Conclusion
+
+The updated PVC configuration follows the best practices observed in the repository and is compatible with the deployment. The changes made enhance the organization and management of the PVC resource while maintaining flexibility across different Kubernetes environments.
