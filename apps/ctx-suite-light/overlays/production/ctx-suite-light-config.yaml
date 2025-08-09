@@ -11,9 +11,9 @@ data:
 
   # Required Services
   NEXTAUTH_URL: 'https://mobile.contextsuite.com'
-  REACT_APP_GRAPH_API_URL: "app.contextsuite.com/graph"
-  REACT_APP_CONTEXT_API_ENDPOINT: "app.contextsuite.com/context"
-  REACT_APP_STATS_API_ENDPOINT: "app.contextsuite.com/stats"
+  REACT_APP_GRAPH_API_URL: "https://app.contextsuite.com/graph"
+  REACT_APP_CONTEXT_API_ENDPOINT: "https://app.contextsuite.com/context"
+  REACT_APP_STATS_API_ENDPOINT: "https://app.contextsuite.com/stats"
 
   GRAPHQL_SERVER_PORT: '4001'
   GRAPHQL_SERVER_PATH: '/context'
