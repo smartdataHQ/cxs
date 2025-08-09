@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+
+resources:
+  - ctx-suite-light-config.yaml
+  - ctx-suite-light-ingress.yml
