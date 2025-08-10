@@ -35,9 +35,63 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 2
+          env:
+            - name: FACEBOOK_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: FACEBOOK_APP_ID
+            - name: FACEBOOK_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: FACEBOOK_APP_SECRET
+            - name: GITHUB_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GITHUB_KEY
+            - name: GITHUB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GITHUB_SECRET
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GOOGLE_CLIENT_SECRET
+            - name: LINKEDIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: LINKEDIN_KEY
+            - name: LINKEDIN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: LINKEDIN_SECRET
+            - name: TWITTER_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: TWITTER_API_SECRET
+            - name: NEXTAUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: NEXTAUTH_SECRET
+            
           envFrom:
             - configMapRef:
                 name: ctx-suite-light-config
+            - secretRef:
+                name: ctx-suite-light
       imagePullSecrets:
         - name: dockerlock
 ---
