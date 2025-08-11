@@ -6,7 +6,7 @@ metadata:
 data:
   API_ENDPOINT: "https://agents.contextsuite.com"
   WSS_ENDPOINT: "wss://agents.contextsuite.com"
-  BOT_IDENTIFIER: "skattur_agent"
+  BOT_IDENTIFIER: "skattur_agent_dev"
   AUTH_URL: "https://mimir.contextsuite.com"
   AUTH_TRUST_HOST: "true"
   CONTEXTSUITE_ADMIN_URL: "https://admin.contextsuite.com"
