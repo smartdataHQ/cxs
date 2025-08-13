@@ -200,6 +200,21 @@ airflow:
         secretKeyRef:
           name: islandshotel
           key: AIRTABLE_LOCATION_METADATA_TABLE_ID
+    - name: CAREN_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: caren-api-key
+    - name: CAREN_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: caren-username
+    - name: CAREN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: caren-password      
   extraVolumeMounts:
     #- name: airflow-logs      
       #mountPath: /opt/airflow/logs

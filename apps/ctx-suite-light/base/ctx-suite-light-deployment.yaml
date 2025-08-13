@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/ctx-suite-light:e05391d
+          image: quicklookup/ctx-suite-light:3bab5f3
           resources:
             requests:
               cpu: 200m
@@ -46,16 +46,6 @@ spec:
                 secretKeyRef:
                   name: contextsuite
                   key: FACEBOOK_APP_SECRET
-            - name: GITHUB_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: contextsuite
-                  key: GITHUB_KEY
-            - name: GITHUB_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: contextsuite
-                  key: GITHUB_SECRET
             - name: GOOGLE_CLIENT_ID
               valueFrom:
                 secretKeyRef:
