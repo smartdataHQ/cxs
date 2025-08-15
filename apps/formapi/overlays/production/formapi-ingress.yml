@@ -16,5 +16,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - forms.contextsuite.com
+        - forms-api.contextsuite.com
       secretName: star-contextsuite-com
