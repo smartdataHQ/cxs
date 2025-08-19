@@ -215,6 +215,11 @@ airflow:
         secretKeyRef:
           name: airflow
           key: caren-password      
+    - name: BLUE_CAR_COMPETITOR_PRICING_URL
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: blue-car-competitor-pricing-url
   extraVolumeMounts:
     #- name: airflow-logs      
       #mountPath: /opt/airflow/logs
