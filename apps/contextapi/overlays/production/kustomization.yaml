@@ -4,4 +4,3 @@ bases:
 resources:
   - contextapi-config.yaml
   - contextapi-ingress.yml
-  - app-contextsuite-com-certificate.yaml

@@ -3,4 +3,3 @@ kind: Kustomization
 
 resources:
   - nifi-deployment.yaml
-  - nifi-contextsuite-com-certificate.yaml
