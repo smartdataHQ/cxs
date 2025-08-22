@@ -4,3 +4,4 @@ resources:
   - ingress-service.yaml
   - ingress-ingress.yaml
   - ingress-autoscaler.yaml
+  - in-contextsuite-com-certificate.yaml

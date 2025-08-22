@@ -4,3 +4,4 @@ resources:
   - inbox-service.yaml
   - inbox-ingress.yaml
   - inbox-autoscaler.yaml
+  - inbox-contextsuite-com-certificate.yaml

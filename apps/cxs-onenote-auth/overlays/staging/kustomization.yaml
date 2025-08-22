@@ -3,3 +3,4 @@ bases:
 
 resources:
   - cxs-onenote-auth-ingress.yaml
+  - onenote-contextsuite-com-certificate.yaml

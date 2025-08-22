@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: docs-contextsuite-com-cert
+  namespace: solutions
+spec:
+  secretName: docs-contextsuite-com-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+  - "docs.contextsuite.com"

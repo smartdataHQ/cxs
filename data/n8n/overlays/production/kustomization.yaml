@@ -4,3 +4,4 @@ resources:
   - n8n-worker.yaml
   - n8n-config.yaml
   - n8n-ingress.yaml
+  - flows-contextsuite-com-certificate.yaml

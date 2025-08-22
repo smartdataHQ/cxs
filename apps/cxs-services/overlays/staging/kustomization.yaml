@@ -3,3 +3,4 @@ bases:
 
 resources:
   - cxs-services-config.yaml
+  - cxs-contextsuite-com-certificate.yaml

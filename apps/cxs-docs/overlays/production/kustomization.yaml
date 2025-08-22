@@ -7,3 +7,4 @@ bases:
 resources:
   - cxs-docs-ingress.yaml
   - cxs-docs-config.yaml
+  - docs-contextsuite-com-certificate.yaml

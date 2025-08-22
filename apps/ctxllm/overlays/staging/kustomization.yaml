@@ -4,3 +4,4 @@ bases:
 resources:
   - ctxllm-config.yaml
   - ctxllm-ingress.yaml
+  - llm-contextsuite-com-certificate.yaml
