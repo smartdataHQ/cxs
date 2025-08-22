@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nifi-sync-test
+  namespace: pipelines
+data:
+  test-key: "Fleet sync is working!"
+  timestamp: "2025-08-22T22:45:00Z"
