@@ -2,8 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: gpt-chat-web
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: chat.contextsuite.com
@@ -19,4 +17,4 @@ spec:
   tls:
     - hosts:
         - chat.contextsuite.com
-      secretName: chat-contextsuite-com-tls
+      secretName: star-contextsuite-com

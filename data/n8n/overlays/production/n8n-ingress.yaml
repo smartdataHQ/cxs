@@ -3,17 +3,15 @@ kind: Ingress
 metadata:
   name: n8n
   annotations:
-    # DISABLED: configuration-snippet annotation is blocked by nginx ingress admission webhook
-    # nginx.ingress.kubernetes.io/configuration-snippet: |
-    #   # Allow embedding in iframes from your domains
-    #   more_set_headers "X-Frame-Options: ALLOWALL";
-    #   more_set_headers "Content-Security-Policy: default-src 'self'; frame-ancestors 'self' https://flows.contextsuite.com https://app.contextsuite.com http://localhost:3000";
-    #   more_set_headers "Cross-Origin-Resource-Policy: cross-origin";
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      # Allow embedding in iframes from your domains
+      more_set_headers "X-Frame-Options: ALLOWALL";
+      more_set_headers "Content-Security-Policy: default-src 'self'; frame-ancestors 'self' https://flows.contextsuite.com https://app.contextsuite.com http://localhost:3000";
+      more_set_headers "Cross-Origin-Resource-Policy: cross-origin";
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://flows.contextsuite.com,https://app.contextsuite.com,http://localhost:3000"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: flows.contextsuite.com
@@ -43,4 +41,4 @@ spec:
   tls:
     - hosts:
         - flows.contextsuite.com
-      secretName: flows-contextsuite-com-tls
+      secretName: star-contextsuite-com

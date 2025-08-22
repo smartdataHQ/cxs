@@ -2,11 +2,9 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: cxsservices
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
-    - host: cxs.contextsuite.com
+    - host: services.contextsuite.com
       http:
         paths:
           - backend:
@@ -19,4 +17,4 @@ spec:
   tls:
     - hosts:
         - cxs.contextsuite.com
-      secretName: cxs-contextsuite-com-tls
+      secretName: star-contextsuite-com

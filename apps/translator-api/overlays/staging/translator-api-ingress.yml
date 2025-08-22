@@ -4,7 +4,6 @@ metadata:
   name: translator-api
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5m"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: transcribe.contextsuite.com
@@ -20,4 +19,4 @@ spec:
   tls:
     - hosts:
         - transcribe.contextsuite.com
-      secretName: transcribe-contextsuite-com-tls
+      secretName: star-contextsuite-com

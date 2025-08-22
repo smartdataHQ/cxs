@@ -2,8 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: formapi
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: forms-api.contextsuite.com
@@ -18,5 +16,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - forms-api.contextsuite.com
-      secretName: forms-api-contextsuite-com-tls
+        - forms.contextsuite.com
+      secretName: star-contextsuite-com

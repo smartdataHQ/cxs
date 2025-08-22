@@ -2,8 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: cxs-mimir-web
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: agents.contextsuite.com
@@ -19,4 +17,4 @@ spec:
   tls:
     - hosts:
         - agents.contextsuite.com
-      secretName: agents-contextsuite-com-tls
+      secretName: star-contextsuite-com
