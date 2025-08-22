@@ -10,6 +10,7 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET,HEAD,PUT,PATCH,POST,DELETE"
     nginx.ingress.kubernetes.io/cors-allow-headers: "Content-Type, Authorization, x-authorization, x-requested-with"
     nginx.ingress.kubernetes.io/cors-expose-headers: "Access-Control-Allow-Origin"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 
 spec:
   rules:
@@ -26,4 +27,4 @@ spec:
   tls:
     - hosts:
         - admin.contextsuite.com
-      secretName: star-contextsuite-com
+      secretName: admin-contextsuite-com-tls

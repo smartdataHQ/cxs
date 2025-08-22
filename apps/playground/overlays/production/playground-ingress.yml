@@ -8,7 +8,7 @@ metadata:
         # nginx.ingress.kubernetes.io/rewrite-target: /$1
         # cert-manager
         ingress.kubernetes.io/ssl-redirect: "false"
-        #  cert-manager.io/cluster-issuer: clusterissuer-letsencrypt-production
+        cert-manager.io/cluster-issuer: "letsencrypt-prod"
         # CORS
         ## to support both frontend origin and 'localhost', need 'configuration-snippet' implementation here, because 'cors-allow-origin' field doesn't support multiple originss yet.
         #nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -56,4 +56,4 @@ spec:
     tls:
         - hosts:
               - playground.contextsuite.com
-          secretName: star-contextsuite-com
+          secretName: playground-contextsuite-com-tls
