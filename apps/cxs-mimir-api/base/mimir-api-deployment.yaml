@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-mimir-api:197cc6f
+          image: quicklookup/cxs-mimir-api:5e8f4e9
           resources:
             requests:
               cpu: 1000m
