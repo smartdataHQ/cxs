@@ -3,11 +3,12 @@ kind: Ingress
 metadata:
   name: n8n
   annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      # Allow embedding in iframes from your domains
-      more_set_headers "X-Frame-Options: ALLOWALL";
-      more_set_headers "Content-Security-Policy: default-src 'self'; frame-ancestors 'self' https://flows.contextsuite.com https://app.contextsuite.com http://localhost:3000";
-      more_set_headers "Cross-Origin-Resource-Policy: cross-origin";
+    # DISABLED: configuration-snippet annotation is blocked by nginx ingress admission webhook
+    # nginx.ingress.kubernetes.io/configuration-snippet: |
+    #   # Allow embedding in iframes from your domains
+    #   more_set_headers "X-Frame-Options: ALLOWALL";
+    #   more_set_headers "Content-Security-Policy: default-src 'self'; frame-ancestors 'self' https://flows.contextsuite.com https://app.contextsuite.com http://localhost:3000";
+    #   more_set_headers "Cross-Origin-Resource-Policy: cross-origin";
     nginx.ingress.kubernetes.io/cors-allow-origin: "https://flows.contextsuite.com,https://app.contextsuite.com,http://localhost:3000"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"

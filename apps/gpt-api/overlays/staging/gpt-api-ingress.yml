@@ -4,6 +4,7 @@ metadata:
   name: gpt-api
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "5m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: chat.contextsuite.com
@@ -19,4 +20,4 @@ spec:
   tls:
     - hosts:
         - chat.contextsuite.com
-      secretName: star-contextsuite-com
+      secretName: chat-contextsuite-com-tls
