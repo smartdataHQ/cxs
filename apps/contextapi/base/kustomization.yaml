@@ -1,3 +1,6 @@
 resources:
   - contextapi-deployment.yaml
   - contextapi-service.yaml
+  - networkpolicy.yaml # Added this line
+  - contextapi-hpa.yaml
+  - contextapi-servicemonitor.yaml
