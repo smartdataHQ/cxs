@@ -43,9 +43,6 @@ data/{service}/
 │   └── production/
 │       └── kustomization.yaml     # Production: full resources + limits
 ├── fleet.yaml                     # Default Fleet config (dev)
-├── fleet-dev.yaml                 # Dev-specific Fleet targeting
-├── fleet-staging.yaml             # Staging-specific Fleet targeting
-├── fleet-production.yaml          # Production-specific Fleet targeting
 └── README.md                      # Concise service documentation
 ```
 

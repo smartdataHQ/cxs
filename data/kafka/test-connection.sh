@@ -11,11 +11,11 @@ PORT="${REMOTE_KAFKA_PORT:-9092}"
 
 echo "🧪 Testing Kafka connectivity to ${HOST}:${PORT}"
 
-kubectl run -i --rm --tty kafka-test-$(date +%s) \
-  --image=ghcr.io/confluentinc/cp-kafka:7.6.1 \
+kubectl run kafka-test-$(date +%s) \
+  --image=busybox:1.36.1 \
   --restart=Never \
   --namespace=data \
-  --command -- bash -lc "
-  timeout 5 bash -lc '</dev/tcp/${HOST}/${PORT}' && echo '✅ Kafka TCP reachable' || (echo '❌ Kafka not reachable'; exit 1)
-  "
+  --attach \
+  --rm \
+  --command -- sh -lc "nc -z -w 5 ${HOST} ${PORT} && echo '✅ Kafka TCP reachable' || (echo '❌ Kafka not reachable'; exit 1)"
 
