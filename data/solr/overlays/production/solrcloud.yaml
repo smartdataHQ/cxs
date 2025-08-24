@@ -1,0 +1,35 @@
+apiVersion: solr.apache.org/v1beta1
+kind: SolrCloud
+metadata:
+  name: solr
+  namespace: data
+spec:
+  replicas: 3
+  solrImage:
+    repository: solr
+    tag: 9.5.0
+  zookeeperRef:
+    connectionInfo:
+      externalConnectionString: zookeeper.data.svc.cluster.local
+  dataStorage:
+    persistent:
+      reclaimPolicy: Retain
+      pvcTemplate:
+        spec:
+          resources:
+            requests:
+              storage: 50Gi
+  updateStrategy:
+    method: StatefulSet
+  customSolrKubeOptions:
+    podOptions:
+      labels:
+        app: solr
+        app.kubernetes.io/instance: solr
+        env: production
+      resources:
+        requests:
+          cpu: 700m
+          memory: 4Gi
+        limits:
+          memory: 8Gi

@@ -104,6 +104,8 @@ load_env() {
   : "${REMOTE_CLICKHOUSE_HOST:=}"
   : "${REMOTE_CLICKHOUSE_PORT:=9000}"
   : "${REMOTE_NEO4J_URI:=}"               # bolt+s://host:7687
+  : "${REMOTE_SOLR_HOST:=}"
+  : "${REMOTE_SOLR_PORT:=8983}"
 }
 
 

@@ -14,7 +14,7 @@ This document defines how we structure Kubernetes, Kustomize, and Rancher Fleet 
 - Cluster label for Fleet selection: `env=dev|staging|production`
   - Note: Some existing Fleet bundles use `role=production`. We will keep those in place and add new `env`-based targetCustomizations as we migrate. Production stays unchanged until we explicitly switch.
 - Namespaces: keep existing domains (e.g., `api`, `data`, `pipelines`, `ingress`)
-- Resource names: do not suffix object names with `-dev`/`-staging`; differentiate by namespace, labels, and overlay config
+- Resource names: do not suffix object names with `-dev`/`-staging`; differentiate by namespace, labels, and overlay config. Use `env: <dev|staging|production>` and, if needed, `app.kubernetes.io/instance: <service>` for selectors.
 - Common labels (applied via Kustomize):
   - `app: <service-name>`
   - `tier: <api|worker|frontend|...>`
@@ -84,8 +84,12 @@ configMapGenerator:
 - staging/prod: immutable tags (Git SHA or release), `imagePullPolicy: Always`
 
 ## Ingress and service exposure
-- dev: default to port-forwarding for simplicity; optionally enable ingress with local hostnames (`*.localtest.me`, `127.0.0.1.nip.io`) when needed
+- dev: default to port-forwarding for simplicity; optionally enable ingress with local hostnames (`*.localtest.me`, `127.0.0.1.nip.io`) when needed. Dev overlays must expose container ports and define a ClusterIP Service so port-forwarding works out of the box.
 - staging/prod: standard DNS (`app.staging.example.com`, `app.example.com`), TLS via cluster issuer
+
+## Probes policy by environment
+- dev: readiness/liveness probes may be relaxed (higher timeouts/failure thresholds) to avoid false restarts on slow local machines; terminationGracePeriodSeconds may be increased. Prefer stability over strictness.
+- staging/prod: keep strict probes and production-grade timings; failures must surface quickly.
 
 ## Rancher Fleet patterns
 - Each bundle’s `fleet.yaml` defines `targetCustomizations` by environment:
@@ -307,6 +311,8 @@ Typical loop:
 - Centralized logging (Loki) and metrics (Prometheus); dashboards and alerts in Grafana
 - Backup/restore plans for data services with tested runbooks
 - No secrets in git; use Rancher-managed Secrets now; plan ESO later
+- JVM-based services: explicitly set heap via env (e.g., `JAVA_TOOL_OPTIONS` or service-specific like `SOLR_JAVA_MEM`); keep `-Xmx` ≤ ~60% of the container memory limit, and set `-Xms` to match for stability. For dev on Rancher Desktop, start with `-Xms1g -Xmx1g` and requests/limits around `1Gi/2Gi`, then tune as needed.
+- JVM shutdown: increase `terminationGracePeriodSeconds` (e.g., 60s) to allow graceful shutdown and avoid SIGKILL during index flush/close.
 
 ## Data layer HA policy (production)
 - Persistence/data solutions (e.g., PostgreSQL, Kafka, ClickHouse, Solr, Neo4j) must be highly available in production: **minimum 3 nodes**.

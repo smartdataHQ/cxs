@@ -2,7 +2,7 @@
 
 ## Key Principles
 
-These principles are derived from our [First Principles and Directives](first-principles.md):
+These principles are derived from our [First Principles and Directives](first-principles.md) and aligned with our [Kubernetes & GitOps standards](k8s-standards.md):
 
 ### 1. **Abstract Reusable Patterns**
 **Critical:** Keep general information in root documentation, service docs minimal.
@@ -38,11 +38,11 @@ data/{service}/
 │   └── [additional-resources/]    # Optional: backup jobs, etc.
 ├── overlays/                      # Environment-specific overlays
 │   ├── dev/
-│   │   └── kustomization.yaml     # Dev: minimal resources
+│   │   └── kustomization.yaml     # Dev: minimal resources, simple Deployment
 │   ├── staging/
-│   │   └── kustomization.yaml     # Staging: moderate resources
+│   │   └── kustomization.yaml     # Staging: operator/clustered topology when applicable
 │   └── production/
-│       └── kustomization.yaml     # Production: full resources + limits
+│       └── kustomization.yaml     # Production: full HA topology + limits + policies
 ├── fleet.yaml                     # Fleet targeting by env labels
 ├── deploy-dev.sh                  # Developer deployment script
 ├── cleanup-dev.sh                 # Developer cleanup script
@@ -75,6 +75,15 @@ APP_PASSWORD=devpassword
 - `show-config.sh` - Display current configuration
 - `test-connection.sh` - Test service connectivity
 - `cleanup-dev.sh` - Remove development deployment
+
+Dev scripts must:
+- Apply manifests via `kubectl kustomize`/`-k overlays/dev` (no env branching)
+- Be remote-aware: when `REMOTE_*` vars are set, skip local deploy and test the remote endpoint instead
+- Keep tests ephemeral: `kubectl run --rm` with official client images only
+
+Naming guidance:
+- Root flags: `ENABLE_<SOLUTION>=true|false` (e.g., `ENABLE_SOLR=true`)
+- Remote vars per solution: `REMOTE_<SOLUTION>_HOST`, `REMOTE_<SOLUTION>_PORT` (and add others if needed)
 
 #### 3. **Fleet Configurations** (Self-documenting)
 - `fleet.yaml` - Target environments via `env=dev|staging|production` label
@@ -153,6 +162,25 @@ For each data service:
 - Apply overlays via Fleet using `targetCustomizations` (cluster label selectors)
 - Dev scripts are optional helpers for Secrets/testing; they must apply manifests via `kubectl kustomize`/`-k` and avoid environment branching
 
+### Developer cherry-pick (root .env + scripts)
+- Root `.env` controls which solutions to deploy locally via `ENABLE_*` flags
+- Root scripts:
+  - `deploy-all.sh` reads `.env` and calls each solution’s `deploy-dev.sh`
+  - `test-connections.sh` delegates to per-solution `test-connection.sh`
+  - `cleanup-all.sh` delegates to per-solution `cleanup-dev.sh`
+- Solutions must keep their dev scripts idempotent and safe when invoked by the root scripts
+
+Example `.env` fragment:
+```bash
+# === ENABLE SOLUTIONS ===
+ENABLE_SOLR=true
+ENABLE_POSTGRES=false
+
+# === REMOTE ENDPOINTS (skip local deploy, test remote) ===
+REMOTE_SOLR_HOST=solr.shared.dev.example.com
+REMOTE_SOLR_PORT=8983
+```
+
 ### Testing policy (repo-wide)
 - Use ephemeral `kubectl run` tests with official client images; avoid committing extra client libraries
 - Ensure tests clean up (`--rm`) and do not leave running pods
@@ -213,4 +241,48 @@ configMapGenerator:
     behavior: merge
     literals:
       - LOG_LEVEL=debug
+```
+
+### Dev port exposure (required)
+- Dev overlays must expose service ports so developers can connect easily (e.g., via port-forward).
+- Ensure container ports and a ClusterIP Service are defined in the base; dev overlay inherits them.
+
+### JVM services (Solr/Java-based) guidance
+- Set explicit heap via env (e.g., `SOLR_JAVA_MEM`): start with `-Xms1g -Xmx1g` for dev on Rancher Desktop.
+- Align container resources: requests `~1Gi`, limits `~2Gi` (tune per service).
+- Relax dev probes (timeouts/failure thresholds) and increase `terminationGracePeriodSeconds` (~60s) to avoid false restarts on slower machines.
+- Keep staging/production probes strict and pin images to stable versions.
+
+Example (in base):
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: {service}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: {service}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {service}
+spec:
+  template:
+    spec:
+      containers:
+        - name: {service}
+          image: {image}
+          ports:
+            - containerPort: 8080
+```
+
+Then developers can run:
+```bash
+kubectl port-forward svc/{service} 8080:8080 -n <namespace>
 ```

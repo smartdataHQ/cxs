@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: solr-allow-from-approved
+  namespace: data
+spec:
+  podSelector:
+    matchLabels:
+      app: solr
+      app.kubernetes.io/instance: solr
+      env: staging
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          allow-solr: "true"
+    ports:
+    - protocol: TCP
+      port: 8983
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 8983
+

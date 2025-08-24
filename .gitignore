@@ -2,3 +2,4 @@
 **/charts/*
 *.env
 /.idea/
+/.vscode/settings.json

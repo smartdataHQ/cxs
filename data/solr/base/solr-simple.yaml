@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: solr
+  labels:
+    app: solr
+spec:
+  selector:
+    matchLabels:
+      app: solr
+  template:
+    metadata:
+      labels:
+        app: solr
+        app.kubernetes.io/instance: solr
+    spec:
+      enableServiceLinks: false
+      securityContext:
+        fsGroup: 8983
+        runAsNonRoot: true
+        runAsUser: 8983
+        runAsGroup: 8983
+      containers:
+      - name: solr
+        image: solr:latest
+        command: ["solr-foreground"]
+        ports:
+        - containerPort: 8983
+        readinessProbe:
+          httpGet:
+            path: /solr/admin/info/system
+            port: 8983
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 5
+        livenessProbe:
+          httpGet:
+            path: /solr/admin/info/system
+            port: 8983
+          initialDelaySeconds: 20
+          timeoutSeconds: 5
+          periodSeconds: 20
+          failureThreshold: 5
+        volumeMounts:
+        - name: solr-data
+          mountPath: /var/solr
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - name: solr-data
+        persistentVolumeClaim:
+          claimName: solr-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: solr-pvc
+  labels:
+    app: solr
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: solr
+  labels:
+    app: solr
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8983
+    targetPort: 8983
+    protocol: TCP
+  selector:
+    app: solr

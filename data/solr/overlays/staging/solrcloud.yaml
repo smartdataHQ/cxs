@@ -1,18 +1,16 @@
 apiVersion: solr.apache.org/v1beta1
 kind: SolrCloud
 metadata:
-  name: cxs-sl
+  name: solr
+  namespace: data
 spec:
-  replicas: 3
+  replicas: 2
   solrImage:
+    repository: solr
     tag: 9.5.0
   zookeeperRef:
     connectionInfo:
       externalConnectionString: zookeeper.data.svc.cluster.local
-  scaling:
-    vacatePodsOnScaleDown: true
-    populatePodsOnScaleUp: true
-  solrJavaMem: -Xms2048M -Xmx8192M
   dataStorage:
     persistent:
       reclaimPolicy: Retain
@@ -25,19 +23,13 @@ spec:
     method: StatefulSet
   customSolrKubeOptions:
     podOptions:
+      labels:
+        app: solr
+        app.kubernetes.io/instance: solr
+        env: staging
       resources:
         requests:
-          cpu: 700m
-          memory: 4Gi
+          cpu: 500m
+          memory: 2Gi
         limits:
-          memory: 16Gi
-      livenessProbe:
-        httpGet:
-          scheme: HTTP
-          path: /solr/admin/customliveness
-          port: 8983
-      readinessProbe:
-        httpGet:
-          scheme: HTTP
-          path: /solr/admin/customreadiness
-          port: 8983
+          memory: 4Gi

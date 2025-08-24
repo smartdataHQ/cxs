@@ -1,22 +1,21 @@
-defaultNamespace: data
-
+namespace: data
 
 targetCustomizations:
+  - name: dev
+    clusterSelector:
+      matchLabels:
+        env: dev
+    kustomize:
+      dir: overlays/dev
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        env: staging
+    kustomize:
+      dir: overlays/staging
   - name: production
     clusterSelector:
       matchLabels:
-        role: unused
+        env: production
     kustomize:
       dir: overlays/production
-
-
-helm:
-  releaseName: solr-operator
-  chart: solr-operator
-  repo: https://solr.apache.org/charts
-  version: 0.8.1
-
-  values:
-    zookeeper-operator:
-      install: false
-      use: true

@@ -1,0 +1,21 @@
+defaultNamespace: solr-operator
+
+helm:
+  repo: https://solr.apache.org/charts
+  chart: solr-operator
+  version: 0.8.1
+  releaseName: solr-operator
+  values:
+    watchNamespaces:
+      - data
+
+targetCustomizations:
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        env: staging
+  - name: production
+    clusterSelector:
+      matchLabels:
+        env: production
+

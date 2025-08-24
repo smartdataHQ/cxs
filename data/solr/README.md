@@ -1,55 +1,43 @@
-# Apache Solr
+# Solr (dev/staging/production)
 
 ## Purpose
-Provides an open-source enterprise search platform built on Apache Lucene. Used for full-text search capabilities and indexing large volumes of data. This deployment is managed using the Solr Operator.
+Search platform for the data layer. Dev uses a simple Deployment; staging/prod use SolrCloud via the operator.
 
-## Configuration
-- **Operator Based:** SolrCloud clusters are defined and configured via a `SolrCloud` Custom Resource (CR) managed by the Solr Operator.
-- **Instance Configuration:**
-    - `solr.yaml`: May contain the base `SolrCloud` Custom Resource definition or other core configurations for the Solr cluster.
-    - `solr.prod.yaml`: Likely an environment-specific values file or patch for production, possibly used by Kustomize or directly by Fleet.
-- **Kustomize:** `kustomization.yaml` suggests that Kustomize is used to manage environment-specific configurations or customizations for the Solr deployment.
-- **Secrets:** Any sensitive information (e.g., credentials for accessing Solr if security features are enabled) should be managed in Rancher and injected at deployment time. Refer to the main project `README.md`.
+## Dev usage (Rancher Desktop)
+```bash
+cd data/solr
+./deploy-dev.sh
+./test-connection.sh
+./show-config.sh
+# Expose locally (required for dev):
+kubectl port-forward svc/solr 8983:8983 -n data
+# Then open http://localhost:8983/solr
+```
 
-## Deployment and Management
-- **Fleet:** Solr is deployed and managed via Fleet, as specified in `fleet.yaml`. Fleet likely applies the Kustomize configurations which would include the Solr Operator Custom Resources.
-- **Solr Operator:** The operator handles the lifecycle management of SolrCloud clusters. The original notes section contains commands for installing the operator.
+## Remote usage
+Set in root `.env` to point to a remote Solr instead of local deploy:
+```bash
+ENABLE_SOLR=false
+REMOTE_SOLR_HOST=solr.shared.dev.example.com
+REMOTE_SOLR_PORT=8983
+```
 
-## Backup and Restore
-[Details on backup and restore procedures for Solr need to be added. This typically involves:
-- Using Solr's Collections API for taking snapshots of collections.
-- Backing up the underlying PersistentVolumes where Solr data (indexes, transaction logs) is stored.
-- If an external Zookeeper is used, backing up its data as well.]
+## Environments
+- dev: single replica, imagePullPolicy IfNotPresent, small PVC, capped JVM
+- staging: SolrCloud via operator, pinned image, resources
+- production: SolrCloud via operator (3+ nodes), pinned image, resources
 
-## Key Files
-- `fleet.yaml`: Fleet configuration for Solr deployment.
-- `solr.yaml`: Potentially contains the base `SolrCloud` Custom Resource definition or other core Solr configurations.
-- `solr.prod.yaml`: Environment-specific values or patches for the Solr deployment.
-- `kustomization.yaml`: Kustomize configuration for managing Solr resources.
-- `README.md`: This file.
+### Dev stability notes
+- Probes are intentionally relaxed in dev to prevent restarts on slow local machines (higher timeouts/failure thresholds; longer termination grace).
+- JVM defaults increased for dev to reduce OOM/restarts: `SOLR_JAVA_MEM="-Xms1g -Xmx1g"`, container requests/limits set to `1Gi/2Gi`.
+- Staging and production keep stricter probes and timings. See `docs/k8s-standards.md` → Probes policy by environment.
 
-## Original Notes (for reference)
-The following commands and links were in the previous version of this README, related to operator installation:
+## Fleet
+`fleet.yaml` targets overlays by cluster label `env=dev|staging|production`.
 
-- **Links:**
-    - https://artifacthub.io/packages/helm/apache-solr/solr?modal=install
-    - https://apache.github.io/solr-operator/docs/running-the-operator
-    - https://apache.github.io/solr-operator/docs/solr-cloud/solr-cloud-crd.html#override-built-in-solr-configuration-files
-    - https://solr.apache.org/operator/articles/explore-v030-gke.html (Older version link)
+See `docs/k8s-standards.md` for environment policies (probes, JVM sizing, image tags) and `docs/migration-template.md` for repo structure guidelines.
 
-- **Operator Installation (v0.8.0 example):**
-    ```bash
-    helm repo add apache-solr https://solr.apache.org/charts
-    helm repo update
-    kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.8.0/all-with-dependencies.yaml -n data
-    helm install solr-operator apache-solr/solr-operator --version 0.8.0 -n data
-    ```
-
-- **Older Operator Installation (v0.3.0 example):**
-    ```bash
-    # https://solr.apache.org/operator/articles/explore-v030-gke.html (Link for context)
-    helm repo add apache-solr https://solr.apache.org/charts
-    helm repo update
-    kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.3.0/all-with-dependencies.yaml
-    helm upgrade --install solr-operator apache-solr/solr-operator --version 0.3.0
-    ```
+See also:
+- docs/migration-template.md
+- docs/k8s-standards.md
+- docs/solution-version-policy.md
