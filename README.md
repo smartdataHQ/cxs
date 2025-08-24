@@ -1,10 +1,10 @@
-# Quick Lookup and Context Suite Deployment
+# CXS Platform GitOps Deployment
 
 This repository contains the configuration for our Kubernetes clusters and the services that run on them. We utilize a GitOps approach, where this repository is the single source of truth for our infrastructure and application deployments.
 
 ## Project Purpose and Architecture
 
-The primary purpose of this project is to manage the deployment and configuration of the **Quick Lookup and Context Suite** applications and their associated backend services. Our architecture relies on the following key technologies:
+The primary purpose of this project is to manage the deployment and configuration of platform solutions and their associated backend services. Our architecture relies on the following key technologies:
 
 *   **Kubernetes:** An open-source system for automating deployment, scaling, and management of containerized applications.
 *   **Rancher:** A platform for managing multiple Kubernetes clusters. We use Rancher to oversee all our clusters, regardless of the underlying cloud provider.
@@ -27,19 +27,14 @@ The overall workflow is as follows:
 - [Monitoring](#monitoring)
 - [Data Storage](#data-storage)
 - [Authentication](#authentication)
+- [Version Policy](#version-policy)
+- [Root-Level Deployment System](#root-level-deployment-system)
+- [First Principles and Directives](#first-principles-and-directives)
 - [Systems involved and their roles](#systems-involved-and-their-roles)
   - [Github](#github)
   - [Rancher](#rancher)
   - [Docker Hub](#docker-hub)
-- [Applications included in repo](#applications-included-in-repo)
-  - [Context Suite](#context-suite)
-    - [The Client Application](#the-client-application)
-    - [The Context API](#the-context-api)
-  - [Quick Lookup](#quick-lookup)
-    - [The Graph API](#the-graph-api)
-    - [The Bestlist](#the-bestlist)
-  - [Self Services Portal](#self-services-portal)
-  - [The GraphQL Playground](#the-graphql-playground)
+  
 
 ### IMPORTANT!
 **No secrets are stored in this repo. NONE AT ALL!**</br>
@@ -59,13 +54,56 @@ This repository is organized as follows:
 
 *   `README.md`: This file, providing an overview of the project.
 *   `VPN.md`: Documentation related to VPN setup using Tailscale.
-*   `apps/`: Contains the Kubernetes manifests (deployments, services, etc.) and Fleet configuration for all our applications (e.g., Context API, Context Suite, Quick Lookup components). Each application typically has a `base/` directory for common Kustomize configurations and an `overlays/` directory for environment-specific configurations (e.g., `production`, `staging`).
+*   `apps/`: Contains the Kubernetes manifests (deployments, services, etc.) and Fleet configuration for application solutions. Each solution typically has a `base/` directory for common Kustomize configurations and an `overlays/` directory for environment-specific configurations (e.g., `production`, `staging`).
 *   `authentication/`: Configuration related to authentication mechanisms, currently housing Tailscale setup via Fleet.
 *   `data/`: Contains configurations for our data stores and related services, such as ClickHouse, Kafka, Neo4j, PostgreSQL, Solr, and object storage mappings (e.g., `c00dbmappings` for S3). It also includes documentation and deployment files for these services.
 *   `db_restore/`: Scripts and configuration files related to database restore procedures.
 *   `monitoring/`: Configuration for our monitoring stack, including Grafana for dashboards and alerting, Loki for log aggregation, and Prometheus service monitors.
 *   `operators/`: Kubernetes operators that extend the functionality of our clusters, such as Cert-Manager for managing TLS certificates and OpenTelemetry (otel) for observability.
 *   `pipelines/`: Configuration for data pipelines and workflow automation tools like Apache Airflow and Apache NiFi.
+*   `FIRST_PRINCIPLES.md`: Core principles and directives that guide all technical decisions and implementations.
+
+## Environments: dev, staging, production
+
+We maintain three variants of the same tech stack with consistent patterns across environments. Development is optimized for Rancher Desktop, while staging and production follow hardened best practices.
+
+### dev (Rancher Desktop)
+- Target runtime: Rancher Desktop with containerd
+- Overlays: `overlays/dev` for each solution
+- Image policy: `imagePullPolicy: Never` for local images; tags like `dev-latest`
+- Scale: single replica, minimal resources
+- Access: port-forward by default; optional dev ingress using `*.localtest.me`
+- Secrets: create local K8s Secrets from `.env.local` (no secrets in git)
+
+### staging
+- Mirrors production topology at smaller scale
+- Image policy: immutable, pinned tags; `imagePullPolicy: Always`
+- TLS and ingress on staging subdomains
+- Uses Rancher-managed Secrets (ESO adoption planned)
+
+### production
+- Pinned, immutable image tags
+- Resource requests/limits and autoscaling
+- Readiness/liveness probes; PodSecurity, NetworkPolicies
+- Encrypted secrets, TLS everywhere, backups/restore procedures
+- Strict RBAC and change controls
+
+### Safety rails
+- Cluster labels: `env=dev|staging|production` and Fleet `targetCustomizations` ensure overlays deploy only to intended clusters
+- Protected branches and reviews required for staging/production changes
+
+Note: Root-level scripts are intended for dev on Rancher Desktop. Staging and production are applied by Fleet via environment overlays.
+
+## Refactor plan (2025): one solution at a time
+
+We are refactoring solutions incrementally to the tri-environment pattern. We will migrate one solution at a time, while keeping staging and production requirements in mind from the outset.
+
+High-level steps per solution:
+- Create/update `base/` to be environment-agnostic
+- Add `overlays/dev|staging|production` with appropriate scaling, tags, and policies
+- Extend `fleet.yaml` with `targetCustomizations` for env selectors
+- Provide `.env.example`, `deploy-dev.sh`, `test-connection.sh`, `cleanup-dev.sh`
+- Validate with Rancher Desktop (dev) and a staging cluster before promoting
 
 ## Development Environment and Contribution
 
@@ -98,6 +136,24 @@ When changes are merged into the main branch of this repository:
 1.  Fleet detects the changes.
 2.  Fleet processes the relevant Helm charts, Kustomize overlays, and Kubernetes manifests.
 3.  Fleet applies these configurations to the designated Kubernetes clusters, ensuring the deployed state matches the state defined in Git.
+
+### Deployment strategy: Kustomize-first
+- Author resources in `base/` with environment-agnostic manifests.
+- Apply environment differences only via `overlays/dev|staging|production`.
+- Use Fleet `targetCustomizations` to select overlays by cluster labels for staging/production.
+- Keep shell scripts as thin dev helpers (secrets, local testing, port-forwarding).
+- No env-specific imperative logic in scripts; use `kubectl kustomize` / `-k` exclusively for apply.
+
+### Testing policy: minimal tooling
+- Prefer ephemeral tests using `kubectl run` with official images (e.g., `postgres:16-alpine`) to verify connectivity.
+- Do not add client libraries/binaries to this repository.
+- Per-solution `test-connection.sh` owns its test; the root `test-connections.sh` only delegates.
+- Always use `--rm` for ephemeral test pods so they are removed automatically when tests complete.
+
+### Data layer high-availability (production)
+- For persistence/data solutions (databases, queues, search, etc.), production must be highly available: **3 or more nodes is the bare minimum**.
+- Achieve HA using the appropriate technology (operators like Percona/Crunchy for PostgreSQL, native clustering for Kafka/Solr, or managed services). Do not scale a single-container `Deployment` for stateful HA.
+- Dev uses a simple single-instance container for simplicity; staging mirrors production patterns at smaller scale; production enforces HA, pinned images, and strict policies.
 
 ## Monitoring
 
@@ -136,8 +192,57 @@ Primary authentication and secure access to our internal resources and clusters 
 
 Refer to the `VPN.md` file for detailed instructions on Tailscale setup and route management.
 
+## Version Policy
+
+All development instances of solutions in the CXS platform use the latest stable version of their underlying technologies to ensure developers are working with up-to-date features and security patches. See `docs/solution-version-policy.md`.
+
+## Root-Level Deployment System
+
+We have implemented a "Super Simple Docker-Compose" for Kubernetes approach that enables frictionless developer onboarding and service orchestration. This system provides:
+
+*   **Single Entry Point:** One `.env` file and one script at the root to deploy any combination of services
+*   **Service Cherry-Picking:** Enable/disable entire services via simple flags in the root `.env` file
+*   **Minimal Configuration:** Only essential settings in root `.env`, everything else uses sane defaults
+*   **Progressive Expansion:** Start simple, add more services over time as they're migrated
+*   **Backwards Compatibility:** Existing individual service deployments still work
+
+For details on this system, see [ROOT_DEPLOYMENT_SYSTEM.md](ROOT_DEPLOYMENT_SYSTEM.md).
+
+### Root .env contract (dev-only)
+The root `.env` enables cherry-picking services and sets global dev passwords. It is parsed by a shared loader that also reads `.env.local` for developer overrides.
+
+Order of precedence:
+1. Defaults in loader
+2. Values from `.env`
+3. Overrides from `.env.local`
+
+Keys:
+- `ENABLE_*` service toggles (e.g., `ENABLE_POSTGRES=true`)
+- `GLOBAL_ADMIN_PASSWORD`, `GLOBAL_APP_PASSWORD` (used by services as defaults)
+ - Optional remote endpoints (prefer remote over local deploys/tests when set):
+   - `REMOTE_POSTGRES_HOST`, `REMOTE_POSTGRES_PORT`, `REMOTE_POSTGRES_USER`, `REMOTE_POSTGRES_PASSWORD`
+   - `REMOTE_KAFKA_BROKERS` (comma-separated), `REMOTE_CLICKHOUSE_HOST`, `REMOTE_CLICKHOUSE_PORT`, `REMOTE_NEO4J_URI`
+
+Service-specific overrides can be defined in local service `.env` files if needed, but services should prefer the global values for simplicity.
+
+#### Remote services (dev convenience)
+Developers can point apps to shared remote databases/queues by setting the `REMOTE_*` variables above. When a remote is configured, local deployment for that service is skipped, and test scripts validate against the remote endpoint instead.
+
+Example:
+```bash
+ENABLE_POSTGRES=false
+REMOTE_POSTGRES_HOST=db.dev.example.com
+REMOTE_POSTGRES_PORT=5432
+REMOTE_POSTGRES_USER=postgres
+REMOTE_POSTGRES_PASSWORD=changeme
+```
+
+## First Principles and Directives
+
+The fundamental principles and directives that guide the design, development, and maintenance of the CXS platform are documented in [FIRST_PRINCIPLES.md](FIRST_PRINCIPLES.md). This document outlines the core first principles including Simplicity Above All, Developer Experience First, Progressive Enhancement, Backwards Compatibility, and Declarative Infrastructure.
+
 ## Systems involved and their roles
-The following systems are involved in deploying Quick Lookup and Context Suite services.
+The following systems are involved in deploying platform services.
 
 ### Github
 This repository is stored on Github and contains all configuration for the services and applications.
@@ -173,7 +278,7 @@ This section was previously in the README, providing instructions for mounting S
 # VPN Access to the Cluster
 This section was previously in the README. For current VPN information, please refer to the [Authentication](#authentication) section and the `VPN.md` file.
 
- - See [kubevpn](https://github.com/kubenetworks/kubevpn)
+ - See [kubevpn](https://github.com/kubenetworks/kubevpn/releases)
  - [Install client](https://github.com/kubenetworks/kubevpn/releases)
  - make the script executable: `chmod +x Download/kubevpn.sh`
  - Login and download KubeConfig from the [CxS Rancher](https://ops.quicklookup.com/)
@@ -181,22 +286,4 @@ This section was previously in the README. For current VPN information, please r
  - disconnect: `kubevpn/bin/kubevpn disconnect`
 
 
-# Applications included in repo
-
-This section lists the high-level applications managed in this repository. More detailed information about each application, including its specific purpose, configuration, and Kubernetes resources, can be found in the `README.md` file within its respective directory under `apps/`.
-
-## Context Suite
-
-### The Client Application
-
-### The Context API
-
-## Quick Lookup
-
-### The Graph API
-
-### The Bestlist
-
-## Self Services Portal
-
-## The GraphQL Playground
+ 

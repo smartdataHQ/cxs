@@ -1,0 +1,73 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: data
+
+resources:
+  - ../../base
+
+nameSuffix: -staging
+
+labels:
+  - includeSelectors: true
+    pairs:
+      environment: staging
+      app.kubernetes.io/instance: postgres-staging
+
+# Simple PostgreSQL patches for staging environment
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: postgres
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: Always
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: postgres:16.2-alpine
+      - op: add
+        path: /spec/template/spec/containers/0/readinessProbe
+        value:
+          exec:
+            command: ["/bin/sh","-c","pg_isready -U $POSTGRES_USER"]
+          initialDelaySeconds: 5
+          periodSeconds: 10
+      - op: add
+        path: /spec/template/spec/containers/0/livenessProbe
+        value:
+          exec:
+            command: ["/bin/sh","-c","pg_isready -U $POSTGRES_USER"]
+          initialDelaySeconds: 10
+          periodSeconds: 20
+      - op: add
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            memory: "1Gi"
+  - target:
+      version: v1
+      kind: PersistentVolumeClaim
+      name: postgres-pvc
+    patch: |-
+      - op: replace
+        path: /spec/resources/requests/storage
+        value: 20Gi
+  - target:
+      group: apps
+      version: v1
+      kind: Deployment
+      name: postgres
+    patch: |-
+      - op: remove
+        path: /spec/template/spec/containers/0/volumeMounts/1
+      - op: remove
+        path: /spec/template/spec/volumes/1

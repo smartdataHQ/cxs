@@ -1,10 +1,21 @@
-#  This file and all contents in it are OPTIONAL.
-
-# The default namespace to apply to resources that are namespaced
-# but do not specify a namespace.  In this example no resources
-# are configured with a namespace so this default will apply
 namespace: data
 
-kustomize:
-  # To use a kustomization.yaml different from the one in the root folder
-  dir: ""
+targetCustomizations:
+  - name: dev
+    clusterSelector:
+      matchLabels:
+        env: dev
+    kustomize:
+      dir: overlays/dev
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        env: staging
+    kustomize:
+      dir: overlays/staging
+  - name: production
+    clusterSelector:
+      matchLabels:
+        env: production
+    kustomize:
+      dir: overlays/production

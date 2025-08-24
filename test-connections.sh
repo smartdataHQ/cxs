@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Test connections to deployed CXS services
+
+set -euo pipefail
+
+echo "🧪 Testing CXS Service Connections"
+echo "================================="
+
+# Load configuration
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/scripts/lib/load-env.sh"
+load_env ".env"
+
+# Test service connections (delegate to per-solution tests)
+if { [ -n "${REMOTE_POSTGRES_HOST}" ] || [ "${ENABLE_POSTGRES:-false}" = "true" ]; } \
+   && [ -d "data/postgres" ] && [ -f "data/postgres/test-connection.sh" ]; then
+  echo "🔌 Testing PostgreSQL connectivity..."
+  (cd data/postgres && ./test-connection.sh)
+  echo ""
+fi
+
+if [ "${ENABLE_CLICKHOUSE:-false}" = "true" ] && [ -d "data/clickhouse" ] && [ -f "data/clickhouse/test-connection.sh" ]; then
+    echo "🔌 Testing ClickHouse connection..."
+    cd data/clickhouse
+    ./test-connection.sh
+    cd ../..
+    echo ""
+fi
+
+if [ "${ENABLE_NEO4J:-false}" = "true" ] && [ -d "data/neo4j" ] && [ -f "data/neo4j/test-connection.sh" ]; then
+    echo "🔌 Testing Neo4j connection..."
+    cd data/neo4j
+    ./test-connection.sh
+    cd ../..
+    echo ""
+fi
+
+if [ "${ENABLE_KAFKA:-false}" = "true" ] && [ -d "data/kafka" ] && [ -f "data/kafka/test-connection.sh" ]; then
+    echo "🔌 Testing Kafka connection..."
+    cd data/kafka
+    ./test-connection.sh
+    cd ../..
+    echo ""
+fi
+
+if [ "${ENABLE_SOLR:-false}" = "true" ] && [ -d "data/solr" ] && [ -f "data/solr/test-connection.sh" ]; then
+    echo "🔌 Testing Solr connection..."
+    cd data/solr
+    ./test-connection.sh
+    cd ../..
+    echo ""
+fi
+
+echo "✅ Connection testing complete!"
