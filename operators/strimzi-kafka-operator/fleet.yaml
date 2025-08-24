@@ -1,0 +1,21 @@
+defaultNamespace: strimzi-system
+
+helm:
+  repo: https://strimzi.io/charts/
+  chart: strimzi-kafka-operator
+  version: 0.41.0
+  releaseName: strimzi-kafka-operator
+  values:
+    watchNamespaces:
+      - data
+
+targetCustomizations:
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        env: staging
+  - name: production
+    clusterSelector:
+      matchLabels:
+        env: production
+

@@ -36,7 +36,8 @@ if [ "${ENABLE_NEO4J:-false}" = "true" ] && [ -d "data/neo4j" ] && [ -f "data/ne
     echo ""
 fi
 
-if [ "${ENABLE_KAFKA:-false}" = "true" ] && [ -d "data/kafka" ] && [ -f "data/kafka/test-connection.sh" ]; then
+if { [ -n "${REMOTE_KAFKA_HOST:-}" ] || [ -n "${REMOTE_KAFKA_BROKERS:-}" ] || [ "${ENABLE_KAFKA:-false}" = "true" ]; } \
+   && [ -d "data/kafka" ] && [ -f "data/kafka/test-connection.sh" ]; then
     echo "🔌 Testing Kafka connection..."
     cd data/kafka
     ./test-connection.sh
@@ -44,7 +45,8 @@ if [ "${ENABLE_KAFKA:-false}" = "true" ] && [ -d "data/kafka" ] && [ -f "data/ka
     echo ""
 fi
 
-if [ "${ENABLE_SOLR:-false}" = "true" ] && [ -d "data/solr" ] && [ -f "data/solr/test-connection.sh" ]; then
+if { [ -n "${REMOTE_SOLR_HOST:-}" ] || [ "${ENABLE_SOLR:-false}" = "true" ]; } \
+   && [ -d "data/solr" ] && [ -f "data/solr/test-connection.sh" ]; then
     echo "🔌 Testing Solr connection..."
     cd data/solr
     ./test-connection.sh

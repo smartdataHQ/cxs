@@ -76,20 +76,20 @@ load_env() {
   local local_file="$env_dir/.env.local"
   parse_file "$local_file"
 
-  # Global defaults (dev)
+  # Global defaults (dev) — enable all services by default; override in .env as needed
   : "${ENABLE_POSTGRES:=true}"
-  : "${ENABLE_CLICKHOUSE:=false}"
-  : "${ENABLE_NEO4J:=false}"
-  : "${ENABLE_KAFKA:=false}"
-  : "${ENABLE_SOLR:=false}"
+  : "${ENABLE_CLICKHOUSE:=true}"
+  : "${ENABLE_NEO4J:=true}"
+  : "${ENABLE_KAFKA:=true}"
+  : "${ENABLE_SOLR:=true}"
 
-  : "${ENABLE_CONTEXTAPI:=false}"
-  : "${ENABLE_CXSSERVICES:=false}"
-  : "${ENABLE_INBOX:=false}"
+  : "${ENABLE_CONTEXTAPI:=true}"
+  : "${ENABLE_CXSSERVICES:=true}"
+  : "${ENABLE_INBOX:=true}"
 
-  : "${ENABLE_GRAFANA:=false}"
-  : "${ENABLE_LOKI:=false}"
-  : "${ENABLE_PROMETHEUS:=false}"
+  : "${ENABLE_GRAFANA:=true}"
+  : "${ENABLE_LOKI:=true}"
+  : "${ENABLE_PROMETHEUS:=true}"
 
   : "${GLOBAL_ADMIN_PASSWORD:=devpassword}"
   : "${GLOBAL_APP_PASSWORD:=devpassword}"
@@ -100,7 +100,9 @@ load_env() {
   : "${REMOTE_POSTGRES_USER:=postgres}"
   : "${REMOTE_POSTGRES_PASSWORD:=}"
 
-  : "${REMOTE_KAFKA_BROKERS:=}"           # comma-separated host:port
+  : "${REMOTE_KAFKA_HOST:=}"
+  : "${REMOTE_KAFKA_PORT:=9092}"
+  : "${REMOTE_KAFKA_BROKERS:=}"           # optional: comma-separated host:port (alternative)
   : "${REMOTE_CLICKHOUSE_HOST:=}"
   : "${REMOTE_CLICKHOUSE_PORT:=9000}"
   : "${REMOTE_NEO4J_URI:=}"               # bolt+s://host:7687

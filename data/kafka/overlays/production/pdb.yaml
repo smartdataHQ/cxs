@@ -1,0 +1,13 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: kafka-pdb
+  namespace: data
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      strimzi.io/name: kafka-kafka
+      app.kubernetes.io/instance: kafka
+      env: production
+

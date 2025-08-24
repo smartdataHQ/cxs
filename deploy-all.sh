@@ -32,8 +32,16 @@ else
 fi
 [ "${ENABLE_CLICKHOUSE:-false}" = "true" ] && echo "  ✅ ClickHouse" || echo "  ❌ ClickHouse (skipped)"
 [ "${ENABLE_NEO4J:-false}" = "true" ] && echo "  ✅ Neo4j" || echo "  ❌ Neo4j (skipped)"
-[ "${ENABLE_KAFKA:-false}" = "true" ] && echo "  ✅ Kafka" || echo "  ❌ Kafka (skipped)"
-[ "${ENABLE_SOLR:-false}" = "true" ] && echo "  ✅ Solr" || echo "  ❌ Solr (skipped)"
+if [ -n "${REMOTE_KAFKA_HOST:-}" ] || [ -n "${REMOTE_KAFKA_BROKERS:-}" ]; then
+    echo "  🔗 Kafka (remote: ${REMOTE_KAFKA_HOST:-${REMOTE_KAFKA_BROKERS}})"
+else
+    [ "${ENABLE_KAFKA:-false}" = "true" ] && echo "  ✅ Kafka" || echo "  ❌ Kafka (skipped)"
+fi
+if [ -n "${REMOTE_SOLR_HOST:-}" ]; then
+    echo "  🔗 Solr (remote: ${REMOTE_SOLR_HOST}:${REMOTE_SOLR_PORT})"
+else
+    [ "${ENABLE_SOLR:-false}" = "true" ] && echo "  ✅ Solr" || echo "  ❌ Solr (skipped)"
+fi
 [ "${ENABLE_CONTEXTAPI:-false}" = "true" ] && echo "  ✅ Context API" || echo "  ❌ Context API (skipped)"
 [ "${ENABLE_CXSSERVICES:-false}" = "true" ] && echo "  ✅ CXS Services" || echo "  ❌ CXS Services (skipped)"
 [ "${ENABLE_INBOX:-false}" = "true" ] && echo "  ✅ Inbox" || echo "  ❌ Inbox (skipped)"
@@ -86,7 +94,7 @@ if [ "${ENABLE_NEO4J:-false}" = "true" ]; then
     fi
 fi
 
-if [ "${ENABLE_KAFKA:-false}" = "true" ]; then
+if [ -z "${REMOTE_KAFKA_HOST:-}" ] && [ -z "${REMOTE_KAFKA_BROKERS:-}" ] && [ "${ENABLE_KAFKA:-false}" = "true" ]; then
     if [ -d "data/kafka" ] && [ -f "data/kafka/deploy-dev.sh" ]; then
         echo "📦 Deploying Kafka..."
         cd data/kafka
@@ -96,9 +104,11 @@ if [ "${ENABLE_KAFKA:-false}" = "true" ]; then
     else
         echo "⚠️  Kafka not found or not migrated yet"
     fi
+elif [ -n "${REMOTE_KAFKA_HOST:-}" ] || [ -n "${REMOTE_KAFKA_BROKERS:-}" ]; then
+    echo "⏭️  Skipping Kafka deploy (remote configured)"
 fi
 
-if [ "${ENABLE_SOLR:-false}" = "true" ]; then
+if [ -z "${REMOTE_SOLR_HOST:-}" ] && [ "${ENABLE_SOLR:-false}" = "true" ]; then
     if [ -d "data/solr" ] && [ -f "data/solr/deploy-dev.sh" ]; then
         echo "📦 Deploying Solr..."
         cd data/solr
@@ -108,6 +118,8 @@ if [ "${ENABLE_SOLR:-false}" = "true" ]; then
     else
         echo "⚠️  Solr not found or not migrated yet"
     fi
+elif [ -n "${REMOTE_SOLR_HOST:-}" ]; then
+    echo "⏭️  Skipping Solr deploy (remote configured)"
 fi
 
 # Deploy application services
