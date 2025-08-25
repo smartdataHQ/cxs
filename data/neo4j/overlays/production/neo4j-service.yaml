@@ -5,6 +5,7 @@ metadata:
   labels:
     app: neo4j
     tier: data
+    app.kubernetes.io/instance: neo4j
 spec:
   type: ClusterIP
   ports:
@@ -15,3 +16,4 @@ spec:
   selector:
     app: neo4j
     tier: data
+    app.kubernetes.io/instance: neo4j

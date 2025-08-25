@@ -4,6 +4,7 @@ metadata:
   name: neo4j
   labels:
     app: neo4j
+    app.kubernetes.io/instance: neo4j
 
 spec:
   serviceName: neo4j
@@ -11,7 +12,7 @@ spec:
     matchLabels:
       app: neo4j
       tier: data
-  replicas: 1
+  replicas: 3
   updateStrategy:
     type: RollingUpdate
   podManagementPolicy: OrderedReady
@@ -20,7 +21,9 @@ spec:
       labels:
         app: neo4j
         tier: data
+        app.kubernetes.io/instance: neo4j
     spec:
+      enableServiceLinks: false
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -40,36 +43,53 @@ spec:
                       - neo4j
               topologyKey: "kubernetes.io/hostname"
       volumes:
-        - name: neo4j
-          hostPath:
-            path: /data/local/neo4j
         - name: neo4j-config
-          hostPath:
-            path: /data/local/neo4j-config
-        - name: neo4j-plugins
-          hostPath:
-            path: /data/local/neo4j-plugins
-        - name: neo4j-backup
-          hostPath:
-            path: /data/local/neo4j-backup
+          configMap:
+            name: neo4j-config
       containers:
         - name: neo4j
-          image: neo4j:5-enterprise
+          image: neo4j:5.18.0-enterprise
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 7474
+            runAsGroup: 7474
+            fsGroup: 7474
           ports:
             - containerPort: 7474
-              hostPort: 7474
             - containerPort: 7687
-              hostPort: 7687
-          restartPolicy: Never
+          resources:
+            requests:
+              cpu: 500m
+              memory: 2Gi
+            limits:
+              memory: 4Gi
+          readinessProbe:
+            tcpSocket:
+              port: 7687
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            tcpSocket:
+              port: 7687
+            initialDelaySeconds: 40
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 10
           volumeMounts:
-            - name: neo4j
+            - name: neo4j-data
               mountPath: /data
             - name: neo4j-config
               mountPath: /var/lib/neo4j/conf/
-            - name: neo4j-backup
-              mountPath: /tmp/backup/
-            - name: neo4j-plugins
-              mountPath: /var/lib/neo4j/plugins
+      volumeClaimTemplates:
+        - metadata:
+            name: neo4j-data
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 50Gi
           envFrom:
             - configMapRef:
                 name: neo4j-config

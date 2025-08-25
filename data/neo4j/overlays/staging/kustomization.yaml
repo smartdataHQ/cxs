@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: data
+
+resources:
+  - ../production/neo4j-stateful.yaml
+  - ../production/neo4j-service.yaml
+  - ../production/neo4j-config.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      env: staging
+      app.kubernetes.io/instance: neo4j
+
+images:
+  - name: neo4j
+    newTag: 5.18.0-enterprise
+

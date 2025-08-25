@@ -108,6 +108,9 @@ load_env() {
   : "${REMOTE_NEO4J_URI:=}"               # bolt+s://host:7687
   : "${REMOTE_SOLR_HOST:=}"
   : "${REMOTE_SOLR_PORT:=8983}"
+
+  # Common dev secret defaults (non-sensitive defaults acceptable for local use only)
+  : "${NEO4J_DEV_PASSWORD:=devpassword}"
 }
 
 

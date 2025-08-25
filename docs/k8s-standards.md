@@ -139,6 +139,8 @@ Current practice (all envs):
 ## Secrets policy
 - Do not commit secrets to git
 - Baseline (all envs): enable encryption at rest for Kubernetes Secrets (KMS-backed if available), and enforce least-privilege RBAC
+ - Dev (local): all per-solution dev secrets must be sourced from the repository root `.env`/`.env.local`. Each solution’s `deploy-dev.sh` must materialize a Kubernetes Secret from these values before applying manifests. Do not hardcode passwords in manifests.
+ - Staging/Production: never source secrets from `.env`. Manage secrets in-cluster (Rancher/Kubernetes Secrets now; External Secrets Operator later). Manifests reference Secret names/keys only.
 
 ### Installing External Secrets Operator (ESO) with Azure Key Vault [planned]
 
