@@ -1,2 +1,4 @@
+namespace: longhorn-system
+
 resources:
   - base
