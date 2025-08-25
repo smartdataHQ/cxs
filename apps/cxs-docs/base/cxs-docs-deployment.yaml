@@ -91,7 +91,7 @@ spec:
     kind: Deployment
     name: cxs-docs
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 1  # This workload depends on a RWO PVC, so more than 1 pod is not possible
   metrics:
   - type: Resource
     resource:
