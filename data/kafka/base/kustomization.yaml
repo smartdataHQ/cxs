@@ -12,4 +12,5 @@ labels:
       app.kubernetes.io/name: kafka
       app.kubernetes.io/part-of: cxs-data-platform
       app.kubernetes.io/managed-by: fleet
+      tier: data
 

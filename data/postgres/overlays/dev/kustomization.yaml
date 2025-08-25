@@ -11,7 +11,7 @@ nameSuffix: -dev
 labels:
   - includeSelectors: true
     pairs:
-      environment: dev
+      env: dev
       app.kubernetes.io/instance: postgres-dev
 
 # Simple PostgreSQL patches for dev environment
@@ -27,7 +27,7 @@ patches:
         value: 1
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
-        value: Never
+        value: IfNotPresent
       - op: add
         path: /spec/template/spec/containers/0/resources
         value:
@@ -47,4 +47,8 @@ patches:
       - op: replace
         path: /spec/resources/requests/storage
         value: 5Gi
+
+images:
+  - name: postgres
+    newTag: latest
 

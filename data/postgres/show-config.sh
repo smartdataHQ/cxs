@@ -23,6 +23,10 @@ else
 echo "  Host: postgres-dev.data.svc.cluster.local:5432 (local)"
 echo "  User: postgres"
 fi
-echo "  Password: ${POSTGRES_PASSWORD:-${GLOBAL_ADMIN_PASSWORD:-devpassword}}"
+if [ -n "${POSTGRES_PASSWORD:-${GLOBAL_ADMIN_PASSWORD:-}}" ]; then
+echo "  Password: **** (set)"
+else
+echo "  Password: (not set)"
+fi
 echo ""
 echo "📋 Available databases: ssp, airflow, n8n, convoy, grafana, synmetrix"

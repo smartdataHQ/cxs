@@ -4,9 +4,11 @@ kind: Kustomization
 namespace: data
 
 resources:
-  - ../production/clickhouse-stateful.yaml
-  - ../production/clickhouse-service.yaml
-  - ../production/clickhouse-config.yaml
+  - clickhouse-stateful.yaml
+  - clickhouse-service.yaml
+  - clickhouse-config.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
 
 labels:
   - includeSelectors: true

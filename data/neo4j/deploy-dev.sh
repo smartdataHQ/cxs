@@ -14,6 +14,9 @@ if [ -n "${REMOTE_NEO4J_URI:-}" ]; then
   exit 0
 fi
 
+echo "📁 Ensuring namespace exists..."
+kubectl create namespace data --dry-run=client -o yaml | kubectl apply -f -
+
 echo "🔐 Ensuring dev Secret exists (from .env) ..."
 NEO4J_PASS="${NEO4J_DEV_PASSWORD:-${GLOBAL_ADMIN_PASSWORD:-devpassword}}"
 kubectl -n data create secret generic neo4j-dev-secrets \

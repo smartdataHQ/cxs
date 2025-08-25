@@ -12,7 +12,7 @@ This system is built on our [First Principles and Directives](first-principles.m
 
 ### 🎯 Key Objectives
 
-1. **Single Entry Point:** One `.env` file and one script at the root to deploy any combination of services
+1. **Single Entry Point:** One `.env` file and one script at the root to deploy any combination of services (see `docs/env.example`)
 2. **Service Cherry-Picking:** Enable/disable entire services via simple flags
 3. **Minimal Configuration:** Only essential settings in root `.env`, everything else uses sane defaults
 4. **Progressive Expansion:** Start simple, add more services over time as they're migrated
@@ -21,7 +21,7 @@ This system is built on our [First Principles and Directives](first-principles.m
 
 ### 🏠 Root-Level System
 
-1. **`.env`** - Enable/disable services + set global passwords
+1. **`.env`** - Enable/disable services + set global passwords (copy from `docs/env.example`)
 2. **`deploy-all.sh`** - Deploy selected services with one command
 3. **Individual service management** - Each service retains its own deployment scripts
 

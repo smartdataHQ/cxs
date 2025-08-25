@@ -299,9 +299,13 @@ Typical loop:
    - `kustomize build apps/<service>/overlays/dev | kubectl apply -f -`
 3) Create dev secrets (once per service):
    - `.env.local` -> `kubectl create secret generic <service>-secrets --from-env-file=.env.local -n <namespace>`
-4) Access app:
+4) Namespace creation: Dev scripts ensure the `data` namespace exists automatically.
+
+5) Access app:
    - `kubectl port-forward deploy/<service> 8080:80 -n <namespace>`
    - or enable dev ingress with local hostnames
+
+Note: A starter template is available at `docs/env.example`. Copy and adjust as needed.
 
 ## Best practices (all environments)
 - Containers run as non-root with minimal capabilities; set `securityContext` appropriately

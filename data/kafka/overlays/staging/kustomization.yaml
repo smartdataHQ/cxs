@@ -5,6 +5,8 @@ namespace: data
 
 resources:
   - kafka.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
 
 labels:
   - includeSelectors: true

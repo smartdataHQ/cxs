@@ -41,7 +41,6 @@ spec:
       containers:
         - name: neo4j
           image: neo4j
-          imagePullPolicy: IfNotPresent
           env: []
           ports:
             - containerPort: 7474

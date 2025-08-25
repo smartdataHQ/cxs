@@ -51,8 +51,8 @@ echo "🔧 Configuration (after .env + defaults):"
     
     # Show password info
     echo "  Passwords:"
-    echo "    Admin: ${GLOBAL_ADMIN_PASSWORD:-devpassword}"
-    echo "    App: ${GLOBAL_APP_PASSWORD:-devpassword}"
+    echo "    Admin: **** (set)"
+    echo "    App: **** (set)"
 echo ""
 
 echo ""

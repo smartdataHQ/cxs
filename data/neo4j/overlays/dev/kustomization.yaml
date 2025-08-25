@@ -31,6 +31,9 @@ patches:
                 name: neo4j-dev-secrets
                 key: NEO4J_AUTH
       - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+      - op: add
         path: /spec/template/spec/containers/0/resources
         value:
           requests:

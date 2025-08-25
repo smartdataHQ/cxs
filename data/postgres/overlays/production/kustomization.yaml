@@ -11,7 +11,7 @@ nameSuffix: -prod
 labels:
   - includeSelectors: true
     pairs:
-      environment: production
+      env: production
       app.kubernetes.io/instance: postgres-prod
 
 # Simple PostgreSQL patches for production environment
@@ -28,9 +28,6 @@ patches:
       - op: add
         path: /spec/template/spec/containers/0/imagePullPolicy
         value: Always
-      - op: replace
-        path: /spec/template/spec/containers/0/image
-        value: postgres:16.2-alpine
       - op: add
         path: /spec/template/spec/containers/0/readinessProbe
         value:
@@ -72,3 +69,7 @@ patches:
         path: /spec/template/spec/containers/0/volumeMounts/1
       - op: remove
         path: /spec/template/spec/volumes/1
+
+images:
+  - name: postgres
+    newTag: 16.2-alpine

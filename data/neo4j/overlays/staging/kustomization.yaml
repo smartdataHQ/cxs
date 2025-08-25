@@ -4,9 +4,11 @@ kind: Kustomization
 namespace: data
 
 resources:
-  - ../production/neo4j-stateful.yaml
-  - ../production/neo4j-service.yaml
-  - ../production/neo4j-config.yaml
+  - neo4j-stateful.yaml
+  - neo4j-service.yaml
+  - neo4j-config.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
 
 labels:
   - includeSelectors: true

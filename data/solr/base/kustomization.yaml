@@ -12,3 +12,4 @@ labels:
       app.kubernetes.io/name: solr
       app.kubernetes.io/part-of: cxs-data-platform
       app.kubernetes.io/managed-by: fleet
+      tier: data

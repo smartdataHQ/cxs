@@ -23,14 +23,25 @@ patches:
         path: /spec/replicas
         value: 1
       - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+      - op: add
         path: /spec/template/spec/containers/0/resources
         value:
           requests:
-            cpu: "250m"
-            memory: "512Mi"
-          limits:
+            cpu: "500m"
             memory: "1Gi"
+          limits:
+            memory: "2Gi"
 images:
   - name: clickhouse/clickhouse-server
     newTag: latest
+
+configMapGenerator: []
+
+secretGenerator:
+  - name: clickhouse-dev-secrets
+    behavior: create
+    literals:
+      - CLICKHOUSE_PASSWORD=${GLOBAL_ADMIN_PASSWORD}
 

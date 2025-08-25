@@ -40,3 +40,5 @@ REMOTE_POSTGRES_PASSWORD=changeme
 
 ## Staging/Production
 Fleet `targetCustomizations` select the appropriate overlay by cluster label. Use pinned image tags, requests/limits, TLS, and managed secrets.
+
+> WARNING: The production overlay in this repo is not HA and should not be used as-is in production. Per policy (see `docs/k8s-standards.md` → Data layer HA policy), production requires a highly available Postgres (operator or managed service) with a minimum of 3 nodes. Consider CrunchyData, Zalando Postgres Operator, or a managed cloud Postgres.

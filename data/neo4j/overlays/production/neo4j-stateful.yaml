@@ -49,6 +49,9 @@ spec:
       containers:
         - name: neo4j
           image: neo4j:5.18.0-enterprise
+          envFrom:
+            - configMapRef:
+                name: neo4j-config
           securityContext:
             runAsNonRoot: true
             runAsUser: 7474
@@ -90,6 +93,3 @@ spec:
             resources:
               requests:
                 storage: 50Gi
-          envFrom:
-            - configMapRef:
-                name: neo4j-config

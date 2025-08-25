@@ -14,6 +14,9 @@ if [ -n "${REMOTE_CLICKHOUSE_HOST:-}" ]; then
   exit 0
 fi
 
+echo "📁 Ensuring namespace exists..."
+kubectl create namespace data --dry-run=client -o yaml | kubectl apply -f -
+
 echo "📁 Applying dev overlay..."
 kubectl apply -k overlays/dev
 

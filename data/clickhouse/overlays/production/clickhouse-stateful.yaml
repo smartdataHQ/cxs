@@ -78,16 +78,21 @@ spec:
           timeoutSeconds: 5
           failureThreshold: 10
         env:
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: clickhouse
-                  key: access_key_id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: clickhouse
-                  key: secret_access_key
+          - name: CLICKHOUSE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: clickhouse
+                key: password
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: clickhouse
+                key: access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: clickhouse
+                key: secret_access_key
         volumeMounts:
           - mountPath: /etc/clickhouse-server/config.d/storage_config.xml
             subPath: storage_config.xml

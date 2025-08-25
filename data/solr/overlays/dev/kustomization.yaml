@@ -72,3 +72,7 @@ patches:
       - op: replace
         path: /spec/resources/requests/storage
         value: 5Gi
+
+images:
+  - name: solr
+    newTag: latest

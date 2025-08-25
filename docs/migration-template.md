@@ -143,6 +143,58 @@ For each data service:
 - [ ] **Test dev deployment** on Rancher Desktop
 - [ ] **Validate Kustomize builds** for all environments
 
+### Data service synchronization checklist (required)
+
+For any new or updated data service, ensure the following to stay consistent:
+
+- Base manifests (under `base/`):
+  - Environment-neutral: no replicas, no env-specific storage sizes
+  - Tag-less images (set tags only in overlays)
+  - No `imagePullPolicy` here
+  - Base `kustomization.yaml` includes standard labels and `tier: data`
+
+- Dev overlay (`overlays/dev`):
+  - `replicas: 1`, small resources, relaxed probes if needed
+  - `imagePullPolicy: IfNotPresent` and tag via `images:` override
+  - Must expose container ports and define a ClusterIP Service (from base)
+  - Dev script creates `data` namespace and applies via `kubectl -k`
+  - Ephemeral `test-connection.sh` using official client images
+  - `show-config.sh` prints endpoints, masks passwords
+
+- Staging overlay (`overlays/staging`):
+  - Pinned, immutable image tags; keep probes strict
+  - Add PodDisruptionBudget and NetworkPolicy
+  - Self-contained files: do not reference sibling overlays (kubectl kustomize path restriction). Copy required manifests locally or centralize in `base/`.
+  - Use operator/cluster CRs where applicable (e.g., Strimzi, SolrCloud)
+
+- Production overlay (`overlays/production`):
+  - HA topology required (≥3 nodes) for stateful services
+  - Pinned image tags; PDB and NetworkPolicy included
+
+- Fleet (`fleet.yaml`):
+  - `targetCustomizations` select overlays by `env=dev|staging|production`
+  - Use the `env` label key (not `environment`)
+
+- Secrets:
+  - No secrets or password hashes in git
+  - Use Secret-derived env in configs (e.g., ClickHouse `password from_env`), avoid in-ConfigMap credentials
+  - Dev: generate Secrets from `.env.local`; Staging/Prod: manage in-cluster (ESO later)
+
+- Remote endpoints:
+  - Support `REMOTE_*` env vars to skip local deploy and test the remote endpoint instead
+
+- Validation:
+  - `kubectl kustomize` for dev/staging/production must render cleanly without cross-overlay references
+
+### Common pitfalls (and fixes)
+
+- Using `environment` label key instead of `env` → standardize on `env`
+- Image tags set in `base/` → move tags to overlays via `images:`
+- Duplicate `env:` blocks in YAML → merge into a single container `env:` list
+- Misplaced `envFrom` (e.g., under `volumeClaimTemplates`) → move under the container spec
+- Referencing sibling overlay files in kustomization → make overlay self-contained or move shared files to `base/`
+- Committing credential hashes in configs (e.g., ClickHouse `password_sha256_hex`) → switch to Secret + `from_env`
+
 ### Best Practices
 
 1. **Prefer standard images over operators** - use simple container deployments when possible

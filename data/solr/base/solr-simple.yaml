@@ -22,7 +22,7 @@ spec:
         runAsGroup: 8983
       containers:
       - name: solr
-        image: solr:latest
+        image: solr
         command: ["solr-foreground"]
         ports:
         - containerPort: 8983
