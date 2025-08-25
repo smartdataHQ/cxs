@@ -28,7 +28,7 @@ spec:
             - sh
             - -c
             - /app/init-data.sh && node /app/server.js --hostname 0.0.0.0
-          image: quicklookup/cxs-utils:4224
+          image: quicklookup/cxs-utils:ce8f
           resources:
             requests:
               cpu: 100m
