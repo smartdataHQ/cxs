@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: data
+
+resources:
+  - vault.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      app.kubernetes.io/name: vault
+      app.kubernetes.io/part-of: cxs-data-platform
+      app.kubernetes.io/managed-by: fleet
+      tier: data
+
+
