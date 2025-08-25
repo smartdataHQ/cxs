@@ -36,6 +36,11 @@ echo "🔧 Configuration (after .env + defaults):"
         [ "${ENABLE_KAFKA:-false}" = "true" ] && echo "    ✅ Kafka" || echo "    ❌ Kafka"
     fi
     [ "${ENABLE_SOLR:-false}" = "true" ] && echo "    ✅ Solr" || echo "    ❌ Solr"
+    if [ -n "${REMOTE_REDIS_HOST:-}" ]; then
+        echo "    🔗 Redis (remote: ${REMOTE_REDIS_HOST}:${REMOTE_REDIS_PORT})"
+    else
+        [ "${ENABLE_REDIS:-false}" = "true" ] && echo "    ✅ Redis" || echo "    ❌ Redis"
+    fi
     
     # Show enabled application services
     echo "  Application Services:"
@@ -62,3 +67,4 @@ echo "📁 Service directories:"
 [ -d "data/neo4j" ] && echo "  📂 data/neo4j (exists)" || echo "  📂 data/neo4j (not found)"
 [ -d "data/kafka" ] && echo "  📂 data/kafka (exists)" || echo "  📂 data/kafka (not found)"
 [ -d "data/solr" ] && echo "  📂 data/solr (exists)" || echo "  📂 data/solr (not found)"
+[ -d "data/redis" ] && echo "  📂 data/redis (exists)" || echo "  📂 data/redis (not found)"

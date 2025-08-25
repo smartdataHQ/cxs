@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-allow-from-approved
+  namespace: data
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+      app.kubernetes.io/instance: redis
+      env: staging
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          allow-redis: "true"
+    ports:
+    - protocol: TCP
+      port: 6379
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 6379
+
+

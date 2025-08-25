@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-allow-from-approved
+  namespace: data
+spec:
+  podSelector:
+    matchLabels:
+      strimzi.io/name: kafka-kafka
+      app.kubernetes.io/instance: kafka
+      env: staging
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          allow-kafka: "true"
+    ports:
+    - protocol: TCP
+      port: 9092
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 9092
+
+

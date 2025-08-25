@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: neo4j-allow-from-approved
+  namespace: data
+spec:
+  podSelector:
+    matchLabels:
+      app: neo4j
+      app.kubernetes.io/instance: neo4j
+      env: staging
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          allow-neo4j: "true"
+    ports:
+    - protocol: TCP
+      port: 7474
+    - protocol: TCP
+      port: 7687
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 7474
+    - protocol: TCP
+      port: 7687
+
+

@@ -54,4 +54,13 @@ if { [ -n "${REMOTE_SOLR_HOST:-}" ] || [ "${ENABLE_SOLR:-false}" = "true" ]; } \
     echo ""
 fi
 
+if { [ -n "${REMOTE_REDIS_HOST:-}" ] || [ "${ENABLE_REDIS:-false}" = "true" ]; } \
+   && [ -d "data/redis" ] && [ -f "data/redis/test-connection.sh" ]; then
+    echo "🔌 Testing Redis connection..."
+    cd data/redis
+    ./test-connection.sh
+    cd ../..
+    echo ""
+fi
+
 echo "✅ Connection testing complete!"

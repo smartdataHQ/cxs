@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: neo4j-pdb
+  namespace: data
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: neo4j
+      app.kubernetes.io/instance: neo4j
+      env: staging
+
+

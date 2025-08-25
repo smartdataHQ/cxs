@@ -46,12 +46,6 @@ spec:
               name: tcp
             - containerPort: 8123
               name: http
-          env:
-            - name: CLICKHOUSE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: clickhouse-dev-secrets
-                  key: CLICKHOUSE_PASSWORD
           volumeMounts:
             - name: clickhouse-data
               mountPath: /var/lib/clickhouse

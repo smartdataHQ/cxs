@@ -1,0 +1,123 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse
+  labels:
+    app: clickhouse
+    app.kubernetes.io/instance: clickhouse
+
+spec:
+  serviceName: clickhouse
+  selector:
+    matchLabels:
+      app: clickhouse
+      tier: data
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+        tier: data
+        app.kubernetes.io/instance: clickhouse
+    spec:
+      enableServiceLinks: false
+      affinity:
+        nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: "localdata"
+                    operator: In
+                    values:
+                      - "true"
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - clickhouse
+              topologyKey: "kubernetes.io/hostname"
+      volumes:
+        - name: config-volume
+          configMap:
+            name: clickhouse-config
+      containers:
+      - name: clickhouse
+        image: clickhouse/clickhouse-server:25.7.4.11
+        env:
+          - name: CLICKHOUSE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: clickhouse
+                key: password
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: clickhouse
+                key: access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: clickhouse
+                key: secret_access_key
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 101
+          runAsGroup: 101
+          fsGroup: 101
+        resources:
+          requests:
+            cpu: 700m
+            memory: 2Gi
+          limits:
+            memory: 4Gi
+        ports:
+        - containerPort: 9000
+        - containerPort: 8123
+        readinessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 10
+        livenessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 40
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 10
+        volumeMounts:
+          - mountPath: /etc/clickhouse-server/config.d/storage_config.xml
+            subPath: storage_config.xml
+            name: config-volume
+          - mountPath: /etc/clickhouse-server/users.xml
+            subPath: users.xml
+            name: config-volume
+          - mountPath: /etc/clickhouse-server/config.xml
+            subPath: config.xml
+            name: config-volume
+          - name: clickhouse-data
+            mountPath: /var/lib/clickhouse
+      volumeClaimTemplates:
+        - metadata:
+            name: clickhouse-data
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 50Gi
+      dnsPolicy: ClusterFirstWithHostNet
+      dnsConfig:
+        searches:
+          - clickhouse.data.svc.cluster.local
+      imagePullSecrets:
+        - name: dockerlock
+
+

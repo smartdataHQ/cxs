@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: clickhouse-pdb
+  namespace: data
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: clickhouse
+      app.kubernetes.io/instance: clickhouse
+      env: staging
+
+

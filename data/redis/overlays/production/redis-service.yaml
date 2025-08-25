@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+    tier: data
+    app.kubernetes.io/instance: redis
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6379
+      name: tcp
+  selector:
+    app: redis
+    tier: data
+    app.kubernetes.io/instance: redis
+
+
