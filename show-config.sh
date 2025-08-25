@@ -41,6 +41,11 @@ echo "🔧 Configuration (after .env + defaults):"
     else
         [ "${ENABLE_REDIS:-false}" = "true" ] && echo "    ✅ Redis" || echo "    ❌ Redis"
     fi
+    if [ -n "${REMOTE_VAULT_ADDR:-}" ]; then
+        echo "    🔗 Vault (remote: ${REMOTE_VAULT_ADDR}:${REMOTE_VAULT_PORT:-8200})"
+    else
+        [ "${ENABLE_VAULT:-false}" = "true" ] && echo "    ✅ Vault" || echo "    ❌ Vault"
+    fi
     
     # Show enabled application services
     echo "  Application Services:"
@@ -68,3 +73,4 @@ echo "📁 Service directories:"
 [ -d "data/kafka" ] && echo "  📂 data/kafka (exists)" || echo "  📂 data/kafka (not found)"
 [ -d "data/solr" ] && echo "  📂 data/solr (exists)" || echo "  📂 data/solr (not found)"
 [ -d "data/redis" ] && echo "  📂 data/redis (exists)" || echo "  📂 data/redis (not found)"
+[ -d "data/vault" ] && echo "  📂 data/vault (exists)" || echo "  📂 data/vault (not found)"

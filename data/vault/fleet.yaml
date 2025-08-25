@@ -1,15 +1,25 @@
-defaultNamespace: data
+namespace: data
 
-helm:
-  releaseName: vault
-  repo: https://helm.releases.hashicorp.com
-  chart: vault
-  # Find new versions
-  #
-  #   helm repo add hashicorp https://helm.releases.hashicorp.com
-  #    helm repo update
-  #    helm  search repo -l hashicorp/vault
-
-  version: 0.29.1
-  valuesFiles:
-    - values.yaml
+targetCustomizations:
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        env: staging
+    helm:
+      releaseName: vault
+      repo: https://helm.releases.hashicorp.com
+      chart: vault
+      version: 0.29.1
+      valuesFiles:
+        - values.yaml
+  - name: production
+    clusterSelector:
+      matchLabels:
+        env: production
+    helm:
+      releaseName: vault
+      repo: https://helm.releases.hashicorp.com
+      chart: vault
+      version: 0.29.1
+      valuesFiles:
+        - values.yaml

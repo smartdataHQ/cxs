@@ -63,4 +63,13 @@ if { [ -n "${REMOTE_REDIS_HOST:-}" ] || [ "${ENABLE_REDIS:-false}" = "true" ]; }
     echo ""
 fi
 
+if { [ -n "${REMOTE_VAULT_ADDR:-}" ] || [ "${ENABLE_VAULT:-false}" = "true" ]; } \
+   && [ -d "data/vault" ] && [ -f "data/vault/test-connection.sh" ]; then
+    echo "🔌 Testing Vault connection..."
+    cd data/vault
+    ./test-connection.sh
+    cd ../..
+    echo ""
+fi
+
 echo "✅ Connection testing complete!"

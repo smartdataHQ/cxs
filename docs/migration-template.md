@@ -1,4 +1,4 @@
-# Data Service Migration Template
+# Solution Migration Template
 
 ## Key Principles
 
@@ -17,9 +17,8 @@ These principles are derived from our [First Principles and Directives](first-pr
 - **Sane defaults:** All other settings use reasonable defaults
 
 ### 3. **Avoid Complex Admin Tools**
-Use simple, standard container images instead of operators for development.
-- Better ARM64 compatibility, simpler maintenance
-- Examples: `postgres:16-alpine`, `clickhouse/clickhouse-server`, `neo4j:5`
+Use simple, standard container images instead of operators for development when feasible.
+ - Improves ARM64 compatibility and reduces maintenance
 
 ### 4. **Use Latest Stable Versions**
 All development instances should use the latest stable version of the technology being provisioned.
@@ -31,22 +30,22 @@ All development instances should use the latest stable version of the technology
 ### Directory Structure
 
 ```
-data/{service}/
+{group}/{solution}/
 ├── base/                           # Shared configuration
-│   ├── {service}.yaml             # Base resource manifests
+│   ├── {solution}.yaml            # Base resource manifests
 │   ├── kustomization.yaml         # Base Kustomize config
 │   └── [additional-resources/]    # Optional: backup jobs, etc.
 ├── overlays/                      # Environment-specific overlays
 │   ├── dev/
 │   │   └── kustomization.yaml     # Dev: minimal resources, simple Deployment
 │   ├── staging/
-│   │   └── kustomization.yaml     # Staging: operator/clustered topology when applicable
+│   │   └── kustomization.yaml     # Staging: operator/cluster topology when applicable
 │   └── production/
 │       └── kustomization.yaml     # Production: full HA topology + limits + policies
 ├── fleet.yaml                     # Fleet targeting by env labels
 ├── deploy-dev.sh                  # Developer deployment script
 ├── cleanup-dev.sh                 # Developer cleanup script
-└── README.md                      # Concise service documentation
+└── README.md                      # Concise solution documentation
 ```
 
 ### Resource Allocation Guidelines
@@ -82,7 +81,7 @@ Dev scripts must:
 - Keep tests ephemeral: `kubectl run --rm` with official client images only
 
 Naming guidance:
-- Root flags: `ENABLE_<SOLUTION>=true|false` (e.g., `ENABLE_SOLR=true`)
+- Root flags: `ENABLE_<SOLUTION>=true|false`
 - Remote vars per solution: `REMOTE_<SOLUTION>_HOST`, `REMOTE_<SOLUTION>_PORT` (and add others if needed)
 
 #### 3. **Fleet Configurations** (Self-documenting)
@@ -129,7 +128,7 @@ APP_PASSWORD=devpassword
 
 ### Migration Checklist
 
-For each data service:
+For each solution:
 
 - [ ] **Create base directory** and move existing config
 - [ ] **Update base config** with environment-neutral defaults
@@ -143,21 +142,21 @@ For each data service:
 - [ ] **Test dev deployment** on Rancher Desktop
 - [ ] **Validate Kustomize builds** for all environments
 
-### Data service synchronization checklist (required)
+### Solution synchronization checklist (required)
 
-For any new or updated data service, ensure the following to stay consistent:
+For any new or updated solution, ensure the following to stay consistent:
 
 - Base manifests (under `base/`):
   - Environment-neutral: no replicas, no env-specific storage sizes
   - Tag-less images (set tags only in overlays)
   - No `imagePullPolicy` here
-  - Base `kustomization.yaml` includes standard labels and `tier: data`
+  - Base `kustomization.yaml` includes standard labels and an appropriate `tier` label (e.g., `data`, `api`, `frontend`)
 
 - Dev overlay (`overlays/dev`):
   - `replicas: 1`, small resources, relaxed probes if needed
   - `imagePullPolicy: IfNotPresent` and tag via `images:` override
   - Must expose container ports and define a ClusterIP Service (from base)
-  - Dev script creates `data` namespace and applies via `kubectl -k`
+  - Dev script ensures target namespace exists and applies via `kubectl -k`
   - Ephemeral `test-connection.sh` using official client images
   - `show-config.sh` prints endpoints, masks passwords
 
@@ -165,7 +164,7 @@ For any new or updated data service, ensure the following to stay consistent:
   - Pinned, immutable image tags; keep probes strict
   - Add PodDisruptionBudget and NetworkPolicy
   - Self-contained files: do not reference sibling overlays (kubectl kustomize path restriction). Copy required manifests locally or centralize in `base/`.
-  - Use operator/cluster CRs where applicable (e.g., Strimzi, SolrCloud)
+  - Use operator/cluster CRs where applicable
 
 - Production overlay (`overlays/production`):
   - HA topology required (≥3 nodes) for stateful services
@@ -177,7 +176,7 @@ For any new or updated data service, ensure the following to stay consistent:
 
 - Secrets:
   - No secrets or password hashes in git
-  - Use Secret-derived env in configs (e.g., ClickHouse `password from_env`), avoid in-ConfigMap credentials
+  - Use Secret-derived env in configs; avoid in-ConfigMap credentials
   - Dev: generate Secrets from `.env.local`; Staging/Prod: manage in-cluster (ESO later)
 
 - Remote endpoints:
@@ -193,13 +192,13 @@ For any new or updated data service, ensure the following to stay consistent:
 - Duplicate `env:` blocks in YAML → merge into a single container `env:` list
 - Misplaced `envFrom` (e.g., under `volumeClaimTemplates`) → move under the container spec
 - Referencing sibling overlay files in kustomization → make overlay self-contained or move shared files to `base/`
-- Committing credential hashes in configs (e.g., ClickHouse `password_sha256_hex`) → switch to Secret + `from_env`
+- Committing credential hashes in configs → switch to Secret + `from_env`
 
 ### Best Practices
 
 1. **Prefer standard images over operators** - use simple container deployments when possible
 2. **Ensure ARM64 compatibility** - use multi-arch images where available
-3. **Include access information** - every service must have connection details and test commands
+3. **Include access information** - every solution must have connection details and test commands
 4. **Keep base config environment-neutral** - no hardcoded replicas or storage sizes
 5. **Use appropriate resource scaling** - dev should run on minimal resources
 6. **Maintain backwards compatibility** - default fleet.yaml deploys dev environment
@@ -225,20 +224,32 @@ For any new or updated data service, ensure the following to stay consistent:
 Example `.env` fragment:
 ```bash
 # === ENABLE SOLUTIONS ===
-ENABLE_SOLR=true
-ENABLE_POSTGRES=false
+ENABLE_SOLUTION_A=true
+ENABLE_SOLUTION_B=false
 
 # === REMOTE ENDPOINTS (skip local deploy, test remote) ===
-REMOTE_SOLR_HOST=solr.shared.dev.example.com
-REMOTE_SOLR_PORT=8983
+REMOTE_SOLUTION_A_HOST=example.shared.dev.example.com
+REMOTE_SOLUTION_A_PORT=0000
 ```
 
 ### Testing policy (repo-wide)
 - Use ephemeral `kubectl run` tests with official client images; avoid committing extra client libraries
 - Ensure tests clean up (`--rm`) and do not leave running pods
 
-### Data layer HA (production)
-- For persistence/data solutions, require HA with at least 3 nodes in production
+### Health checks and connection tests (dev standard)
+Each solution must include a `test-connection.sh` that:
+- Runs from an ephemeral pod (via `kubectl run --rm`), using standard/minimal images (e.g., curl, busybox, official client)
+- Confirms the service is reachable (TCP connect or HTTP 2xx/expected code)
+- Prints a clear success (`✅ OK`) or failure (`❌ Failed`) message
+- Exits non-zero on failure
+
+Implementation guidance:
+- Prefer the simplest viable probe per protocol (HTTP endpoint or TCP connect)
+- Do not persist test pods; always use `--rm` and avoid side effects
+- Keep scripts environment-aware: if a corresponding `REMOTE_*` is set, test the remote endpoint instead of deploying locally
+
+### HA (production) for stateful workloads
+- For stateful/persistent solutions, require HA with at least 3 nodes in production
 - Use appropriate operators/clustering (avoid scaling single Deployments for stateful HA)
 
 ### Fleet examples (env selectors)

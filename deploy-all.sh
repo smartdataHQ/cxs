@@ -43,6 +43,7 @@ else
     [ "${ENABLE_SOLR:-false}" = "true" ] && echo "  ✅ Solr" || echo "  ❌ Solr (skipped)"
 fi
 [ "${ENABLE_REDIS:-false}" = "true" ] && echo "  ✅ Redis" || echo "  ❌ Redis (skipped)"
+[ "${ENABLE_VAULT:-false}" = "true" ] && echo "  ✅ Vault" || echo "  ❌ Vault (skipped)"
 [ "${ENABLE_CONTEXTAPI:-false}" = "true" ] && echo "  ✅ Context API" || echo "  ❌ Context API (skipped)"
 [ "${ENABLE_CXSSERVICES:-false}" = "true" ] && echo "  ✅ CXS Services" || echo "  ❌ CXS Services (skipped)"
 [ "${ENABLE_INBOX:-false}" = "true" ] && echo "  ✅ Inbox" || echo "  ❌ Inbox (skipped)"
@@ -132,6 +133,18 @@ if [ "${ENABLE_REDIS:-false}" = "true" ]; then
         echo ""
     else
         echo "⚠️  Redis not found or not migrated yet"
+    fi
+fi
+
+if [ "${ENABLE_VAULT:-false}" = "true" ]; then
+    if [ -d "data/vault" ] && [ -f "data/vault/deploy-dev.sh" ]; then
+        echo "📦 Deploying Vault..."
+        cd data/vault
+        ./deploy-dev.sh
+        cd ../..
+        echo ""
+    else
+        echo "⚠️  Vault not found or not migrated yet"
     fi
 fi
 
