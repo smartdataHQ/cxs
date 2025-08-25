@@ -45,6 +45,22 @@ This policy aligns with our [First Principles and Directives](first-principles.m
 3. **Test Thoroughly** across version bumps
 4. **Monitor Release Notes** for breaking changes
 
+## Automation directive: Always fetch latest stable releases (solution-agnostic)
+
+Before selecting image tags for any solution, check the upstream for the latest GA/stable version and avoid RC/alpha/beta.
+
+- Upstream release (GitHub API example):
+  - `OWNER=myorg REPO=myrepo; curl -s "https://api.github.com/repos/${OWNER}/${REPO}/releases/latest" | jq -r .tag_name`
+
+- Container registry tags (Docker Hub API example):
+  - `IMAGE_REPO=library/imagename; curl -s "https://registry.hub.docker.com/v2/repositories/${IMAGE_REPO}/tags/?page_size=100" | jq -r '.results[].name' | grep -E '^[0-9]+' | grep -viE 'rc|alpha|beta' | sort -V | tail -1`
+
+- Apply per policy:
+  - Dev overlays: set images to latest stable (or `:latest`) via Kustomize `images` override; do not set tags in base.
+  - Staging/Production overlays: pin immutable tags in overlays; base remains tag-less.
+
+Document pinned versions in the solution README when updating staging/production.
+
 ## Exceptions
 
 Certain solutions may require specific versions due to:

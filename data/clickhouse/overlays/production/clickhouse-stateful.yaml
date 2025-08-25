@@ -4,6 +4,7 @@ metadata:
   name: clickhouse
   labels:
     app: clickhouse
+    app.kubernetes.io/instance: clickhouse
 
 spec:
   serviceName: clickhouse
@@ -20,7 +21,9 @@ spec:
       labels:
         app: clickhouse
         tier: data
+        app.kubernetes.io/instance: clickhouse
     spec:
+      enableServiceLinks: false
       affinity:
         nodeAffinity:
             requiredDuringSchedulingIgnoredDuringExecution:
@@ -43,19 +46,37 @@ spec:
         - name: config-volume
           configMap:
             name: clickhouse-config
-        - name: clickhouse-data
-          hostPath:
-            path: /data/local/clickhouse
-        - name: clickhouse-elastic
-          hostPath:
-            path: /data/elastic/clickhouse
       containers:
       - name: clickhouse
-        image: clickhouse/clickhouse-server:24.8.4.13-alpine
+        image: clickhouse/clickhouse-server:25.7.4.11
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 101
+          runAsGroup: 101
+          fsGroup: 101
+        resources:
+          requests:
+            cpu: 700m
+            memory: 2Gi
+          limits:
+            memory: 4Gi
         ports:
         - containerPort: 9000
         - containerPort: 8123
-        restartPolicy: Never
+        readinessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 10
+        livenessProbe:
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 40
+          periodSeconds: 15
+          timeoutSeconds: 5
+          failureThreshold: 10
         env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
@@ -79,6 +100,14 @@ spec:
             name: config-volume
           - name: clickhouse-data
             mountPath: /var/lib/clickhouse
+      volumeClaimTemplates:
+        - metadata:
+            name: clickhouse-data
+          spec:
+            accessModes: ["ReadWriteOnce"]
+            resources:
+              requests:
+                storage: 50Gi
       dnsPolicy: ClusterFirstWithHostNet
       dnsConfig:
         searches:

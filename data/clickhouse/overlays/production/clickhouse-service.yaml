@@ -5,6 +5,7 @@ metadata:
   labels:
     app: clickhouse
     tier: data
+    app.kubernetes.io/instance: clickhouse
   annotations:
     tailscale.com/expose: "true"
 spec:
@@ -19,3 +20,4 @@ spec:
   selector:
     app: clickhouse
     tier: data
+    app.kubernetes.io/instance: clickhouse

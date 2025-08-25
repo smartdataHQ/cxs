@@ -1,18 +1,33 @@
-# ClickHouse
+# ClickHouse (dev/staging/production)
 
 ## Purpose
-Provides a high-performance, column-oriented Online Analytical Processing (OLAP) database management system. Used for analytics and processing large-scale data queries.
+Columnar OLAP database. Dev uses a single Deployment; staging/prod use a 3-replica StatefulSet.
 
-## Configuration
-- Configuration is managed via Kustomize overlays, with environment-specific settings in the `overlays/` directory (e.g., `overlays/production/`). These overlays likely define the ClickHouse cluster setup (StatefulSet, Services, ConfigMaps).
-- Secrets are managed in Rancher and injected at deployment time. Refer to the main project `README.md` for more details on secret management.
+## Dev usage (Rancher Desktop)
+```bash
+cd data/clickhouse
+./deploy-dev.sh
+./test-connection.sh
+# Expose locally if needed:
+kubectl port-forward svc/clickhouse 8123:8123 -n data
+```
 
-## Deployment
-Deployed and managed via Fleet, as specified in `fleet.yaml`. Fleet applies the Kustomize configurations from the `overlays/` directory.
+## Remote usage
+```bash
+ENABLE_CLICKHOUSE=false
+REMOTE_CLICKHOUSE_HOST=clickhouse.shared.dev.example.com
+REMOTE_CLICKHOUSE_HTTP_PORT=8123
+```
 
-## Backup and Restore
-[Details on backup and restore procedures for ClickHouse need to be added. This might involve tools like `clickhouse-backup` or custom snapshot strategies.]
+## Environments
+- dev: single pod Deployment, IfNotPresent, small resources
+- staging: 3-replica StatefulSet, medium resources
+- production: 3-replica StatefulSet, policies/config, pinned image
 
-## Key Files
-- `fleet.yaml`: Fleet configuration for deployment.
-- `overlays/`: Directory containing Kustomize overlays for different environments, defining the ClickHouse cluster resources.
+## Fleet
+`fleet.yaml` targets overlays by cluster label `env=dev|staging|production`.
+
+See also:
+- docs/migration-template.md
+- docs/k8s-standards.md
+- docs/solution-version-policy.md
