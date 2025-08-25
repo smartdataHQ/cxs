@@ -12,6 +12,7 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: flows.contextsuite.com
@@ -41,4 +42,4 @@ spec:
   tls:
     - hosts:
         - flows.contextsuite.com
-      secretName: star-contextsuite-com
+      secretName: flows-contextsuite-com-tls
