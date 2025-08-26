@@ -86,8 +86,7 @@ airflow:
   connectionsUpdate: false    
   variables: []
   pools: [] 
-  extraPipPackages:
-    - "pymysql==1.1.1"
+  extraPipPackages: []
   extraEnv:        
     - name: AIRFLOW__CORE__FERNET_KEY
       valueFrom:
