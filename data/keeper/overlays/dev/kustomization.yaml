@@ -1,0 +1,59 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: data
+
+resources:
+  - ../../base
+  - keeper-config.yaml
+
+labels:
+  - includeSelectors: true
+    pairs:
+      env: dev
+      app.kubernetes.io/instance: keeper
+
+patches:
+  - target:
+      group: apps
+      version: v1
+      kind: StatefulSet
+      name: keeper
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          fsGroup: 101
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext
+        value:
+          runAsNonRoot: true
+          runAsUser: 101
+          runAsGroup: 101
+      - op: add
+        path: /spec/template/spec/containers/0/imagePullPolicy
+        value: IfNotPresent
+      - op: add
+        path: /spec/template/spec/volumes
+        value:
+          - name: config-volume
+            configMap:
+              name: keeper-config
+          - name: keeper-data
+            emptyDir: {}
+      - op: add
+        path: /spec/template/spec/containers/0/volumeMounts
+        value:
+          - mountPath: /etc/clickhouse-keeper/keeper_config.xml
+            name: config-volume
+            subPath: keeper_config.xml
+          - name: keeper-data
+            mountPath: /var/lib/clickhouse-keeper
+images:
+  - name: clickhouse/clickhouse-keeper
+    newTag: 24.3.2.23-alpine
+
+

@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: keeper
+  labels:
+    app: keeper
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9234
+      name: raft
+    - port: 9181
+      name: zookeeper
+  selector:
+    app: keeper
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keeper
+  labels:
+    app: keeper
+spec:
+  serviceName: keeper
+  selector:
+    matchLabels:
+      app: keeper
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: keeper
+        app.kubernetes.io/instance: keeper
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: keeper
+          image: clickhouse/clickhouse-keeper
+          ports:
+            - containerPort: 9181
+              name: zookeeper
+            - containerPort: 9234
+              name: raft
+          readinessProbe:
+            tcpSocket:
+              port: 9181
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9181
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 10
+

@@ -37,6 +37,8 @@ if [ -n "${REMOTE_KAFKA_HOST:-}" ] || [ -n "${REMOTE_KAFKA_BROKERS:-}" ]; then
 else
     [ "${ENABLE_KAFKA:-false}" = "true" ] && echo "  ✅ Kafka" || echo "  ❌ Kafka (skipped)"
 fi
+[ "${ENABLE_SCHEMA_REGISTRY:-false}" = "true" ] && echo "  ✅ Schema Registry" || echo "  ❌ Schema Registry (skipped)"
+[ "${ENABLE_KEEPER:-false}" = "true" ] && echo "  ✅ Keeper (ZK)" || echo "  ❌ Keeper (skipped)"
 if [ -n "${REMOTE_SOLR_HOST:-}" ]; then
     echo "  🔗 Solr (remote: ${REMOTE_SOLR_HOST}:${REMOTE_SOLR_PORT})"
 else
@@ -108,6 +110,30 @@ if [ -z "${REMOTE_KAFKA_HOST:-}" ] && [ -z "${REMOTE_KAFKA_BROKERS:-}" ] && [ "$
     fi
 elif [ -n "${REMOTE_KAFKA_HOST:-}" ] || [ -n "${REMOTE_KAFKA_BROKERS:-}" ]; then
     echo "⏭️  Skipping Kafka deploy (remote configured)"
+fi
+
+if [ "${ENABLE_SCHEMA_REGISTRY:-false}" = "true" ]; then
+    if [ -d "data/kafka-schema-registry" ] && [ -f "data/kafka-schema-registry/deploy-dev.sh" ]; then
+        echo "📦 Deploying Schema Registry..."
+        cd data/kafka-schema-registry
+        ./deploy-dev.sh
+        cd ../..
+        echo ""
+    else
+        echo "⚠️  Schema Registry not found or not migrated yet"
+    fi
+fi
+
+if [ "${ENABLE_KEEPER:-false}" = "true" ]; then
+    if [ -d "data/keeper" ] && [ -f "data/keeper/deploy-dev.sh" ]; then
+        echo "📦 Deploying Keeper (ZK)..."
+        cd data/keeper
+        ./deploy-dev.sh
+        cd ../..
+        echo ""
+    else
+        echo "⚠️  Keeper not found or not migrated yet"
+    fi
 fi
 
 if [ -z "${REMOTE_SOLR_HOST:-}" ] && [ "${ENABLE_SOLR:-false}" = "true" ]; then

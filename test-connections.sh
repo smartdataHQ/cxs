@@ -45,6 +45,14 @@ if { [ -n "${REMOTE_KAFKA_HOST:-}" ] || [ -n "${REMOTE_KAFKA_BROKERS:-}" ] || [ 
     echo ""
 fi
 
+if [ "${ENABLE_SCHEMA_REGISTRY:-false}" = "true" ] && [ -d "data/kafka-schema-registry" ] && [ -f "data/kafka-schema-registry/test-connection.sh" ]; then
+    echo "🔌 Testing Schema Registry connection..."
+    cd data/kafka-schema-registry
+    ./test-connection.sh
+    cd ../..
+    echo ""
+fi
+
 if { [ -n "${REMOTE_SOLR_HOST:-}" ] || [ "${ENABLE_SOLR:-false}" = "true" ]; } \
    && [ -d "data/solr" ] && [ -f "data/solr/test-connection.sh" ]; then
     echo "🔌 Testing Solr connection..."
