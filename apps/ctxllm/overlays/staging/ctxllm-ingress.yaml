@@ -2,6 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ctxllm
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: llm.contextsuite.com
@@ -17,4 +19,4 @@ spec:
   tls:
     - hosts:
         - llm.contextsuite.com
-      secretName: star-contextsuite-com
+      secretName: llm-contextsuite-com-tls

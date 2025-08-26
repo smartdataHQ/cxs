@@ -1,0 +1,4 @@
+namespace: pipelines
+resources:
+  - nifi-deployment.yaml
+  - test-configmap.yaml

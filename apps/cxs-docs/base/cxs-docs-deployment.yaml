@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: cxs-docs
 spec:
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: cxs-docs
@@ -28,7 +30,7 @@ spec:
             - sh
             - -c
             - /app/init-data.sh && node /app/server.js --hostname 0.0.0.0
-          image: quicklookup/cxs-utils:4224
+          image: quicklookup/cxs-utils:ce8f
           resources:
             requests:
               cpu: 100m
@@ -89,7 +91,7 @@ spec:
     kind: Deployment
     name: cxs-docs
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 1  # This workload depends on a RWO PVC, so more than 1 pod is not possible
   metrics:
   - type: Resource
     resource:
