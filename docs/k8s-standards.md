@@ -14,7 +14,7 @@ This document defines how we structure Kubernetes, Kustomize, and Rancher Fleet 
 - Cluster label for Fleet selection: `env=dev|staging|production`
   - Note: Some existing Fleet bundles use `role=production`. We will keep those in place and add new `env`-based targetCustomizations as we migrate. Production stays unchanged until we explicitly switch.
 - Namespaces: keep existing domains (e.g., `api`, `data`, `pipelines`, `ingress`)
-- Resource names: do not suffix object names with `-dev`/`-staging`; differentiate by namespace, labels, and overlay config. Use `env: <dev|staging|production>` and, if needed, `app.kubernetes.io/instance: <service>` for selectors.
+- Resource names: do not suffix object names with `-dev`/`-staging`; differentiate by namespace, labels, and overlay config
 - Common labels (applied via Kustomize):
   - `app: <service-name>`
   - `tier: <api|worker|frontend|...>`
@@ -41,18 +41,6 @@ Likewise under `data/` and other top-level groups.
   - ingress hosts, annotations
   - logging levels and feature flags via ConfigMap
 - Prefer JSON 6902 patches for precise edits; use `patchStrategicMerge` for simple merges
-
-### Kustomize-first policy
-- Base manifests carry no environment-specific values
-- All env differences (replicas, resources, tags, ingress) live in overlays
-- Fleet selects overlays by cluster labels; no manual script-based applies in staging/prod
-- Dev helper scripts may create Secrets and run tests, but must apply manifests via `kubectl kustomize`/`-k`
-
-### Testing policy (dev/stage/prod)
-- Use ephemeral pods via `kubectl run` with official client images for connectivity checks
-- Avoid adding language runtimes or client libraries to this repo
-- Own tests per solution; aggregate runner only delegates
-- Ensure test pods are deleted after completion (`--rm`); do not leave test workloads running
 - Example: minimal dev overlay
 ```yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -84,12 +72,8 @@ configMapGenerator:
 - staging/prod: immutable tags (Git SHA or release), `imagePullPolicy: Always`
 
 ## Ingress and service exposure
-- dev: default to port-forwarding for simplicity; optionally enable ingress with local hostnames (`*.localtest.me`, `127.0.0.1.nip.io`) when needed. Dev overlays must expose container ports and define a ClusterIP Service so port-forwarding works out of the box.
+- dev: default to port-forwarding for simplicity; optionally enable ingress with local hostnames (`*.localtest.me`, `127.0.0.1.nip.io`) when needed
 - staging/prod: standard DNS (`app.staging.example.com`, `app.example.com`), TLS via cluster issuer
-
-## Probes policy by environment
-- dev: readiness/liveness probes may be relaxed (higher timeouts/failure thresholds) to avoid false restarts on slow local machines; terminationGracePeriodSeconds may be increased. Prefer stability over strictness.
-- staging/prod: keep strict probes and production-grade timings; failures must surface quickly.
 
 ## Rancher Fleet patterns
 - Each bundle’s `fleet.yaml` defines `targetCustomizations` by environment:
@@ -139,8 +123,6 @@ Current practice (all envs):
 ## Secrets policy
 - Do not commit secrets to git
 - Baseline (all envs): enable encryption at rest for Kubernetes Secrets (KMS-backed if available), and enforce least-privilege RBAC
- - Dev (local): all per-solution dev secrets must be sourced from the repository root `.env`/`.env.local`. Each solution’s `deploy-dev.sh` must materialize a Kubernetes Secret from these values before applying manifests. Do not hardcode passwords in manifests.
- - Staging/Production: never source secrets from `.env`. Manage secrets in-cluster (Rancher/Kubernetes Secrets now; External Secrets Operator later). Manifests reference Secret names/keys only.
 
 ### Installing External Secrets Operator (ESO) with Azure Key Vault [planned]
 
@@ -290,42 +272,13 @@ Typical loop:
   - `make dev-secrets NAMESPACE=data NAME=<secret-name> FILE=.env.local`
 - Cleanup when done:
   - `kubectl delete -k data/<component>/overlays/dev`
-### Remote service usage (dev)
-- Developers may set `REMOTE_*` variables in root `.env` to point to shared services (e.g., remote PostgreSQL, Kafka).
-- When a `REMOTE_*` is set, local deployment for that service is skipped; connection tests target the remote endpoint.
-- Keep credentials in `.env.local` where possible; do not commit any `.env` files.
-
 
    - `kustomize build apps/<service>/overlays/dev | kubectl apply -f -`
 3) Create dev secrets (once per service):
    - `.env.local` -> `kubectl create secret generic <service>-secrets --from-env-file=.env.local -n <namespace>`
-4) Namespace creation: Dev scripts ensure the `data` namespace exists automatically.
-
-5) Access app:
+4) Access app:
    - `kubectl port-forward deploy/<service> 8080:80 -n <namespace>`
    - or enable dev ingress with local hostnames
-
-Note: A starter template is available at `docs/env.example`. Copy and adjust as needed.
-
-## Best practices (all environments)
-- Containers run as non-root with minimal capabilities; set `securityContext` appropriately
-- Define readiness and liveness probes for all Deployments
-- Resource requests/limits defined in staging/production; autoscaling where appropriate
-- Use NetworkPolicies to restrict pod-to-pod communication
-- Enforce TLS for all ingress; use cluster issuers in staging/production
-- Immutable, pinned image tags for staging/production; avoid `latest`
-- Centralized logging (Loki) and metrics (Prometheus); dashboards and alerts in Grafana
-- Backup/restore plans for data services with tested runbooks
-- No secrets in git; use Rancher-managed Secrets now; plan ESO later
-- JVM-based services: explicitly set heap via env (e.g., `JAVA_TOOL_OPTIONS` or service-specific like `SOLR_JAVA_MEM`); keep `-Xmx` ≤ ~60% of the container memory limit, and set `-Xms` to match for stability. For dev on Rancher Desktop, start with `-Xms1g -Xmx1g` and requests/limits around `1Gi/2Gi`, then tune as needed.
-- JVM shutdown: increase `terminationGracePeriodSeconds` (e.g., 60s) to allow graceful shutdown and avoid SIGKILL during index flush/close.
-
-## Data layer HA policy (production)
-- Persistence/data solutions (e.g., PostgreSQL, Kafka, ClickHouse, Solr, Neo4j) must be highly available in production: **minimum 3 nodes**.
-- Use the right primitives:
-  - Databases: operators or managed services (not multi-replica Deployments)
-  - Queues/search/OLAP: native clustering/replication topologies
-- Dev: single instance for simplicity; staging: scaled-down but topology-aligned; prod: full HA, pinned images, probes, NetworkPolicies, PDBs.
 
 ## Migration playbook (incremental, safe-by-default)
 1) Create `overlays/dev` and `overlays/staging` for a pilot service
