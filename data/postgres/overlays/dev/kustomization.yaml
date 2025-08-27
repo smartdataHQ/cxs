@@ -50,5 +50,5 @@ patches:
 
 images:
   - name: postgres
-    newTag: latest
+    newTag: "16"
 
