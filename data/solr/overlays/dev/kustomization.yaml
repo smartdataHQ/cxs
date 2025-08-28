@@ -41,6 +41,8 @@ patches:
             value: "-Xms1g -Xmx1g"
           - name: SOLR_OPTS
             value: "-Dsolr.stop.wait=60"
+      - op: remove
+        path: /spec/template/spec/containers/0/command
       - op: replace
         path: /spec/template/spec/containers/0/readinessProbe
         value:
