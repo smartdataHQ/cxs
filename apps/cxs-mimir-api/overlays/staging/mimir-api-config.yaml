@@ -24,3 +24,7 @@ data:
   SERVICES_BACKEND_URL: 'http://cxsservices:8088'
   SFTP_HOSTNAME: "ams.origin.gcdn.co"
   JWT_ALGORITHM: "HS256"
+
+  LANGSMITH_PROJECT: "Mimir-Production"
+  LANGSMITH_TRACING: "true"
+  LANGSMITH_ENDPOINT: "https://api.smith.langchain.com"
