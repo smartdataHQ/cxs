@@ -6,6 +6,11 @@ namespace: synmetrix
 resources:
   - ../../base
 
+images:
+  - name: quicklookup/synmetrix-actions
+    newTag: 7270f8d
+
+
 # Production-specific configMap additions
 
 patches:
