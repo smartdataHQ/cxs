@@ -10,7 +10,7 @@ images:
   - name: quicklookup/synmetrix-actions
     newTag: 7270f8d
   - name: quicklookup/synmetrix-cube
-    newTag: "4723881"
+    newTag: "1b8790e"
 
 patches:
   - target:
