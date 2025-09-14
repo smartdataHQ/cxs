@@ -37,3 +37,8 @@ data:
 
   N8N_RUNNERS_ENABLED: "true"
   OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS: "true"
+
+  # Execution data retention settings
+  EXECUTIONS_DATA_MAX_AGE: "2160"  # 90 days = 2160 hours (maximum age)
+  EXECUTIONS_DATA_PRUNE_MAX_COUNT: "50000"  # Maximum number of executions to keep  
+  EXECUTIONS_DATA_HARD_DELETE_BUFFER: "168" # Hard guard against deleting data younger than 7 days
