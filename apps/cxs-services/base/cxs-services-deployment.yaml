@@ -34,6 +34,8 @@ spec:
             periodSeconds: 10
             timeoutSeconds: 3
           env:
+          - name: ANONYMIZATION_SERVICE_URL
+            value: "http://cxs-anonymization.solutions.svc.cluster.local:8081"
           - name: CLICKHOUSE_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -185,6 +187,8 @@ spec:
           image: quicklookup/cxs-services:b34856f
           command: ["python", "cxs/services/components/jobs/consumer.py"]
           env:
+          - name: ANONYMIZATION_SERVICE_URL
+            value: "http://cxs-anonymization.solutions.svc.cluster.local:8081"
           - name: PYTHONPATH
             value: .
           - name: CLICKHOUSE_PASSWORD

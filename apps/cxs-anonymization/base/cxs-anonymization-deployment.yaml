@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxs-anonymization
+spec:
+  selector:
+    matchLabels:
+      app: cxs-anonymization
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: cxs-anonymization
+        tier: api
+    spec:
+      containers:
+        - name: anonymization
+          image: quicklookup/cxs-anonymization:latest
+          resources:
+            requests:
+              cpu: 8000m
+              memory: 4000Mi
+            limits:
+              cpu: 16000m
+              memory: 8000Mi
+          ports:
+            - containerPort: 8081
+          livenessProbe:
+            httpGet:
+              port: 8081
+              path: /health
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              port: 8081
+              path: /health
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          env:
+            # Server Configuration
+            - name: ANONYMIZATION_HOST
+              value: "0.0.0.0"
+            - name: ANONYMIZATION_PORT
+              value: "8081"
+
+            # Service Configuration
+            - name: WORKERS
+              value: "1"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: DEBUG
+              value: "false"
+            - name: RELOAD
+              value: "false"
+
+            # Performance Settings
+            - name: PYTORCH_NUM_THREADS
+              value: "8"
+            - name: MAX_NER_TEXT_LENGTH
+              value: "512"
+
+            # Model Configuration
+            - name: GLINER_MODEL_PATH
+              value: "ai_models/ner_transformer"
+
+            # Health Check Configuration
+            - name: HEALTH_CHECK_TIMEOUT
+              value: "30"
+
+            # Python Path and Environment
+            - name: PYTHONPATH
+              value: "/app"
+            - name: HF_HOME
+              value: "/tmp/hf_cache"
+
+            # Python security
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: ENV
+              value: "prod"
+          volumeMounts:
+            - name: hf-cache
+              mountPath: /tmp/hf_cache
+            - name: model-cache
+              mountPath: /app/ai_models
+      imagePullSecrets:
+        - name: dockerlock
+      volumes:
+        - name: hf-cache
+          emptyDir:
+            sizeLimit: 10Gi
+        - name: model-cache
+          emptyDir:
+            sizeLimit: 5Gi
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cxs-anonymization
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cxs-anonymization
+  maxReplicas: 1
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60

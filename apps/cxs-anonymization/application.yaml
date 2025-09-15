@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cxs-anonymization
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/smartdataHQ/cxs
+    path: apps/cxs-anonymization
+    targetRevision: HEAD
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: solutions
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
