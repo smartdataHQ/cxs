@@ -2,6 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: cxs-onenote-auth
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: onenote.contextsuite.com
@@ -17,4 +19,4 @@ spec:
   tls:
     - hosts:
         - onenote.contextsuite.com
-      secretName: star-contextsuite-com
+      secretName: onenote-contextsuite-com-tls

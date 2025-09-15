@@ -62,6 +62,7 @@ metadata:
   namespace: pipelines
   annotations:
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: nifi.contextsuite.com
@@ -84,4 +85,4 @@ spec:
   tls:
     - hosts:
         - nifi.contextsuite.com
-      secretName: star-contextsuite-com    
+      secretName: nifi-contextsuite-com-tls

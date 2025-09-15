@@ -1,0 +1,3 @@
+resources:
+  - ctx-suite-light-deployment.yaml
+  - ctx-suite-light-service.yaml

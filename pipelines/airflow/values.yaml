@@ -200,6 +200,26 @@ airflow:
         secretKeyRef:
           name: islandshotel
           key: AIRTABLE_LOCATION_METADATA_TABLE_ID
+    - name: CAREN_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: caren-api-key
+    - name: CAREN_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: caren-username
+    - name: CAREN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: caren-password      
+    - name: BLUE_CAR_COMPETITOR_PRICING_URL
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: blue-car-competitor-pricing-url
   extraVolumeMounts:
     #- name: airflow-logs      
       #mountPath: /opt/airflow/logs
@@ -314,7 +334,13 @@ dags:
     sshKnownHosts: |-
       github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
 ingress:
-  enabled: false
+  enabled: true
+  host: airflow.contextsuite.com
+  tls:
+    enabled: true
+    secretName: airflow-contextsuite-com-tls
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 serviceAccount:
   create: true
   name: ""

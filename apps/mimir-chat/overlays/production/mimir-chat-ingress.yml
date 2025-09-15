@@ -2,6 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: mimir-chat-web
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: mimir.contextsuite.com
@@ -17,4 +19,4 @@ spec:
   tls:
     - hosts:
         - mimir.contextsuite.com
-      secretName: star-contextsuite-com
+      secretName: star-contextsuite-com-tls

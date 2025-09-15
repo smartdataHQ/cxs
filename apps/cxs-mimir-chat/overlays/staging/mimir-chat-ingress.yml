@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: cxs-mimir-web
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
     - host: agents.contextsuite.dev
@@ -18,5 +18,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - agents.contextsuite.dev 
-      secretName: agents-tls
+        - agents.contextsuite.dev
+      secretName: agents-contextsuite-com-tls

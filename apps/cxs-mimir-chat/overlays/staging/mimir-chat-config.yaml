@@ -4,8 +4,8 @@ metadata:
   name: cxs-mimir-web-config
   # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
 data:
-  API_ENDPOINT: "https://agents.contextsuite.com"
-  WSS_ENDPOINT: "wss://agents.contextsuite.com"
-  NEXT_PUBLIC_API_ENDPOINT: "https://agents.contextsuite.com"
-  NEXT_PUBLIC_WSS_ENDPOINT: "wss://agents.contextsuite.com"
+  BROWSER_CHAT_API: "https://agents.contextsuite.com"
+  BROWSER_APP_API: "https://agents.contextsuite.com"
+  MIMIR_SERVER_API: "https://agents.contextsuite.com"
+  BROWSER_CHAT_WSS_API: "wss://agents.contextsuite.com"
 

@@ -1,49 +1,60 @@
-# CXS Documentation
+# CXS Docs PVC Configuration
 
-## Purpose
-This application serves the Context Suite documentation, providing a centralized location for users to access documentation for all Context Suite products and services. It is deployed using the Docker image `quicklookup/cxs-utils:91df8784d7cfc2079c3048267a3db20c9cfecc0c` and is accessible at docs.contextsuite.com.
+This document outlines the changes made to the PVC configuration for the cxs-docs application based on best practices observed in the repository and troubleshooting of persistent volume binding issues.
 
-## Configuration
-Configuration for CXS Documentation is managed using Kustomize.
-- Base configuration is located in the `base/` directory.
-- Environment-specific configurations (production) are managed via overlays in the `overlays/` directory.
+## Changes Made
 
-### ConfigMap
-Non-sensitive configuration is stored in the `cxs-docs-config.yaml` ConfigMap in the production overlay. This includes:
-- Airtable configuration (base ID, table IDs)
-- Directory paths
-- Backup settings
-- Runtime settings
+The following changes were made to the `cxs-docs-pvc.yaml` file:
 
-### Secrets
-**Important:** No secrets are stored in this repository. Secrets are managed in Rancher and injected into the cluster at deployment time. Refer to the main project `README.md` for more details on secret management.
+1. Added labels to the metadata section:
+   - `app: cxs-docs` - Identifies the application this PVC belongs to
+   - `service: cxs-docs-pvc` - Identifies the specific service/resource
+   - `tier: web` - Matches the tier label used in the deployment
 
-The following secrets need to be created in Rancher under the name `cxs-docs`:
+2. Added explicit `storageClassName: longhorn` to use the Longhorn storage class that is used by other applications in the cluster.
 
-| Key | Description |
-|-----|-------------|
-| `OPENAI_API_KEY` | API key for OpenAI services |
-| `GEMINI_API_KEY` | API key for Google Gemini services |
-| `AIRTABLE_API_KEY` | API key for Airtable access |
+## Issue Resolution
 
-To create these secrets in Rancher:
-1. Navigate to the Rancher dashboard
-2. Go to the "solutions" namespace
-3. Select "Secrets" from the menu
-4. Click "Create" and select "Secret"
-5. Enter "cxs-docs" as the name
-6. Add each key-value pair from the table above
-7. Click "Create"
+The cxs-docs deployment was experiencing the following error:
+```
+0/3 nodes are available: pod has unbound immediate PersistentVolumeClaims. preemption: 0/3 nodes are available: 3 Preemption is not helpful for scheduling.
+```
 
-## Deployment
-This application is deployed automatically by Fleet when changes are pushed to this repository. The Fleet configuration for this application can be found in `fleet.yaml`.
+This error indicates that the PersistentVolumeClaim could not be bound to any available storage in the cluster. After examining other PVC configurations in the repository, we found that:
 
-## Kubernetes Resources
-The base configuration defines the following Kubernetes resources:
-- `cxs-docs-deployment.yaml`: Manages the deployment of the documentation pods, including the HorizontalPodAutoscaler for automatic scaling. The application runs on port 3000 within the container.
-- `cxs-docs-service.yaml`: Exposes the documentation service internally within the cluster. The service maps external port 80 to the container's port 3000.
-- `kustomization.yaml`: Defines the Kustomize configuration for the base layer.
+1. Many successful deployments use the "longhorn" storage class explicitly
+2. The Neo4j deployment uses `storageClassName: longhorn` for its dynamic provisioning
+3. The isl-hotel-streaming-client uses `storageClassName: longhorn-static` with an explicitly defined PersistentVolume
 
-The production overlay adds the following resources:
-- `cxs-docs-ingress.yaml`: Configures the Ingress resource to expose the documentation service externally at docs.contextsuite.com.
-- `kustomization.yaml`: Defines the Kustomize configuration for the production overlay.
+By specifying the "longhorn" storage class, we ensure that the PVC will use a storage class that is known to work in this cluster, rather than relying on the default storage class which might not be properly configured or might not have enough resources.
+
+## Storage Classes in the Repository
+
+After examining multiple PVC configurations in the repository, the following patterns were identified:
+
+1. **Explicit Storage Classes**: Several PVCs in the repository specify a storage class, with "longhorn" and "longhorn-static" being the most common. This suggests that Longhorn is the primary storage solution used in this Kubernetes cluster.
+
+2. **Access Modes**: Most PVCs use the `ReadWriteOnce` access mode, which allows the volume to be mounted as read-write by a single node. This is appropriate for most applications, including cxs-docs.
+
+3. **Consistent Naming**: All PVCs follow a consistent naming pattern, typically including the application name and "-pvc" suffix (e.g., `cxs-docs-pvc`).
+
+4. **Labeling**: Many PVCs include labels that identify the application and service they belong to, which helps with organization, filtering, and management.
+
+5. **Storage Sizing**: Storage requests vary based on the needs of the application, ranging from 1Gi to 16Gi in the examples examined.
+
+## Compatibility with Deployment
+
+The cxs-docs deployment correctly references the PVC in the volumes section:
+
+```yaml
+volumes:
+- name: docs-data
+  persistentVolumeClaim:
+    claimName: cxs-docs-pvc
+```
+
+The deployment includes a HorizontalPodAutoscaler that allows scaling between 1 and 3 replicas. Since the PVC uses the `ReadWriteOnce` access mode, each pod will get its own copy of the PVC when scaling.
+
+## Conclusion
+
+The updated PVC configuration addresses the "unbound immediate PersistentVolumeClaims" error by explicitly specifying the "longhorn" storage class that is used by other applications in the cluster. This change ensures that the PVC can be bound to available storage, allowing the cxs-docs pods to be scheduled successfully.

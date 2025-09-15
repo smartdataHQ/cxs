@@ -1,2 +1,4 @@
+namespace: longhorn-system
+
 resources:
-  - longhorn-service-monitor.yaml
+  - base

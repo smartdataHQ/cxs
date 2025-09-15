@@ -20,12 +20,14 @@ grafana.ini:
 
 ingress:
   enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
     - grafana.contextsuite.com
   tls:
     - hosts:
         - grafana.contextsuite.com
-      secretName: star-contextsuite-com
+      secretName: grafana-contextsuite-com-tls
 
 extraSecretMounts:
   - name: csx-secrets

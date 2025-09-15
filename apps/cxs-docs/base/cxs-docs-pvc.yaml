@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cxs-docs-pvc
+  labels:
+    app: cxs-docs
+    service: cxs-docs-pvc
+    tier: web
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: longhorn
+  # Using the longhorn storage class which is used by other applications in the cluster

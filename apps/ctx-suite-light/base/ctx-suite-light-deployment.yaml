@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ctx-suite-light
+spec:
+  selector:
+    matchLabels:
+      app: ctx-suite-light
+      tier: app
+  template:
+    metadata:
+      labels:
+        app: ctx-suite-light
+        tier: app
+    spec:
+      containers:
+        - name: node
+          image: quicklookup/ctx-suite-light:22a694d
+          resources:
+            requests:
+              cpu: 200m
+              memory: 200Mi
+          ports:
+            - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              port: 3000
+              path: /api/status/alive
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: 3000
+              path: /api/status/ready
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+          env:
+            - name: FACEBOOK_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: FACEBOOK_APP_ID
+            - name: FACEBOOK_APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: FACEBOOK_APP_SECRET
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: GOOGLE_CLIENT_SECRET
+            - name: LINKEDIN_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: LINKEDIN_KEY
+            - name: LINKEDIN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: LINKEDIN_SECRET
+            - name: TWITTER_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: TWITTER_API_SECRET
+            - name: NEXTAUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: contextsuite
+                  key: NEXTAUTH_SECRET
+            
+          envFrom:
+            - configMapRef:
+                name: ctx-suite-light-config
+            - secretRef:
+                name: ctx-suite-light
+      imagePullSecrets:
+        - name: dockerlock
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ctx-suite-light
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ctx-suite-light
+  maxReplicas: 4
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60

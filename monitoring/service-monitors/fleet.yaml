@@ -1,0 +1,10 @@
+defaultNamespace: longhorn-system
+namespace: longhorn-system
+
+targetCustomizations:
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: base

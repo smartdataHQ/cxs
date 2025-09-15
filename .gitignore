@@ -6,3 +6,5 @@
 # Database migration artifacts
 .backups/
 .logs/
+
+/.idea/
