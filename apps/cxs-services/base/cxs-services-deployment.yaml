@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-services:84125cd
+          image: quicklookup/cxs-services:52239e4
 
           ports:
             - containerPort: 8088
