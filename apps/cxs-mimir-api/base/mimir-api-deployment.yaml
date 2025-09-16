@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-mimir-api:bc41bc4
+          image: quicklookup/cxs-mimir-api:27285c5
           resources:
             requests:
               cpu: 1000m
@@ -154,11 +154,11 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: HF_TOKEN
-            - name: LANGSMITH_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: LANGSMITH_API_KEY
+            # - name: LANGSMITH_API_KEY
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: llm
+            #       key: LANGSMITH_API_KEY
           envFrom:
             - configMapRef:
                 name: cxs-mimir-api-config

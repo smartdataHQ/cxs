@@ -25,6 +25,6 @@ data:
   SFTP_HOSTNAME: "ams.origin.gcdn.co"
   JWT_ALGORITHM: "HS256"
 
-  LANGSMITH_PROJECT: "Mimir-Production"
-  LANGSMITH_TRACING: "true"
-  LANGSMITH_ENDPOINT: "https://api.smith.langchain.com"
+  # LANGSMITH_PROJECT: "Mimir-Production"
+  # LANGSMITH_TRACING: "true"
+  # LANGSMITH_ENDPOINT: "https://api.smith.langchain.com"
