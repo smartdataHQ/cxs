@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: anonymization
-          image: quicklookup/cxs-anonymization:latest
+          image: quicklookup/cxs-anonymization:1c710c8
           resources:
             requests:
               cpu: 8000m
