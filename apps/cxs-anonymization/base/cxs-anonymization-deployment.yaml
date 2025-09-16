@@ -88,17 +88,14 @@ spec:
           volumeMounts:
             - name: hf-cache
               mountPath: /tmp/hf_cache
-            - name: model-cache
-              mountPath: /app/ai_models
+
       imagePullSecrets:
         - name: dockerlock
       volumes:
         - name: hf-cache
           emptyDir:
             sizeLimit: 10Gi
-        - name: model-cache
-          emptyDir:
-            sizeLimit: 5Gi
+
 ---
 apiVersion: autoscaling/v1
 kind: HorizontalPodAutoscaler
