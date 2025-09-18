@@ -1,6 +1,6 @@
-bases:
-  - ../../base
+namespace: solutions
 
 resources:
+  - ../../base
   - mimir-api-config.yaml
   - mimir-api-ingress.yml
