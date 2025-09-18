@@ -9,7 +9,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/smartdataHQ/cxs.git
-        revision: main
+        revision: staging
         directories:
           - path: apps/*/overlays/production
   template:
@@ -21,7 +21,7 @@ spec:
       project: default
       source:
         repoURL: https://github.com/smartdataHQ/cxs.git
-        targetRevision: main
+        targetRevision: staging
         path: "{{.path.path}}"
       destination:
         server: https://kubernetes.default.svc
