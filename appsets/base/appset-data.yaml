@@ -1,33 +1,33 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: staging-monitoring-apps
+  name: appset-data
   namespace: argocd
 spec:
   goTemplate: true
-  goTemplateOptions: [ missingkey=error ]
+  goTemplateOptions: [ "missingkey=error" ]
   generators:
     - git:
         repoURL: https://github.com/smartdataHQ/cxs.git
-        revision: staging
-        directories: # Target staging overlays
-          - path: monitoring/*/overlays/staging
+        revision: main
+        directories: # production is default
+          - path: data/*/overlays/production
   template:
     metadata:
       name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
       labels:
-        part-of: cxs-monitoring
+        part-of: cxs-data
     spec:
       project: default
       source:
         repoURL: https://github.com/smartdataHQ/cxs.git
-        targetRevision: staging
+        targetRevision: main
         path: "{{.path.path}}"
       destination:
         server: https://kubernetes.default.svc
         namespace: ""  # this is left each application's to kustomization.yaml
 
-#      syncPolicy:
-#        automated:
-#          prune: true
-#          selfHeal: true
+      # syncPolicy:
+      #   automated:
+      #     prune: true
+      #     selfHeal: true

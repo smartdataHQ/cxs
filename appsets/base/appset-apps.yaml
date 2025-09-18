@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: staging-data-apps
+  name: appset-apps
   namespace: argocd
 spec:
   goTemplate: true
@@ -9,25 +9,27 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/smartdataHQ/cxs.git
-        revision: staging
-        directories: # Target staging overlays
-          - path: data/*/overlays/staging
+        revision: main
+        directories:
+          - path: apps/*/overlays/production
   template:
     metadata:
       name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
       labels:
-        part-of: cxs-data
+        part-of: cxs-apps
     spec:
       project: default
       source:
         repoURL: https://github.com/smartdataHQ/cxs.git
-        targetRevision: staging
+        targetRevision: main
         path: "{{.path.path}}"
       destination:
         server: https://kubernetes.default.svc
         namespace: ""  # this is left each application's to kustomization.yaml
 
-      # syncPolicy:
-      #   automated:
-      #     prune: true
-      #     selfHeal: true
+      syncPolicy:
+        syncOptions:
+          - PreserveResourcesOnDeletion=true
+        # automated:
+        #   prune: true
+        #   selfHeal: true
