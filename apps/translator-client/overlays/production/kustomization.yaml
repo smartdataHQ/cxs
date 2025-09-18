@@ -1,6 +1,6 @@
-bases:
-  - ../../base
+namespace: solutions
 
 resources:
+  - ../../base
   - translator-client-config.yaml
   - translator-client-ingress.yml
