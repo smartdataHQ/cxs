@@ -1,6 +1,6 @@
 
 global:
-    domain: argocd.contextsuite.com
+    domain: argo.contextsuite.com
 
 
 configs:
@@ -16,7 +16,7 @@ configs:
       requestedScopes: ["openid", "profile", "email"]
       requestedIDTokenClaims: {"groups": {"essential": true}}
     # URL configuration
-    url: https://argocd.contextsuite.com
+    url: https://argo.contextsuite.com
   rbac:
     # RBAC policy configuration
     policy.default: role:readonly
