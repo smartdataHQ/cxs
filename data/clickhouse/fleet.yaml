@@ -1,0 +1,10 @@
+defaultNamespace: data
+namespace: data
+
+targetCustomizations:
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: overlays/staging
