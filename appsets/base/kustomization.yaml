@@ -1,0 +1,6 @@
+resources:
+  - appset-apps.yaml
+  - appset-data.yaml
+  - appset-monitoring.yaml
+  - appset-operators.yaml 
+

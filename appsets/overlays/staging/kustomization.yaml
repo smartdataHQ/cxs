@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+patches:
+# Patch ApplicationSets to target staging overlays instead of production
+- target:
+    kind: ApplicationSet
+    name: appset-apps
+  patch: |-
+    - op: replace
+      path: /spec/generators/0/git/directories/0/path
+      value: apps/*/overlays/staging
+- target:
+    kind: ApplicationSet
+    name: appset-data
+  patch: |-
+    - op: replace
+      path: /spec/generators/0/git/directories/0/path
+      value: data/*/overlays/staging
+- target:
+    kind: ApplicationSet
+    name: appset-monitoring
+  patch: |-
+    - op: replace
+      path: /spec/generators/0/git/directories/0/path
+      value: monitoring/*/overlays/staging
+- target:
+    kind: ApplicationSet
+    name: appset-operators
+  patch: |-
+    - op: replace
+      path: /spec/generators/0/git/directories/0/path
+      value: operators/*/overlays/staging
