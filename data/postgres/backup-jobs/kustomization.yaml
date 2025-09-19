@@ -1,2 +1,5 @@
 resources:
-  - postgres-backup-cronjobs.yaml 
+  - backup-rbac.yaml
+  - backup-script-configmap.yaml
+  - backup-cronjobs-repo1.yaml
+  - backup-cronjobs-minio.yaml 

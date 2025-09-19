@@ -1,0 +1,117 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cxs-pg-full-backup
+  namespace: data
+  labels:
+    app: cxs-pg-backup
+    type: full
+    repo: local
+spec:
+  # Run every Monday at 06:00
+  schedule: "0 6 * * 1"
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600  # 1 hour timeout
+      template:
+        metadata:
+          labels:
+            app: postgres-backup
+            type: full
+            repo: local
+        spec:
+          serviceAccountName: cxs-pg-backup
+          restartPolicy: OnFailure
+          containers:
+          - name: backup
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/bash
+            - /scripts/backup.sh
+            - full
+            - "1"
+            env:
+            - name: PGBACKREST_REPO_POD_NAME
+              value: "cxs-pg-repo-host-0"
+            - name: PGBACKREST_REPO_POD_NAMESPACE
+              value: "data"
+            volumeMounts:
+            - name: backup-script
+              mountPath: /scripts
+              readOnly: true
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "100m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
+          volumes:
+          - name: backup-script
+            configMap:
+              name: cxs-pg-backup-script
+              defaultMode: 0755
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cxs-pg-diff-backup
+  namespace: data
+  labels:
+    app: cxs-pg-backup
+    type: differential
+    repo: local
+spec:
+  # Run Tuesday through Sunday at 06:00
+  schedule: "0 6 * * 0,2-6"
+  timeZone: "UTC"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 7
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 1800  # 30 minutes timeout
+      template:
+        metadata:
+          labels:
+            app: postgres-backup
+            type: differential
+            repo: local
+        spec:
+          serviceAccountName: cxs-pg-backup
+          restartPolicy: OnFailure
+          containers:
+          - name: backup
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/bash
+            - /scripts/backup.sh
+            - diff
+            - "1"
+            env:
+            - name: PGBACKREST_REPO_POD_NAME
+              value: "cxs-pg-repo-host-0"
+            - name: PGBACKREST_REPO_POD_NAMESPACE
+              value: "data"
+            volumeMounts:
+            - name: backup-script
+              mountPath: /scripts
+              readOnly: true
+            resources:
+              requests:
+                memory: "64Mi"
+                cpu: "100m"
+              limits:
+                memory: "128Mi"
+                cpu: "200m"
+          volumes:
+          - name: backup-script
+            configMap:
+              name: cxs-pg-backup-script
+              defaultMode: 0755

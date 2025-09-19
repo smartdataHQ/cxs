@@ -4,34 +4,68 @@ This setup creates automated PostgreSQL backups using Kubernetes CronJobs that e
 
 ## Overview
 
-The backup system consists of:
-- **Full backups**: Every Monday at 06:00 UTC
-- **Differential backups**: Tuesday through Sunday at 06:00 UTC
+The backup system consists of two repositories with staggered schedules:
+
+### Repo1 (Local)
+- **Full Backup**: Monday 06:00 UTC
+- **Differential Backup**: Tuesday-Sunday 06:00 UTC
+
+### Repo2 (MinIO)
+- **Full Backup**: Tuesday 07:00 UTC  
+- **Differential Backup**: Monday, Wednesday-Saturday 07:00 UTC
 
 Jobs will fail naturally if pgbackrest returns a non-zero exit code, making them easy to monitor with Grafana or other Kubernetes monitoring systems.
 
-## Files
+## File Structure
 
-- `postgres-backup-cronjobs.yaml` - CronJob definitions and RBAC setup
-- `postgres-backup-cronjobs-README.md` - This documentation
+### Core Components
+- **`backup-rbac.yaml`** - ServiceAccount, Role, and RoleBinding for backup jobs
+- **`backup-script-configmap.yaml`** - ConfigMap containing the backup script
+
+### CronJob Definitions
+- **`backup-cronjobs-repo1.yaml`** - Backup jobs for repo1 (local pgBackRest repository)
+- **`backup-cronjobs-minio.yaml`** - Backup jobs for repo2 (MinIO S3-compatible storage)
+- **`kustomization.yaml`** - Kustomize configuration for all resources
 
 ## Deployment
 
-1. **Deploy the backup CronJobs:**
-   ```bash
-   kubectl apply -f postgres-backup-cronjobs.yaml
-   ```
+### Deploy All Components
+```bash
+# Deploy everything with kustomize
+kubectl apply -k .
 
-2. **Verify deployment:**
-   ```bash
-   # Check CronJobs
-   kubectl get cronjobs -n data -l app=postgres-backup
-   
-   # Check ServiceAccount and RBAC
-   kubectl get serviceaccount postgres-backup -n data
-   kubectl get role postgres-backup -n data
-   kubectl get rolebinding postgres-backup -n data
-   ```
+# Or deploy manually
+kubectl apply -f backup-rbac.yaml
+kubectl apply -f backup-script-configmap.yaml
+kubectl apply -f backup-cronjobs-repo1.yaml
+kubectl apply -f backup-cronjobs-minio.yaml
+```
+
+### Deploy Specific Repositories
+```bash
+# Repo1 only
+kubectl apply -f backup-rbac.yaml
+kubectl apply -f backup-script-configmap.yaml
+kubectl apply -f backup-cronjobs-repo1.yaml
+
+# MinIO only (requires RBAC and script to be deployed first)
+kubectl apply -f backup-cronjobs-minio.yaml
+```
+
+### Verify Deployment
+```bash
+# Check all CronJobs
+kubectl get cronjobs -n data -l app=cxs-pg-backup
+
+# Check by repository
+kubectl get cronjobs -n data -l repo=local
+kubectl get cronjobs -n data -l repo=minio
+
+# Check ServiceAccount and RBAC
+kubectl get serviceaccount cxs-pg-backup -n data
+kubectl get role cxs-pg-backup -n data
+kubectl get rolebinding cxs-pg-backup -n data
+```
 
 ## Configuration
 
@@ -39,9 +73,9 @@ Jobs will fail naturally if pgbackrest returns a non-zero exit code, making them
 The CronJobs are configured to target:
 - **Pod Name**: `cxs-pg-repo-host-0`
 - **Namespace**: `data`
-- **Stanza**: `db1`
+- **Stanza**: `db`
 
-To modify these values, update the ConfigMap in `postgres-backup-cronjobs.yaml`:
+To modify these values, update the ConfigMap in `backup-script-configmap.yaml`:
 ```yaml
 data:
   backup.sh: |
@@ -50,21 +84,33 @@ data:
     # ... rest of script
 ```
 
-### Schedule Configuration
-- **Full backups**: `"0 6 * * 1"` (Monday 06:00 UTC)
-- **Differential backups**: `"0 6 * * 2-7"` (Tuesday-Sunday 06:00 UTC)
+### Repository Configuration
+The backup script accepts a repository parameter:
+- `$1`: Backup type (`full` or `diff`)
+- `$2`: Repository number (`1` for local, `2` for MinIO)
 
-To change the schedule, modify the `schedule` field in the CronJob specs.
+### Schedule Configuration
+**Repo1 (Local):**
+- **Full backups**: `"0 6 * * 1"` (Monday 06:00 UTC)
+- **Differential backups**: `"0 6 * * 0,2-6"` (Tuesday-Sunday 06:00 UTC)
+
+**Repo2 (MinIO):**
+- **Full backups**: `"0 7 * * 2"` (Tuesday 07:00 UTC)
+- **Differential backups**: `"0 7 * * 1,3-6"` (Monday, Wednesday-Saturday 07:00 UTC)
+
+To change schedules, modify the `schedule` field in the respective CronJob files.
 
 ## Management Commands
 
 ### Manual Backup Execution
 ```bash
-# Trigger a full backup manually
-kubectl create job --from=cronjob/postgres-full-backup postgres-full-backup-manual -n data
+# Trigger repo1 backups manually
+kubectl create job --from=cronjob/cxs-pg-full-backup cxs-pg-full-backup-manual -n data
+kubectl create job --from=cronjob/cxs-pg-diff-backup cxs-pg-diff-backup-manual -n data
 
-# Trigger a differential backup manually
-kubectl create job --from=cronjob/postgres-diff-backup postgres-diff-backup-manual -n data
+# Trigger MinIO backups manually
+kubectl create job --from=cronjob/cxs-pg-full-backup-minio cxs-pg-full-backup-minio-manual -n data
+kubectl create job --from=cronjob/cxs-pg-diff-backup-minio cxs-pg-diff-backup-minio-manual -n data
 ```
 
 ### View Backup Status
@@ -72,11 +118,17 @@ kubectl create job --from=cronjob/postgres-diff-backup postgres-diff-backup-manu
 # Check recent backup jobs
 kubectl get jobs -n data -l app=postgres-backup
 
+# Check by repository
+kubectl get jobs -n data -l repo=local
+kubectl get jobs -n data -l repo=minio
+
 # View logs from the most recent backup
 kubectl logs -n data -l app=postgres-backup --tail=100
 
 # Check backup info directly from the PostgreSQL pod
-kubectl exec -n data cxs-pg-repo-host-0 -- pgbackrest info --stanza=db1
+kubectl exec -n data cxs-pg-repo-host-0 -- pgbackrest info --stanza=db
+kubectl exec -n data cxs-pg-repo-host-0 -- pgbackrest info --stanza=db --repo=1
+kubectl exec -n data cxs-pg-repo-host-0 -- pgbackrest info --stanza=db --repo=2
 ```
 
 ### Cleanup Failed Jobs
@@ -86,6 +138,10 @@ kubectl delete jobs -n data -l app=postgres-backup --field-selector status.succe
 
 # Delete all backup jobs (keeping CronJobs)
 kubectl delete jobs -n data -l app=postgres-backup
+
+# Delete jobs by repository
+kubectl delete jobs -n data -l repo=local
+kubectl delete jobs -n data -l repo=minio
 ```
 
 ## Troubleshooting
@@ -119,13 +175,19 @@ kubectl logs -n data -l app=postgres-backup -f
 
 ### Suspend/Resume CronJobs
 ```bash
-# Suspend all backup CronJobs
-kubectl patch cronjob postgres-full-backup -n data -p '{"spec":{"suspend":true}}'
-kubectl patch cronjob postgres-diff-backup -n data -p '{"spec":{"suspend":true}}'
+# Suspend repo1 backup CronJobs
+kubectl patch cronjob cxs-pg-full-backup -n data -p '{"spec":{"suspend":true}}'
+kubectl patch cronjob cxs-pg-diff-backup -n data -p '{"spec":{"suspend":true}}'
+
+# Suspend MinIO backup CronJobs
+kubectl patch cronjob cxs-pg-full-backup-minio -n data -p '{"spec":{"suspend":true}}'
+kubectl patch cronjob cxs-pg-diff-backup-minio -n data -p '{"spec":{"suspend":true}}'
 
 # Resume all backup CronJobs
-kubectl patch cronjob postgres-full-backup -n data -p '{"spec":{"suspend":false}}'
-kubectl patch cronjob postgres-diff-backup -n data -p '{"spec":{"suspend":false}}'
+kubectl patch cronjob cxs-pg-full-backup -n data -p '{"spec":{"suspend":false}}'
+kubectl patch cronjob cxs-pg-diff-backup -n data -p '{"spec":{"suspend":false}}'
+kubectl patch cronjob cxs-pg-full-backup-minio -n data -p '{"spec":{"suspend":false}}'
+kubectl patch cronjob cxs-pg-diff-backup-minio -n data -p '{"spec":{"suspend":false}}'
 ```
 
 ## Monitoring with Grafana
@@ -136,17 +198,26 @@ The CronJobs are designed to fail naturally when pgbackrest returns a non-zero e
 
 **Job Success Rate:**
 ```promql
-rate(kube_job_status_succeeded{namespace="data", job_name=~"postgres-.*-backup-.*"}[24h])
+rate(kube_job_status_succeeded{namespace="data", job_name=~"cxs-pg-.*-backup.*"}[24h])
 ```
 
 **Failed Jobs:**
 ```promql
-kube_job_status_failed{namespace="data", job_name=~"postgres-.*-backup-.*"} > 0
+kube_job_status_failed{namespace="data", job_name=~"cxs-pg-.*-backup.*"} > 0
 ```
 
 **Job Duration:**
 ```promql
-kube_job_status_completion_time{namespace="data", job_name=~"postgres-.*-backup-.*"} - kube_job_status_start_time{namespace="data", job_name=~"postgres-.*-backup-.*"}
+kube_job_status_completion_time{namespace="data", job_name=~"cxs-pg-.*-backup.*"} - kube_job_status_start_time{namespace="data", job_name=~"cxs-pg-.*-backup.*"}
+```
+
+**Repository-specific monitoring:**
+```promql
+# Repo1 success rate
+rate(kube_job_status_succeeded{namespace="data", job_name=~"cxs-pg-.*-backup-[0-9]+"}[24h])
+
+# MinIO success rate  
+rate(kube_job_status_succeeded{namespace="data", job_name=~"cxs-pg-.*-backup-minio-[0-9]+"}[24h])
 ```
 
 ## Security Considerations
