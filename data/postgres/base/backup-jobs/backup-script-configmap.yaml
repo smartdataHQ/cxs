@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cxs-pg-backup-script
+  namespace: data
+data:
+  backup.sh: |
+    #!/bin/bash
+    set -e
+    
+    POD_NAME="${PGBACKREST_REPO_POD_NAME:-cxs-pg-repo-host-0}"
+    NAMESPACE="${PGBACKREST_REPO_POD_NAMESPACE:-data}"
+    BACKUP_TYPE="${1:-diff}"
+    REPO_NUM="${2:-1}"
+    
+    echo "$(date): Starting pgbackrest ${BACKUP_TYPE} backup to repo${REPO_NUM}..."
+    
+    if [ "$BACKUP_TYPE" = "full" ]; then
+        BACKUP_COMMAND="pgbackrest backup --stanza=db --type=full --repo=${REPO_NUM} --log-level-console=detail"
+    else
+        BACKUP_COMMAND="pgbackrest backup --stanza=db --type=diff --repo=${REPO_NUM} --log-level-console=detail"
+    fi
+    
+    echo "Pod: ${POD_NAME}"
+    echo "Namespace: ${NAMESPACE}"
+    echo "Repository: repo${REPO_NUM}"
+    echo "Command: ${BACKUP_COMMAND}"
+    
+    # Execute backup command - will exit with non-zero code on failure
+    kubectl exec -n "${NAMESPACE}" "${POD_NAME}" -- ${BACKUP_COMMAND}
+    
+    echo "$(date): Backup to repo${REPO_NUM} completed successfully"
