@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: pipelines
+
+helmCharts:
+- name: airflow
+  repo: https://apache.github.io/airflow
+  version: 8.9.0
+  releaseName: airflow
+  valuesFile: values.yaml

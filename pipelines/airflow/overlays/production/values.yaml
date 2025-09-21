@@ -1,0 +1,375 @@
+airflow:
+  legacyCommands: false
+  image:
+    repository: quicklookup/airflow-pipelines
+    tag: 7c55290
+    pullPolicy: IfNotPresent
+    pullSecret: "dockerlock"
+
+  executor: KubernetesExecutor
+  fernetKey: ""
+  webserverSecretKey: ""
+  config:
+    AIRFLOW__WEBSERVER__RBAC: "True"
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
+    AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX: "True"
+    AIRFLOW__WEBSERVER__WARN_DEPLOYMENT_EXPOSURE: false
+    AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
+    AIRFLOW__EMAIL__EMAIL_CONN_ID: "smtp_default"
+    AIRFLOW__SMTP__SMTP_HOST: "smtp.sendgrid.net"
+    AIRFLOW__SMTP__SMTP_STARTTLS: "True"
+    AIRFLOW__SMTP__SMTP_SSL: "False"
+    AIRFLOW__SMTP__SMTP_PORT: "587"
+  users: []
+  connections:
+    - id: blue_car_azure_sql
+      type: mssql
+      description: "Blue car caren azure sql db"
+      host: caren-prod-server.database.windows.net
+      schema: CarenProd_Copy
+      login: bluecarlogin
+      password: ${BLUE_CAR_AZURE_SQL_PASSWORD}
+      port: 1433
+      extra: |-
+        { 
+          "timeout": 10000
+        }
+    - id: arctic_bigquery
+      type: gcpbigquery
+      description: "Arctic booking data big query db"
+      extra: |-
+        { 
+          "project": "arctic-data",
+          "key_path": "/opt/airflow/arctic-data-bigquery-service-account.json",
+          "num_retries": 5,
+          "is_anonymous": false,
+          "use_legacy_sql": true,
+          "priority": "INTERACTIVE"
+        }
+    - id: n1_sftp
+      type: sftp
+      description: "sftp snjallgogn@file.festi.is"
+      host: file.festi.is
+      port: 22
+      login: snjallgogn
+      password: ${N1_SFTP_PASSWORD}
+    - id: icelandic_tourist_board_azure_sql
+      type: mssql
+      description: "Icelandic tourist board azure sql db"
+      host: ferda-sql-mbferdathjonusta-prod-01.database.windows.net
+      schema: ferda-sqldb-mbftdatawarehouse-prod-01
+      login: snjallgogn
+      password: ${ICELANDIC_TOURIST_BOARD_AZURE_SQL_PASSWORD}
+      port: 1433
+      extra: |-
+        { 
+          "timeout": 10000
+        }  
+  connectionsTemplates:
+    BLUE_CAR_AZURE_SQL_PASSWORD:
+      kind: secret
+      name: airflow
+      key: blue-car-azure-sql-password
+    ARCTIC_DATA_BIGQUERY_SERVICE_ACCOUNT:
+      kind: secret
+      name: airflow
+      key: arctic-data-bigquery-service-account
+    N1_SFTP_PASSWORD:
+      kind: secret
+      name: airflow
+      key: n1-sftp-password
+    ICELANDIC_TOURIST_BOARD_AZURE_SQL_PASSWORD:
+      kind: secret
+      name: airflow
+      key: icelandic-toursit-board-azure-sql-password
+  connectionsUpdate: false
+  variables: []
+  pools: []
+  extraPipPackages: []
+  extraEnv:
+    - name: AIRFLOW__CORE__FERNET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: airflow-core-fernet-key
+    - name: AIRFLOW__WEBSERVER__SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: airflow-webserver-secret-key
+    - name: KAFKA_HOST
+      value: "kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092"
+    - name: KAFKA_USER
+      value: "user1"
+    - name: KAFKA_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: kafka-password
+    - name: REDIS_HOST
+      value: "redis-master.data"
+    - name: REDIS_PORT
+      value: "6379"
+    - name: REDIS_DB
+      value: "4"
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: redis-password
+    - name: POSTGRES_HOST
+      value: "cxs-pg-primary.data.svc"
+    - name: POSTGRES_PORT
+      value: "5432"
+    - name: POSTGRES_DB
+      value: "airflow"
+    - name: POSTGRES_USER
+      value: "aiflow"
+    - name: POSTGRES_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: postgres-password
+    - name: CLICKHOUSE_PORT
+      value: "8123"
+    - name: CLICKHOUSE_DB
+      value: "default"
+    - name: CLICKHOUSE_HOST
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: clickhouse-host
+    - name: CLICKHOUSE_USER
+      value: "default"
+    - name: CLICKHOUSE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: clickhouse-password
+    - name: DB_PATH
+      value: "/pipedrive/databases"
+    - name: RAW_PATH
+      value: "/pipedrive/raw"
+    - name: RUST_BACKTRACE
+      value: "full"
+    - name: GID_ROOT
+      value: "https://the.gid.is"
+    - name: AIRFLOW__SMTP__SMTP_MAIL_FROM
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: airflow-smtp-smtp-mail-from
+    - name: AIRFLOW__SMTP__SMTP_USER
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: airflow-smtp-smtp-user
+    - name: AIRFLOW__SMTP__SMTP_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: airflow-smtp-smtp-password
+    - name: AZURE_CLIENT_ID
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: azure-client-id
+    - name: AZURE_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: azure-client-secret
+    - name: AZURE_TENANT_ID
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: azure-tenant-id
+    - name: ISLHTL_AIRTABLE_LOCATION_METADATA_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: islandshotel
+          key: AIRTABLE_LOCATION_METADATA_API_KEY
+    - name: ISLHTL_AIRTABLE_LOCATION_METADATA_APP_ID
+      valueFrom:
+        secretKeyRef:
+          name: islandshotel
+          key: AIRTABLE_LOCATION_METADATA_APP_ID
+    - name: ISLHTL_AIRTABLE_LOCATION_METADATA_TABLE_ID
+      valueFrom:
+        secretKeyRef:
+          name: islandshotel
+          key: AIRTABLE_LOCATION_METADATA_TABLE_ID
+    - name: CAREN_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: caren-api-key
+    - name: CAREN_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: caren-username
+    - name: CAREN_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: caren-password
+    - name: BLUE_CAR_COMPETITOR_PRICING_URL
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: blue-car-competitor-pricing-url
+  extraVolumeMounts:
+    #- name: airflow-logs      
+    #mountPath: /opt/airflow/logs
+    - name: airflow-sftp
+      mountPath: /opt/airflow/id_rsa
+      readOnly: true
+      subPath: ssh-privatekey
+    - name: arctic-bigquery-service-account
+      mountPath: /opt/airflow/arctic-data-bigquery-service-account.json
+      readOnly: true
+      subPath: arctic-data-bigquery-service-account
+  extraVolumes:
+    #- name: airflow-logs
+    #persistentVolumeClaim:
+    #claimName: airflow-logs-pvc
+    - name: airflow-sftp
+      secret:
+        defaultMode: 420
+        secretName: airflow-ssh-sftp-secret
+    - name: arctic-bigquery-service-account
+      secret:
+        defaultMode: 420
+        secretName: airflow
+  kubernetesPodTemplate:
+    stringOverride: ""
+    resources: {}
+    extraPipPackages: []
+    extraVolumeMounts: []
+    extraVolumes: []
+scheduler:
+  replicas: 1
+  resources: {}
+  logCleanup:
+    enabled: false
+    retentionMinutes: 21600
+  livenessProbe:
+    enabled: true
+    taskCreationCheck:
+      enabled: true
+      thresholdSeconds: 300
+      schedulerAgeBeforeCheck: 180
+web:
+  replicas: 1
+  resources: {}
+  service:
+    type: ClusterIP
+    externalPort: 8080
+  webserverConfig:
+    stringOverride: |
+      import os
+      from airflow import configuration as conf
+      from flask_appbuilder.security.manager import AUTH_OAUTH  
+      
+      WTF_CSRF_ENABLED = True
+      WTF_CSRF_TIME_LIMIT = None   
+      
+      AUTH_USER_REGISTRATION_ROLE = "Admin"
+      AUTH_USER_REGISTRATION = True
+      
+      AUTH_TYPE = AUTH_OAUTH
+      
+      OAUTH_PROVIDERS = [
+        {
+        "name": "azure",
+        "icon": "fa-windows",
+        "token_key": "access_token",
+        "remote_app": {
+            "client_id": os.environ.get("AZURE_CLIENT_ID"),
+            "client_secret": os.environ.get("AZURE_CLIENT_SECRET"),
+            "api_base_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2",
+            "client_kwargs": {
+                "scope": "User.read name preferred_username email profile upn",
+                "resource": os.environ.get("AZURE_CLIENT_ID"),                
+                "verify_signature": False
+            },
+            "request_token_url": None,
+            "access_token_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2/token",
+            "authorize_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2/authorize",
+            },
+        }
+      ]
+    existingSecret: ""
+workers:
+  logCleanup:
+    enabled: false
+  enabled: false
+triggerer:
+  enabled: true
+  replicas: 1
+  resources: {}
+  capacity: 1000
+flower:
+  enabled: false
+logs:
+  path: /opt/airflow/logs
+  persistence:
+    enabled: true
+    existingClaim: airflow-logs-pvc
+    accessMode: ReadWriteMany
+dags:
+  path: /opt/airflow/dags
+  persistence:
+    enabled: false
+  gitSync:
+    enabled: true
+    repo: "git@github.com:smartdataHQ/pipelines.git"
+    branch: "main"
+    revision: "HEAD"
+    syncWait: 60
+    sshSecret: "airflow-ssh-git-secret"
+    sshSecretKey: "ssh-privatekey"
+    sshKnownHosts: |-
+      github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+ingress:
+  enabled: true
+  host: airflow.contextsuite.com
+  tls:
+    enabled: true
+    secretName: airflow-contextsuite-com-tls
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+extraManifests: []
+pgbouncer:
+  enabled: false
+  resources: {}
+  authType: md5
+postgresql:
+  enabled: false
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 8Gi
+externalDatabase:
+  type: postgres
+  host: cxs-pg-primary.data.svc
+  port: 5432
+  database: airflow
+  user: aiflow
+  passwordSecret: "airflow"
+  passwordSecretKey: "postgres-password"
+  properties: ""
+redis:
+  enabled: false
+externalRedis:
+  host: redis-master.data
+  port: 6379
+  databaseNumber: 0
+  passwordSecret: "airflow"
+  passwordSecretKey: "redis-password"
