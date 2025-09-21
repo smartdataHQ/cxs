@@ -18,6 +18,11 @@ grafana.ini:
     url: $__file{/etc/secrets/csx-secrets/db-url}
     ssl_mode: require
 
+admin:
+  existingSecret: "csx-deployment-monitoring-grafana"
+  userKey: admin-user
+  passwordKey: admin-password
+
 ingress:
   enabled: true
   hosts:
