@@ -5,7 +5,7 @@ namespace: pipelines
 
 helmCharts:
 - name: airflow
-  repo: https://apache.github.io/airflow
+  repo: https://airflow-helm.github.io/charts
   version: 8.9.0
   releaseName: airflow
   valuesFile: values.yaml
