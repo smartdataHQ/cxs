@@ -3,6 +3,14 @@ kind: ConfigMap
 metadata:
   name: mimir-chat-config
   # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
-data: {}
+data:
+  AUTH_TRUST_HOST: 'true'
+  AUTH_URL: "https://mimir.contextsuite.com"
+  BOT_IDENTIFIER: "skattur_agent_dev"
+  BROWSER_APP_API: "https://agents.contextsuite.com"
+  BROWSER_CHAT_API: "https://agents.contextsuite.com"
+  BROWSER_CHAT_WSS_API: "wss://agents.contextsuite.com"
+  CONTEXTSUITE_ADMIN_API: "https://admin.contextsuite.com"
+  MIMIR_SERVER_API: "https://agents.contextsuite.com"
 #  API_ENDPOINT: "https://mimir.contextsuite.com"
 #  WSS_ENDPOINT: "wss://mimir.contextsuite.com"
