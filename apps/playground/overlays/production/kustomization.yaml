@@ -6,5 +6,4 @@ namespace: api
 resources:
   - ../../base
 
-# Production uses the default values from base (no patches needed)
 

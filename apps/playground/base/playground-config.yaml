@@ -3,6 +3,6 @@ kind: ConfigMap
 metadata:
   name: playground-config
 data:
-  ENVIRONMENT: production
-  DOMAIN: contextsuite.com
-  GRAPH_ENDPOINT: https://app.contextsuite.com/context
+  ENVIRONMENT: "production"
+  DOMAIN: "contextsuite.com"
+  GRAPH_ENDPOINT: "https://app.contextsuite.com/context"

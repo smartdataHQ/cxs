@@ -19,4 +19,4 @@ spec:
     tls:
         - hosts:
               - playground.contextsuite.com
-          secretName: star-contextsuite-com 
+          secretName: playground-contextsuite-com-tls
