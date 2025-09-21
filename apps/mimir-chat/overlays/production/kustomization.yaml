@@ -1,7 +1,4 @@
-bases:
-  - ../../base
-
 namespace: solutions
 resources:
-  - mimir-chat-config.yaml
-  - mimir-chat-ingress.yml
+  - ../../base
+
