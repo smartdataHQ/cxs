@@ -25,7 +25,7 @@ ingress:
   tls:
     - hosts:
         - grafana.contextsuite.com
-      secretName: star-contextsuite-com
+      secretName: grafana-contextsuite-com-tls
 
 extraSecretMounts:
   - name: csx-secrets
