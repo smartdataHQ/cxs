@@ -19,4 +19,4 @@ spec:
   tls:
     - hosts:
         - mimir.contextsuite.com
-      secretName: star-contextsuite-com-tls
+      secretName: mimir-contextsuite-com-tls
