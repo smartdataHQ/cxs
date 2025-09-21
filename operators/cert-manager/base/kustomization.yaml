@@ -17,4 +17,5 @@ helmCharts:
           enabled: false
       global:
         leaderElection:
-          namespace: cert-manager
+          namespace: kube-system'
+#          namespace: cert-manager
