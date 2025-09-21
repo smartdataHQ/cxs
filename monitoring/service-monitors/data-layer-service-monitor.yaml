@@ -1,0 +1,119 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: data-layer-nodes
+  namespace: cattle-monitoring-system
+  labels:
+    release: rancher-monitoring
+spec:
+  endpoints:
+    # Node Exporter metrics
+    - port: http-metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+      relabelings:
+        - sourceLabels: [__address__]
+          regex: '([^:]+):.*'
+          targetLabel: instance
+          replacement: '${1}'
+        - sourceLabels: [__address__]
+          regex: '([^:]+):.*'  
+          targetLabel: datacenter
+          replacement: 'cxs-eu1'
+        - sourceLabels: [__address__]
+          regex: '([^:]+):.*'
+          targetLabel: node_role
+          replacement: 'data-layer'
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          targetLabel: cluster
+          replacement: 'cxs-data-layer'
+    # MinIO native metrics
+    - port: minio-metrics
+      path: /minio/v2/metrics/cluster
+      interval: 30s
+      scrapeTimeout: 10s
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
+      bearerTokenSecret:
+        name: minio-prometheus-token
+        key: token
+      relabelings:
+        - sourceLabels: [__address__]
+          regex: '([^:]+):.*'
+          targetLabel: instance
+          replacement: '${1}'
+        - sourceLabels: [__address__]
+          regex: '([^:]+):.*'  
+          targetLabel: datacenter
+          replacement: 'cxs-eu1'
+        - sourceLabels: [__address__]
+          regex: '([^:]+):.*'
+          targetLabel: node_role
+          replacement: 'data-layer'
+      metricRelabelings:
+        - sourceLabels: [__name__]
+          targetLabel: cluster
+          replacement: 'cxs-data-layer'
+  selector:
+    matchLabels:
+      app: data-layer-monitoring
+  namespaceSelector:
+    matchNames:
+      - cattle-monitoring-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-layer-node-c001db1
+  namespace: cattle-monitoring-system
+  labels:
+    app: data-layer-monitoring
+spec:
+  type: ExternalName
+  externalName: c001db1
+  ports:
+    - name: http-metrics
+      port: 9100
+      targetPort: 9100
+    - name: minio-metrics
+      port: 9025
+      targetPort: 9025
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-layer-node-c001db2
+  namespace: cattle-monitoring-system
+  labels:
+    app: data-layer-monitoring
+spec:
+  type: ExternalName
+  externalName: c001db2
+  ports:
+    - name: http-metrics
+      port: 9100
+      targetPort: 9100
+    - name: minio-metrics
+      port: 9025
+      targetPort: 9025
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-layer-node-c001db3
+  namespace: cattle-monitoring-system
+  labels:
+    app: data-layer-monitoring
+spec:
+  type: ExternalName
+  externalName: c001db3
+  ports:
+    - name: http-metrics
+      port: 9100
+      targetPort: 9100
+    - name: minio-metrics
+      port: 9025
+      targetPort: 9025

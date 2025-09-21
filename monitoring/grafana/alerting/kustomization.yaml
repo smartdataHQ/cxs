@@ -11,6 +11,13 @@ configMapGenerator:
       disableNameSuffixHash: true
       labels:
         grafana_alert: "1"
+  - name: grafana-postgresql-backup-alerts
+    files:
+      - postgresql-backup-rules.yaml=postgresql-backup-rules.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        grafana_alert: "1"
 
     
 

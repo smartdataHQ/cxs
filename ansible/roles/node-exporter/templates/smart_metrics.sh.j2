@@ -1,0 +1,99 @@
+#!/bin/bash
+# SMART metrics collector for Node Exporter
+# Critical for monitoring RAID-0 NVMe drives
+
+set -euo pipefail
+
+HOSTNAME=$(hostname -s)
+
+# Function to get SMART attribute value
+get_smart_value() {
+    local device=$1
+    local attribute=$2
+    smartctl -A "$device" | awk -v attr="$attribute" '$0 ~ attr {print $10}' || echo "0"
+}
+
+# Function to get SMART health status
+get_smart_health() {
+    local device=$1
+    if smartctl -H "$device" | grep -q "PASSED"; then
+        echo "1"
+    else
+        echo "0"
+    fi
+}
+
+# Function to get device temperature
+get_temperature() {
+    local device=$1
+    smartctl -A "$device" | awk '/Temperature_Celsius/ {print $10}' || echo "0"
+}
+
+# Function to get wear level (SSD specific)
+get_wear_level() {
+    local device=$1
+    smartctl -A "$device" | awk '/Wear_Leveling_Count/ {print $10}' || \
+    smartctl -A "$device" | awk '/SSD_Life_Left/ {print $10}' || echo "100"
+}
+
+echo "# HELP smart_device_health SMART health status (1=healthy, 0=failed)"
+echo "# TYPE smart_device_health gauge"
+
+echo "# HELP smart_temperature_celsius Device temperature in Celsius"  
+echo "# TYPE smart_temperature_celsius gauge"
+
+echo "# HELP smart_wear_level_percent SSD wear level percentage"
+echo "# TYPE smart_wear_level_percent gauge"
+
+echo "# HELP smart_reallocated_sectors_count Reallocated sectors count"
+echo "# TYPE smart_reallocated_sectors_count gauge"
+
+echo "# HELP smart_pending_sectors_count Pending sectors count"
+echo "# TYPE smart_pending_sectors_count gauge"
+
+echo "# HELP smart_power_on_hours Total power on hours"
+echo "# TYPE smart_power_on_hours counter"
+
+# Monitor all available block devices (should catch NVMe drives)
+for device in /dev/sd* /dev/nvme*; do
+    if [ -b "$device" ] && smartctl -i "$device" >/dev/null 2>&1; then
+        device_name=$(basename "$device")
+        
+        # Basic health check
+        health=$(get_smart_health "$device")
+        echo "smart_device_health{device=\"$device_name\",hostname=\"$HOSTNAME\"} $health"
+        
+        # Temperature monitoring (critical for NVMe)
+        temp=$(get_temperature "$device")
+        echo "smart_temperature_celsius{device=\"$device_name\",hostname=\"$HOSTNAME\"} $temp"
+        
+        # Wear level (SSD/NVMe specific)
+        wear=$(get_wear_level "$device")
+        echo "smart_wear_level_percent{device=\"$device_name\",hostname=\"$HOSTNAME\"} $wear"
+        
+        # Critical error counts
+        reallocated=$(get_smart_value "$device" "Reallocated_Sector_Ct")
+        echo "smart_reallocated_sectors_count{device=\"$device_name\",hostname=\"$HOSTNAME\"} $reallocated"
+        
+        pending=$(get_smart_value "$device" "Current_Pending_Sector")
+        echo "smart_pending_sectors_count{device=\"$device_name\",hostname=\"$HOSTNAME\"} $pending"
+        
+        # Power on hours for lifetime tracking
+        power_hours=$(get_smart_value "$device" "Power_On_Hours")
+        echo "smart_power_on_hours{device=\"$device_name\",hostname=\"$HOSTNAME\"} $power_hours"
+    fi
+done
+
+# RAID status check (critical for RAID-0 setup)
+echo "# HELP raid_array_status RAID array status (1=healthy, 0=degraded/failed)"
+echo "# TYPE raid_array_status gauge"
+
+if [ -f /proc/mdstat ]; then
+    raid_healthy=1
+    if grep -q "\[.*_.*\]" /proc/mdstat; then
+        raid_healthy=0
+    fi
+    echo "raid_array_status{hostname=\"$HOSTNAME\"} $raid_healthy"
+else
+    echo "raid_array_status{hostname=\"$HOSTNAME\"} 1"
+fi

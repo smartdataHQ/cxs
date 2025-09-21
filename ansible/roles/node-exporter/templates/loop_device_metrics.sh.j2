@@ -1,0 +1,59 @@
+#!/bin/bash
+# Loop device monitoring for MinIO storage
+
+set -euo pipefail
+
+HOSTNAME=$(hostname -s)
+
+echo "# HELP loop_device_size_bytes Loop device size in bytes"
+echo "# TYPE loop_device_size_bytes gauge"
+
+echo "# HELP loop_device_usage_bytes Loop device used space in bytes"
+echo "# TYPE loop_device_usage_bytes gauge"
+
+echo "# HELP loop_device_available_bytes Loop device available space in bytes"  
+echo "# TYPE loop_device_available_bytes gauge"
+
+echo "# HELP loop_device_usage_percent Loop device usage percentage"
+echo "# TYPE loop_device_usage_percent gauge"
+
+echo "# HELP loop_device_attached Loop device attachment status (1=attached, 0=detached)"
+echo "# TYPE loop_device_attached gauge"
+
+# Check loop devices
+for loop_dev in /dev/loop*; do
+    if [ -b "$loop_dev" ] && losetup "$loop_dev" >/dev/null 2>&1; then
+        loop_name=$(basename "$loop_dev")
+        backing_file=$(losetup -l "$loop_dev" | tail -1 | awk '{print $6}')
+        
+        # Skip if no backing file
+        if [ -z "$backing_file" ] || [ "$backing_file" = "BACK-FILE" ]; then
+            continue
+        fi
+        
+        echo "loop_device_attached{device=\"$loop_name\",backing_file=\"$backing_file\",hostname=\"$HOSTNAME\"} 1"
+        
+        # Get mount point if mounted
+        mount_point=$(findmnt -n -o TARGET "$loop_dev" 2>/dev/null || echo "")
+        
+        if [ -n "$mount_point" ]; then
+            # Get filesystem statistics
+            disk_info=$(df -B1 "$mount_point" | tail -1)
+            total_bytes=$(echo $disk_info | awk '{print $2}')
+            used_bytes=$(echo $disk_info | awk '{print $3}')
+            available_bytes=$(echo $disk_info | awk '{print $4}')
+            
+            # Calculate usage percentage
+            if [ "$total_bytes" -gt 0 ]; then
+                usage_percent=$(echo "scale=2; $used_bytes * 100 / $total_bytes" | bc)
+            else
+                usage_percent=0
+            fi
+            
+            echo "loop_device_size_bytes{device=\"$loop_name\",mount_point=\"$mount_point\",hostname=\"$HOSTNAME\"} $total_bytes"
+            echo "loop_device_usage_bytes{device=\"$loop_name\",mount_point=\"$mount_point\",hostname=\"$HOSTNAME\"} $used_bytes"  
+            echo "loop_device_available_bytes{device=\"$loop_name\",mount_point=\"$mount_point\",hostname=\"$HOSTNAME\"} $available_bytes"
+            echo "loop_device_usage_percent{device=\"$loop_name\",mount_point=\"$mount_point\",hostname=\"$HOSTNAME\"} $usage_percent"
+        fi
+    fi
+done

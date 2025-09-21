@@ -1,0 +1,136 @@
+---
+# Critical alerting rules for data layer infrastructure
+# These rules address the RAID-0 risks and prevent storage crises
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-data-layer-alerts
+  namespace: monitoring
+data:
+  data-layer-rules.yml: |
+    groups:
+    - name: data-layer-critical
+      interval: 30s
+      rules:
+      
+      # CRITICAL: Drive failure alerts (RAID-0 = zero fault tolerance)
+      - alert: DataLayerDriveFailure
+        expr: smart_device_health{node_role="data-layer"} == 0
+        for: 0m
+        labels:
+          severity: critical
+          team: infrastructure
+          component: storage
+        annotations:
+          summary: "CRITICAL: NVMe drive failure detected on {{ $labels.instance }}"
+          description: "Drive {{ $labels.device }} on {{ $labels.instance }} has failed SMART health check. RAID-0 setup means complete node failure imminent."
+          runbook_url: "https://docs.internal/runbooks/data-layer-drive-failure"
+          
+      # CRITICAL: High drive temperature  
+      - alert: DataLayerDriveTemperature
+        expr: smart_temperature_celsius{node_role="data-layer"} > 70
+        for: 5m
+        labels:
+          severity: critical
+          team: infrastructure
+          component: storage
+        annotations:
+          summary: "Drive temperature critical on {{ $labels.instance }}"
+          description: "Drive {{ $labels.device }} temperature is {{ $value }}°C (threshold: 70°C)"
+          
+      # CRITICAL: Storage capacity - prevent another MinIO crisis
+      - alert: DataLayerStorageCritical
+        expr: (loop_device_usage_percent{node_role="data-layer"} > 90)
+        for: 2m
+        labels:
+          severity: critical
+          team: infrastructure
+          component: storage
+        annotations:
+          summary: "Storage critically full on {{ $labels.instance }}"
+          description: "Loop device {{ $labels.device }} is {{ $value }}% full (threshold: 90%)"
+          
+      # WARNING: Storage capacity planning
+      - alert: DataLayerStorageWarning  
+        expr: (loop_device_usage_percent{node_role="data-layer"} > 80)
+        for: 5m
+        labels:
+          severity: warning
+          team: infrastructure
+          component: storage
+        annotations:
+          summary: "Storage usage high on {{ $labels.instance }}"
+          description: "Loop device {{ $labels.device }} is {{ $value }}% full (threshold: 80%)"
+          
+      # CRITICAL: Node unreachable
+      - alert: DataLayerNodeDown
+        expr: up{job="data-layer-nodes"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: infrastructure
+          component: compute
+        annotations:
+          summary: "Data layer node {{ $labels.instance }} is unreachable"
+          description: "Cannot scrape metrics from {{ $labels.instance }}. Node may be down or network issues."
+          
+      # CRITICAL: MinIO service down
+      - alert: DataLayerMinIODown
+        expr: minio_service_status{node_role="data-layer"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: infrastructure
+          component: storage
+        annotations:
+          summary: "MinIO service down on {{ $labels.instance }}"
+          description: "MinIO service is not running on {{ $labels.instance }}. Backup operations will fail."
+          
+      # WARNING: MinIO API slow response
+      - alert: DataLayerMinIOSlowAPI
+        expr: minio_api_response_time{node_role="data-layer"} > 5
+        for: 2m
+        labels:
+          severity: warning
+          team: infrastructure
+          component: storage
+        annotations:
+          summary: "MinIO API slow response on {{ $labels.instance }}"
+          description: "MinIO API response time is {{ $value }}s (threshold: 5s)"
+          
+      # CRITICAL: RAID array degraded (if using mdadm)
+      - alert: DataLayerRAIDDegraded
+        expr: raid_array_status{node_role="data-layer"} == 0
+        for: 0m
+        labels:
+          severity: critical
+          team: infrastructure
+          component: storage
+        annotations:
+          summary: "RAID array degraded on {{ $labels.instance }}"
+          description: "RAID array on {{ $labels.instance }} is degraded or failed"
+          
+      # WARNING: High drive wear (SSD/NVMe)
+      - alert: DataLayerDriveWear
+        expr: smart_wear_level_percent{node_role="data-layer"} < 10
+        for: 10m
+        labels:
+          severity: warning
+          team: infrastructure
+          component: storage
+        annotations:
+          summary: "Drive wear level low on {{ $labels.instance }}"
+          description: "Drive {{ $labels.device }} wear level is {{ $value }}% (threshold: 10%)"
+          
+      # CRITICAL: Reallocated sectors detected
+      - alert: DataLayerReallocatedSectors
+        expr: smart_reallocated_sectors_count{node_role="data-layer"} > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: infrastructure
+          component: storage
+        annotations:
+          summary: "Reallocated sectors detected on {{ $labels.instance }}"
+          description: "Drive {{ $labels.device }} has {{ $value }} reallocated sectors. Drive may be failing."

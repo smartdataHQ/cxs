@@ -1,0 +1,165 @@
+---
+- name: Create node_exporter group
+  group:
+    name: "{{ node_exporter_group }}"
+    system: yes
+
+- name: Create node_exporter user
+  user:
+    name: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    system: yes
+    shell: /bin/false
+    home: /var/lib/node_exporter
+    create_home: yes
+
+- name: Create textfile collector directory
+  file:
+    path: "{{ textfile_collector_path }}"
+    state: directory
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    mode: '0755'
+
+- name: Download node_exporter binary
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    dest: /tmp/node_exporter.tar.gz
+    mode: '0644'
+    timeout: 30
+  register: download_result
+  retries: 3
+  delay: 5
+  until: download_result is succeeded
+
+- name: Extract node_exporter
+  unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /tmp
+    remote_src: yes
+    creates: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64"
+  when: download_result is succeeded
+
+- name: Install node_exporter binary
+  copy:
+    src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+    dest: /usr/local/bin/node_exporter
+    owner: root
+    group: root
+    mode: '0755'
+    remote_src: yes
+
+- name: Create node_exporter systemd service
+  template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - reload systemd
+    - restart node_exporter
+
+- name: Enable and start node_exporter service
+  systemd:
+    name: node_exporter
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: Install smartmontools for SMART monitoring
+  package:
+    name: smartmontools
+    state: present
+
+- name: Create SMART monitoring script
+  template:
+    src: smart_metrics.sh.j2
+    dest: /usr/local/bin/smart_metrics.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create cron job for SMART metrics collection
+  cron:
+    name: "Collect SMART metrics"
+    minute: "*/5"
+    job: "/usr/local/bin/smart_metrics.sh > {{ textfile_collector_path }}/smart_metrics.prom.tmp && mv {{ textfile_collector_path }}/smart_metrics.prom.tmp {{ textfile_collector_path }}/smart_metrics.prom"
+    user: root
+
+# MinIO health monitoring removed - using native MinIO Prometheus metrics instead
+- name: Remove old MinIO health check cron job
+  cron:
+    name: "MinIO health check"
+    state: absent
+    user: root
+
+- name: Remove old MinIO health check script
+  file:
+    path: /usr/local/bin/minio_health_check.sh
+    state: absent
+
+- name: Create loop device monitoring script
+  template:
+    src: loop_device_metrics.sh.j2
+    dest: /usr/local/bin/loop_device_metrics.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create cron job for loop device metrics
+  cron:
+    name: "Loop device metrics"
+    minute: "*/2"
+    job: "/usr/local/bin/loop_device_metrics.sh > {{ textfile_collector_path }}/loop_device_metrics.prom.tmp && mv {{ textfile_collector_path }}/loop_device_metrics.prom.tmp {{ textfile_collector_path }}/loop_device_metrics.prom"
+    user: root
+
+- name: Create MinIO binaries directory
+  file:
+    path: "{{ ansible_env.HOME }}/minio-binaries"
+    state: directory
+    mode: '0755'
+
+- name: Download MinIO client (mc)
+  get_url:
+    url: https://dl.min.io/client/mc/release/linux-amd64/mc
+    dest: "{{ ansible_env.HOME }}/minio-binaries/mc"
+    mode: '0755'
+    timeout: 30
+  register: mc_download_result
+  retries: 3
+  delay: 5
+  until: mc_download_result is succeeded
+
+- name: Add MinIO binaries to PATH in .bashrc
+  lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: "export PATH=$PATH:$HOME/minio-binaries/"
+    create: yes
+
+- name: Read MinIO credentials from /etc/default/minio
+  slurp:
+    src: /etc/default/minio
+  register: minio_config
+
+- name: Extract MinIO root user
+  set_fact:
+    minio_root_user: "{{ minio_config['content'] | b64decode | regex_findall('MINIO_ROOT_USER=(.*)') | first }}"
+
+- name: Extract MinIO root password
+  set_fact:
+    minio_root_password: "{{ minio_config['content'] | b64decode | regex_findall('MINIO_ROOT_PASSWORD=(.*)') | first }}"
+
+- name: Configure mc alias for local MinIO cluster
+  shell: |
+    export PATH=$PATH:{{ ansible_env.HOME }}/minio-binaries/
+    {{ ansible_env.HOME }}/minio-binaries/mc alias set local https://{{ ansible_host }}:9025 {{ minio_root_user }} {{ minio_root_password }} --insecure
+  register: mc_alias_result
+  changed_when: "'Added `local`' in mc_alias_result.stderr or 'Updated `local`' in mc_alias_result.stderr"
+
+- name: Enable Prometheus metrics in MinIO
+  shell: |
+    export PATH=$PATH:{{ ansible_env.HOME }}/minio-binaries/
+    {{ ansible_env.HOME }}/minio-binaries/mc admin prometheus generate local --insecure
+  register: prometheus_config_result
+  changed_when: false

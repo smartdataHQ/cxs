@@ -1,0 +1,34 @@
+---
+- name: Deploy monitoring for data layer nodes
+  hosts: data_nodes
+  become: yes
+  gather_facts: yes
+  
+  roles:
+    - node-exporter
+  
+  post_tasks:
+    - name: Verify node_exporter is running
+      wait_for:
+        port: "{{ node_exporter_port }}"
+        host: "{{ ansible_host }}"
+        delay: 5
+        timeout: 30
+        
+    - name: Test node_exporter metrics endpoint
+      uri:
+        url: "http://{{ ansible_host }}:{{ node_exporter_port }}/metrics"
+        method: GET
+        timeout: 10
+      delegate_to: localhost
+      become: no
+      
+    - name: Display deployment summary
+      debug:
+        msg: |
+          Node Exporter deployed successfully on {{ inventory_hostname }}
+          - Metrics endpoint: http://{{ ansible_host }}:{{ node_exporter_port }}/metrics
+          - SMART monitoring: Enabled (every 5 minutes)
+          - MinIO health checks: Enabled (every minute)  
+          - Loop device monitoring: Enabled (every 2 minutes)
+          - Textfile collector path: {{ textfile_collector_path }}

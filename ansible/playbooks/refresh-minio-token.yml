@@ -1,0 +1,24 @@
+---
+- name: Refresh MinIO Prometheus Bearer Token
+  hosts: data_nodes
+  become: yes
+  gather_facts: no
+  
+  tasks:
+    - name: Include token generation tasks
+      include_tasks: ../roles/node-exporter/tasks/generate-minio-token.yml
+      
+  post_tasks:
+    - name: Instructions
+      debug:
+        msg: |
+          ✅ MinIO Prometheus token refreshed successfully!
+          
+          📋 Next steps:
+          1. Copy the new token from the output above
+          2. Update the Kubernetes secret:
+             kubectl patch secret minio-prometheus-token -n cattle-monitoring-system -p '{"stringData":{"token":"NEW_TOKEN_HERE"}}'
+          3. Prometheus will automatically pick up the new token
+          
+          🔄 Recommended: Run this playbook monthly to refresh tokens
+      run_once: true

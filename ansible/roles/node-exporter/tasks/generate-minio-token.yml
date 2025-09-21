@@ -1,0 +1,26 @@
+---
+# This playbook can be run periodically to refresh MinIO Prometheus tokens
+- name: Generate new MinIO Prometheus token
+  shell: |
+    export PATH=$PATH:{{ ansible_env.HOME }}/minio-binaries/
+    {{ ansible_env.HOME }}/minio-binaries/mc admin prometheus generate local --insecure
+  register: prometheus_config
+  run_once: true
+  delegate_to: "{{ groups['data_nodes'][0] }}"
+
+- name: Extract bearer token from MinIO config
+  set_fact:
+    new_bearer_token: "{{ prometheus_config.stdout | regex_search('bearer_token: (.+)', '\\1') | first }}"
+  run_once: true
+  delegate_to: "{{ groups['data_nodes'][0] }}"
+
+- name: Display new token (for manual secret update)
+  debug:
+    msg: |
+      New MinIO Prometheus bearer token generated:
+      {{ new_bearer_token }}
+      
+      To update the Kubernetes secret, run:
+      kubectl patch secret minio-prometheus-token -n monitoring -p '{"stringData":{"token":"{{ new_bearer_token }}"}}'
+  run_once: true
+  delegate_to: "{{ groups['data_nodes'][0] }}"

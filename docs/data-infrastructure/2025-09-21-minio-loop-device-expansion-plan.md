@@ -138,7 +138,7 @@ done
 wait
 ```
 
-### Phase 5: Loop Device Expansion (15-20 minutes)
+### Phase 5: Loop Device Expansion (30 minutes)
 
 #### Step 5.1: Expand Image Files (SAFER METHOD)
 ```bash
@@ -168,25 +168,28 @@ wait
 ```bash
 # Re-attach loop devices and resize filesystems in parallel
 for host in c001db{1..3}; do
-    {
-        echo "=== Re-attaching and resizing on $host ==="
-        ssh $host "
-            echo 'Re-attaching loop device...'
-            losetup /dev/loop0 /mnt/minio-disk1.img
-            
-            echo 'Checking filesystem before resize...'
-            e2fsck -f /dev/loop0
-            
-            echo 'Resizing filesystem...'
-            resize2fs /dev/loop0
-            
-            echo 'Re-mounting disk...'
-            mount /dev/loop0 /var/lib/minio/disk1
-            
-            echo 'Verifying new capacity:'
-            df -h /var/lib/minio/disk1
-        "
-    } &
+{
+  echo "=== Re-attaching and resizing on $host ==="
+  ssh $host "
+      echo '$host: Finding free loop device and attaching...'
+      LOOP_DEV=\$(losetup -f)
+      losetup \$LOOP_DEV /mnt/minio-disk1.img
+      echo '$host: Using loop device:' \$LOOP_DEV
+
+      echo '$host: Force checking filesystem (non-interactive)...'
+      e2fsck -f -p \$LOOP_DEV
+
+      echo '$host: Resizing filesystem...'
+      resize2fs \$LOOP_DEV
+
+      echo '$host: Re-mounting disk...'
+      mount \$LOOP_DEV /var/lib/minio/disk1
+
+      echo '$host: Verifying new capacity:'
+      df -h /var/lib/minio/disk1
+      lsblk | grep loop
+  "
+} &
 done
 wait
 ```
@@ -204,7 +207,7 @@ done
 wait
 ```
 
-### Phase 6: Service Restart (5-10 minutes)
+### Phase 6: Service Restart 
 
 #### Step 6.1: Start MinIO Services
 ```bash

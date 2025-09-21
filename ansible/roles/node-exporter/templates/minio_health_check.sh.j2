@@ -1,0 +1,53 @@
+#!/bin/bash
+# MinIO health monitoring script for Node Exporter
+
+set -euo pipefail
+
+HOSTNAME=$(hostname -s)
+
+echo "# HELP minio_service_status MinIO service status (1=running, 0=stopped)"
+echo "# TYPE minio_service_status gauge"
+
+echo "# HELP minio_api_response_time MinIO API response time in seconds"
+echo "# TYPE minio_api_response_time gauge"
+
+echo "# HELP minio_disk_usage_bytes MinIO disk usage in bytes"
+echo "# TYPE minio_disk_usage_bytes gauge"
+
+echo "# HELP minio_disk_total_bytes MinIO disk total capacity in bytes"
+echo "# TYPE minio_disk_total_bytes gauge"
+
+# Check MinIO service status
+if systemctl is-active --quiet minio.service; then
+    service_status=1
+else
+    service_status=0
+fi
+echo "minio_service_status{hostname=\"$HOSTNAME\"} $service_status"
+
+# Check MinIO API responsiveness (if service is running)
+if [ $service_status -eq 1 ]; then
+    start_time=$(date +%s.%N)
+    if curl -s -k -m 5 https://localhost:9025/minio/health/live >/dev/null 2>&1; then
+        end_time=$(date +%s.%N)
+        response_time=$(echo "$end_time - $start_time" | bc)
+        echo "minio_api_response_time{hostname=\"$HOSTNAME\"} $response_time"
+    else
+        echo "minio_api_response_time{hostname=\"$HOSTNAME\"} -1"
+    fi
+else
+    echo "minio_api_response_time{hostname=\"$HOSTNAME\"} -1"
+fi
+
+# Monitor MinIO disk usage (from our loop device)
+if mountpoint -q /var/lib/minio/disk1; then
+    disk_info=$(df -B1 /var/lib/minio/disk1 | tail -1)
+    total_bytes=$(echo $disk_info | awk '{print $2}')
+    used_bytes=$(echo $disk_info | awk '{print $3}')
+    
+    echo "minio_disk_total_bytes{hostname=\"$HOSTNAME\"} $total_bytes"
+    echo "minio_disk_usage_bytes{hostname=\"$HOSTNAME\"} $used_bytes"
+else
+    echo "minio_disk_total_bytes{hostname=\"$HOSTNAME\"} 0"
+    echo "minio_disk_usage_bytes{hostname=\"$HOSTNAME\"} 0"
+fi
