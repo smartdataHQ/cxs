@@ -1,0 +1,20 @@
+namespace: cert-manager
+
+resources:
+  - cluster-issuer.yaml
+
+helmCharts:
+  - name: cert-manager
+    repo: https://charts.jetstack.io
+    version: 1.15.3
+    releaseName: cert-manager
+    namespace: cert-manager
+    valuesInline:
+      crds:
+        enabled: true
+      webhook:
+        validatingAdmissionWebhook:
+          enabled: false
+      global:
+        leaderElection:
+          namespace: cert-manager

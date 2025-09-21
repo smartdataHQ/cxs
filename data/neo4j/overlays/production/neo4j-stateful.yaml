@@ -60,7 +60,6 @@ spec:
               hostPort: 7474
             - containerPort: 7687
               hostPort: 7687
-          restartPolicy: Never
           volumeMounts:
             - name: neo4j
               mountPath: /data

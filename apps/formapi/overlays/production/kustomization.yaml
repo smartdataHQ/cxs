@@ -1,6 +1,6 @@
-bases:
-  - ../../base
+# images:
+#   - name: quicklookup/formapi
+#     newTag: bd7d4a6
 
 resources:
-  - formapi-config.yaml
-  - formapi-ingress.yml
+  - ../../base

@@ -1,0 +1,8 @@
+# images:
+#   - name: quicklookup/ctxllm
+#     newTag: 95a2104
+
+resources:
+  - ../../base
+
+

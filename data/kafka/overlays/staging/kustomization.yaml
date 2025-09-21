@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: data
+
+resources:
+  - ../../base
+
+# helmCharts:
+#   - name: kafka
+#     repo: oci://registry-1.docker.io/bitnamicharts
+#     version: 28.0.1
+#     namespace: data
+#     releaseName: kafka
+#     # SRC: https://github.com/bitnami/charts/blob/kafka/28.0.1/bitnami/kafka/values.yaml
+#     valuesInline:
+#       broker:
+#         replicaCount: 3 # Increase the number of replicas to 3
+#         heapOpts: -Xmx16048m -Xms2024m # Increase the max heap size to 8GB
+
+#       resourcesPreset: large # Set a preset profile or define resources
+#       clusterDomain: kafka.data
+
+#       externalZookeeper:
+#         servers: [zookeeper.data.svc.cluster.local]   
+
+#       commonAnnotations:
+#         tailscale.com/expose: "true"
+#         tailscale.com/hostname: data-kafka-dev

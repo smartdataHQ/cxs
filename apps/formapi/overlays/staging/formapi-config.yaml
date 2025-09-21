@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: formapi-config
+data:
+  # NODE_ENV: 'staging' # Changing this from production breaks redis connections
+  
+  FRONTEND_URL: 'https://forms.contextsuite.dev'

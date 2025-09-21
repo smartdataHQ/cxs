@@ -127,7 +127,7 @@ spec:
               secretKeyRef:
                 name: cxs-services-minio
                 key: MINIO_SECURE
-          
+
           - name: KAFKA_HOSTS
             valueFrom:
               secretKeyRef:
@@ -166,6 +166,10 @@ spec:
         - name: config
           persistentVolumeClaim:
             claimName: cxs-service-pvc
+        - name: cache
+          hostPath:
+            path: /cache
+            type: DirectoryOrCreate
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -282,7 +286,7 @@ spec:
               secretKeyRef:
                 name: cxs-services-minio
                 key: MINIO_SECURE
-          
+
           - name: KAFKA_HOSTS
             valueFrom:
               secretKeyRef:

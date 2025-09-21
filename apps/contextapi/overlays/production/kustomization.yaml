@@ -1,6 +1,6 @@
-bases:
-  - ../../base
+# images:
+#   - name: quicklookup/contextapi
+#     newTag: 6c2bad8
 
 resources:
-  - contextapi-config.yaml
-  - contextapi-ingress.yml
+- ../../base

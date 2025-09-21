@@ -1,0 +1,16 @@
+resources:
+  - ../../base/
+
+namespace: grafana
+
+helmCharts:
+  - name: loki
+    repo: https://grafana.github.io/helm-charts
+    releaseName: loki
+    # Find new versions
+    #   helm repo add grafana https://grafana.github.io/helm-charts
+    #   helm repo update
+    #   helm search repo -l grafana/loki
+    version: 6.27.0
+    namespace: grafana
+    valuesFile: values.yaml

@@ -8,7 +8,7 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   rules:
-    - host: mimir.contextsuite.com
+    - host: mimir.contextsuite.dev
       http:
         paths:
           - backend:
@@ -20,5 +20,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - mimir.contextsuite.com
+        - mimir.contextsuite.dev
       secretName: mimir-contextsuite-com-tls

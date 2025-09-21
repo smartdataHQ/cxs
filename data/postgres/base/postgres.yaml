@@ -1,0 +1,352 @@
+apiVersion: pgv2.percona.com/v2
+kind: PerconaPGCluster
+metadata:
+  name: cxs-pg
+#  finalizers:
+#  - percona.com/delete-pvc
+#  - percona.com/delete-ssl
+spec:
+  crVersion: 2.3.1
+  #  secrets:
+  #    customTLSSecret:
+  #      name: cluster1-cert
+  #    customReplicationTLSSecret:
+  #      name: replication1-cert
+
+  #  standby:
+  #    enabled: true
+  #    host: "<primary-ip>"
+  #    port: "<primary-port>"
+  #    repoName: repo1
+
+  #  openshift: true
+
+  users:
+    - name: postgres
+    - name: cxs-pg
+      options: SUPERUSER
+      databases:
+        - ssp
+    - name: aiflow-db
+      databases:
+        - airflow
+    - name: n8n-db
+      databases:
+        - n8n
+    - name: convoy-db
+      databases:
+        - convoy
+    - name: grafana-db
+      databases:
+        - grafana
+    - name: grafana
+      databases:
+        - grafana
+    - name: synmetrix
+      options: SUPERUSER
+      databases:
+        - synmetrix
+  #  users:
+  #    - name: rhino
+  #      databases:
+  #        - zoo
+  #      options: "SUPERUSER"
+  #      password:
+  #        type: ASCII
+  #      secretName: "rhino-credentials"
+
+  #  databaseInitSQL:
+  #    key: init.sql
+  #    name: cluster1-init-sql
+
+  #  pause: true
+  #  unmanaged: true
+
+  #  dataSource:
+  #    postgresCluster:
+  #      clusterName: cluster1
+  #      repoName: repo1
+  #      options:
+  #      - --type=time
+  #      - --target="2021-06-09 14:15:11-04"
+  #    pgbackrest:
+  #      stanza: db
+  #      configuration:
+  #      - secret:
+  #          name: pgo-s3-creds
+  #      global:
+  #        repo1-path: /pgbackrest/postgres-operator/hippo/repo1
+  #      repo:
+  #        name: repo1
+  #        s3:
+  #          bucket: "my-bucket"
+  #          endpoint: "s3.ca-central-1.amazonaws.com"
+  #          region: "ca-central-1"
+
+  image: percona/percona-postgresql-operator:2.3.1-ppg16-postgres
+  imagePullPolicy: Always
+  postgresVersion: 16
+
+  #  port: 5432
+  #  expose:
+  #    annotations:
+  #      my-annotation: value1
+  #    labels:
+  #      my-label: value2
+  #    type: LoadBalancer
+  #    loadBalancerSourceRanges:
+  #      - 10.0.0.0/8
+
+  instances:
+    - name: instance1
+      replicas: 3
+      resources : {}
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    postgres-operator.crunchydata.com/data: postgres
+                topologyKey: kubernetes.io/hostname
+      #    resources:
+      #      limits:
+      #        cpu: 2.0
+      #        memory: 4Gi
+      #
+      #    sidecars:
+      #    - name: testcontainer
+      #      image: mycontainer1:latest
+      #    - name: testcontainer2
+      #      image: mycontainer1:latest
+      #
+      #    topologySpreadConstraints:
+      #      - maxSkew: 1
+      #        topologyKey: my-node-label
+      #        whenUnsatisfiable: DoNotSchedule
+      #        labelSelector:
+      #          matchLabels:
+      #            postgres-operator.crunchydata.com/instance-set: instance1
+      #
+      #    tolerations:
+      #    - effect: NoSchedule
+      #      key: role
+      #      operator: Equal
+      #      value: connection-poolers
+      #
+      #    priorityClassName: high-priority
+      #
+      #    walVolumeClaimSpec:
+      #       accessModes:
+      #       - "ReadWriteOnce"
+      #       resources:
+      #         requests:
+      #           storage: 1Gi
+      #
+      dataVolumeClaimSpec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 200Gi
+
+  proxy:
+    pgBouncer:
+      replicas: 3
+      image: percona/percona-postgresql-operator:2.3.1-ppg16-pgbouncer
+      exposeSuperusers: true
+      config:
+        global:
+          max_client_conn: "200"
+          default_pool_size: "50"
+      # expose:
+      #   annotations:
+      #     tailscale.com/expose: "true"
+      #     tailscale.com/hostname: data-cxs-pg-pgbouncer
+
+
+      #          pool_mode: transaction
+      #      resources:
+      #        limits:
+      #          cpu: 200m
+      #          memory: 128Mi
+      #
+      #      expose:
+      #        annotations:
+      #          my-annotation: value1
+      #        labels:
+      #          my-label: value2
+      #        type: LoadBalancer
+      #        loadBalancerSourceRanges:
+      #          - 10.0.0.0/8
+      #
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    postgres-operator.crunchydata.com/role: pgbouncer
+                topologyKey: kubernetes.io/hostname
+  #
+  #      tolerations:
+  #      - effect: NoSchedule
+  #        key: role
+  #        operator: Equal
+  #        value: connection-poolers
+  #
+  #      topologySpreadConstraints:
+  #        - maxSkew: 1
+  #          topologyKey: my-node-label
+  #          whenUnsatisfiable: ScheduleAnyway
+  #          labelSelector:
+  #            matchLabels:
+  #              postgres-operator.crunchydata.com/role: pgbouncer
+  #
+  #      sidecars:
+  #      - name: bouncertestcontainer1
+  #        image: mycontainer1:latest
+  #
+  #      customTLSSecret:
+  #        name: keycloakdb-pgbouncer.tls
+  #
+
+  backups:
+    pgbackrest:
+      #      metadata:
+      #        labels:
+      image: percona/percona-postgresql-operator:2.3.1-ppg16-pgbackrest
+      configuration:
+        - secret:
+            name: postgres-minio-backup-credentials
+      #      jobs:
+      #        priorityClassName: high-priority
+      #        resources:
+      #          limits:
+      #            cpu: 200m
+      #            memory: 128Mi
+      #        tolerations:
+      #        - effect: NoSchedule
+      #          key: role
+      #          operator: Equal
+      #          value: connection-poolers
+      #
+      #      global:
+      #        repo1-retention-full: "14"
+      #        repo1-retention-full-type: time
+      #        repo1-path: /pgbackrest/postgres-operator/cluster1/repo1
+      #        repo1-cipher-type: aes-256-cbc
+      #        repo1-s3-uri-style: path
+      #        repo2-path: /pgbackrest/postgres-operator/cluster1-multi-repo/repo2
+      #        repo3-path: /pgbackrest/postgres-operator/cluster1-multi-repo/repo3
+      #        repo4-path: /pgbackrest/postgres-operator/cluster1-multi-repo/repo4
+      global:
+        # Configuration for "repo1"
+        repo1-retention-full: "4"        # store 4 full backups
+        repo1-retention-full-type: count # expire backups based on backup count
+        repo1-retention-archive: "2"     # Retain the ability to perform PIT restore across 2 latest full backups
+        repo1-retention-diff: "7"        # store 7 differential backups
+        
+        # Configuration for "repo2" (MinIO S3)
+        repo2-retention-full: "8"       # Keep more backups offsite
+        repo2-retention-full-type: count
+        repo2-retention-archive: "4"
+        repo2-retention-diff: "14"
+        repo2-s3-uri-style: path         # Required for MinIO
+        repo2-storage-verify-tls: "n"      # Use HTTP instead of HTTPS
+      repoHost:
+        affinity:
+          podAntiAffinity:
+            preferredDuringSchedulingIgnoredDuringExecution:
+              - weight: 1
+                podAffinityTerm:
+                  labelSelector:
+                    matchLabels:
+                      postgres-operator.crunchydata.com/data: pgbackrest
+                  topologyKey: kubernetes.io/hostname
+      #        priorityClassName: high-priority
+      #
+      #        topologySpreadConstraints:
+      #        - maxSkew: 1
+      #          topologyKey: my-node-label
+      #          whenUnsatisfiable: ScheduleAnyway
+      #          labelSelector:
+      #            matchLabels:
+      #              postgres-operator.crunchydata.com/pgbackrest: ""
+      #
+      manual:
+        repoName: repo1
+        options:
+          - --type=diff
+          - --log-level-stderr=debug
+      repos:
+        - name: repo1
+          schedules:
+            full: "0 0 * * 6"  # every Saturday at 00:00
+            differential: "0 0 * * 0-5"  # every day (except Saturday) at 00:00
+          volume:
+            volumeClaimSpec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 200Gi
+        - name: repo2
+          schedules:
+            full: "0 2 * * 6"      # Saturday 02:00 (offset from repo1)
+            differential: "0 2 * * 0-5"  # Daily 02:00
+          s3:
+            bucket: "backups"
+            endpoint: "https://minio.storage.svc.cluster.local:9025" # this points to the c001db{1:3} data cluster
+            region: "minio"
+  #      - name: repo3
+  #        gcs:
+  #          bucket: "<YOUR_GCS_BUCKET_NAME>"
+  #      - name: repo4
+  #        azure:
+  #          container: "<YOUR_AZURE_CONTAINER>"
+  #
+  #    restore:
+  #      enabled: true
+  #      repoName: repo1
+  #      options:
+  #       PITR restore in place
+  #       - --type=time
+  #       - --target="2021-06-09 14:15:11-04"
+  #       restore individual databases
+  #       - --db-include=hippo
+
+  pmm:
+    enabled: false
+    image: percona/pmm-client:2.41.0
+    #    imagePullPolicy: IfNotPresent
+    secret: cluster1-pmm-secret
+    serverHost: monitoring-service
+  patroni:
+    dynamicConfiguration:
+      postgresql:
+        parameters:
+          max_connections: 300
+#          max_parallel_workers: 2
+#          max_worker_processes: 2
+#          shared_buffers: 1GB
+#          work_mem: 2MB
+
+#  extensions:
+#    image: percona/percona-postgresql-operator:2.3.1
+#    imagePullPolicy: Always
+#    storage:
+#      type: s3
+#      bucket: pg-extensions
+#      region: eu-central-1
+#      secret:
+#        name: cluster1-extensions-secret
+#    builtin:
+#      pg_stat_monitor: true
+#      pg_audit: true
+#    custom:
+#    - name: pg_cron
+#      version: 1.6.1

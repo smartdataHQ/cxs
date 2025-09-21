@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: servicerunner-config
+data:
+  OPENAI_LLM_COMBINED_EXTRACTION_PROMPT: 'gpt-4o'
+  OPENAI_LLM_MAKE_DREAM_TOUR: 'gpt_3_5_turbo'
+  CLICKHOUSE_HOST: '10.180.122.32'
+  CLICKHOUSE_USER: 'default'
+  ENVIRONMENT: 'prod'
+  DEVELOPER: 'prod@snjallgogn.is'
+  REDIS_USER: ''
+  REDIS_HOST: 'redis-master.data.svc.cluster.local'
+  POSTGRES_DB: 'ssp'
+  POSTGRES_PORT: '5432'
+  POSTGRES_HOST: 'cxs-pg-pgbouncer.data'
+  POSTGRES_USER: 'cxs-pg'

@@ -9,6 +9,7 @@ metadata:
     heritage: {{ .Release.Service }}
   annotations:
     tailscale.com/expose: "true"
+    tailscale.com/hostname: data-cp-schema-registry-dev
 spec:
   ports:
     - name: schema-registry

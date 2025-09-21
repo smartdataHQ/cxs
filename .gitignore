@@ -1,4 +1,12 @@
 .qodo
 **/charts/*
 *.env
+.validation*
+
+# Database migration artifacts
+.backups/
+.logs/
+
+/.idea/
+
 /.idea/

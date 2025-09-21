@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keeper
+  labels:
+    app: keeper
+
+spec:
+  serviceName: keeper
+  selector:
+    matchLabels:
+      app: keeper
+      tier: data
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: keeper
+        tier: data
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: "localdata"
+                    operator: In
+                    values:
+                      - "true"
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - keeper
+              topologyKey: "kubernetes.io/hostname"
+      initContainers:
+        - name: init-chown
+          image: busybox
+          securityContext:
+            runAsUser: 0  # Runs as root to modify ownership
+          command: [ 'sh', '-c' ]
+          args:
+            - |
+              echo "Setting ownership of Keeper data directory at $KEEPER_DATA_PATH to $KEEPER_USER_ID";
+              chown -v $KEEPER_USER_ID:$KEEPER_USER_ID $KEEPER_DATA_PATH;
+          env:
+            - name: KEEPER_USER_ID
+              value: "101"
+            - name: KEEPER_DATA_PATH
+              value: /var/lib/clickhouse-keeper
+          volumeMounts:
+            - name: keeper-data
+              mountPath: /var/lib/clickhouse-keeper
+      containers:
+      - name: keeper
+        image: clickhouse/clickhouse-keeper:24.3.2.23-alpine
+        ports:
+        - containerPort: 9181
+          hostPort: 9181
+        - containerPort: 9234
+          hostPort: 9234
+        command: [ "/bin/bash", "-c"]
+        args: [ "IFS=- read -r var1 var2 <<< $HOSTNAME ; echo 'Custom Entrypoint' ; echo $var2 ; declare -x PODNR=$var2 ; /entrypoint.sh" ]
+        volumeMounts:
+          - mountPath: /etc/clickhouse-keeper/keeper_config.xml
+            name: config-volume
+            subPath: keeper_config.xml
+          - name: keeper-data
+            mountPath: /var/lib/clickhouse-keeper
+          - name: keeper-logs
+            mountPath: /var/log
+      volumes:
+        - name: config-volume
+          configMap:
+            name: keeper-config
+        - name: keeper-data
+          hostPath:
+            path: /data/local/keeper
+        - name: keeper-logs
+          hostPath:
+            path: /data/logs/keeper

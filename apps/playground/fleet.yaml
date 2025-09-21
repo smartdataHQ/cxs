@@ -1,4 +1,3 @@
-defaultNamespace: api
 namespace: api
 
 targetCustomizations:
@@ -9,3 +8,11 @@ targetCustomizations:
         role: production
     kustomize:
       dir: overlays/production
+
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        role: staging
+    kustomize:
+      dir: overlays/staging
+    doNotDeploy: true

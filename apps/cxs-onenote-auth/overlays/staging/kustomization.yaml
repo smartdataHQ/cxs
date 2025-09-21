@@ -1,5 +1,31 @@
 bases:
   - ../../base
 
-resources:
-  - cxs-onenote-auth-ingress.yaml
+patches:
+  - target:
+      kind: Ingress
+      name: cxs-onenote-auth
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          cert-manager.io/cluster-issuer: letsencrypt-prod
+      - op: replace
+        path: /spec/rules/0/host
+        value: onenote.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: onenote.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: onenote-contextsuite-dev-tls
+
+  - target:
+      kind: Service
+      name: cxs-onenote-auth
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          tailscale.com/expose: "true"
+          tailscale.com/hostname: solutions-cxs-onenote-auth-dev

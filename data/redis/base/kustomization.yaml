@@ -1,0 +1,31 @@
+namespace: data
+
+helmCharts:
+  - name: redis
+    repo: oci://registry-1.docker.io/bitnamicharts
+    releaseName: redis
+    version: 19.0.1
+    namespace: data
+    valuesInline:
+      auth:
+        enabled: true
+        existingSecret: "redis"
+        existingSecretPasswordKey: "redis-password"
+      persistence:
+        enabled: true
+        size: 8Gi
+      master:
+        resources:
+          limits: {}
+          requests: 
+            memory: 2Gi
+            cpu: 100m
+        service:
+          annotations:
+            tailscale.com/expose: "true"
+      replica: 
+        resources:
+          limits: {}
+          requests: 
+            memory: 4Gi
+            cpu: 500m

@@ -1,6 +1,6 @@
-bases:
-  - ../../base
+namespace: api
 
 resources:
+  - ../../base
   - ssp-config.yaml
   - ssp-ingress.yml

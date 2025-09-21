@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse
+  labels:
+    app: clickhouse
+
+spec:
+  serviceName: clickhouse
+  selector:
+    matchLabels:
+      app: clickhouse
+      tier: data
+  replicas: 3
+  updateStrategy:
+    type: RollingUpdate
+  podManagementPolicy: OrderedReady
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+        tier: data
+    spec:
+      securityContext:
+        fsGroup: 101  # All files in the volume will belong to group 1000
+      affinity:
+        nodeAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: "localdata"
+                    operator: In
+                    values:
+                      - "true"
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: "app"
+                    operator: In
+                    values:
+                      - clickhouse
+              topologyKey: "kubernetes.io/hostname"
+      initContainers:
+        - name: init-chown
+          image: busybox
+          securityContext:
+            runAsUser: 0  # Runs as root to modify ownership
+          command: ['sh', '-c' ]
+          args:
+            - |
+              echo "Setting ownership of ClickHouse data directory at $CLICKHOUSE_DATA_PATH to $CLICKHOUSE_USER_ID";
+              chown -v $CLICKHOUSE_USER_ID $CLICKHOUSE_DATA_PATH;
+          env:
+           - name: CLICKHOUSE_USER_ID
+             value: "101"
+           - name: CLICKHOUSE_DATA_PATH
+             value: /var/lib/clickhouse
+          volumeMounts:
+              - name: clickhouse-data
+                mountPath: /var/lib/clickhouse
+      containers:
+      - name: clickhouse
+        image: clickhouse/clickhouse-server:25.7.1.3997
+
+        ports:
+        - containerPort: 9000
+        - containerPort: 8123
+        env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse
+                  key: access_key_id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: clickhouse
+                  key: secret_access_key
+        volumeMounts:
+          - mountPath: /etc/clickhouse-server/config.d/storage_config.xml
+            subPath: storage_config.xml
+            name: config-volume
+          - mountPath: /etc/clickhouse-server/users.xml
+            subPath: users.xml
+            name: config-volume
+          - mountPath: /etc/clickhouse-server/config.xml
+            subPath: config.xml
+            name: config-volume
+          - name: clickhouse-data
+            mountPath: /var/lib/clickhouse
+      volumes:
+        - name: config-volume
+          configMap:
+            name: clickhouse-config
+      dnsPolicy: ClusterFirstWithHostNet
+      dnsConfig:
+        searches:
+          - clickhouse.data.svc.cluster.local
+      imagePullSecrets:
+        - name: dockerlock
+  volumeClaimTemplates:
+    - metadata:
+        name: clickhouse-data
+        labels:
+          app: clickhouse
+          tier: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: longhorn
+        resources:
+          requests:
+            storage: 100Gi

@@ -1,0 +1,14 @@
+resources:
+  - ../../base
+
+patches:
+  - target:
+      kind: ClusterIssuer
+      name: letsencrypt-prod
+    patch: |
+      - op: replace
+        path: /metadata/name
+        value: letsencrypt-staging
+      - op: replace
+        path: /spec/acme/privateKeySecretRef/name
+        value: letsencrypt-staging 

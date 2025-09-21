@@ -18,6 +18,13 @@ patches:
       - op: replace
         path: /spec/tls/0/hosts/0
         value: synmetrix.contextsuite.dev
+  - target:
+      kind: PersistentVolumeClaim
+      name: synmetrix-cubestore-pvc
+    patch: |-
+      - op: replace
+        path: /spec/accessModes/0
+        value: ReadWriteMany
 
 # Staging-specific configMap additions
 configMapGenerator:

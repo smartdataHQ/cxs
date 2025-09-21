@@ -1,6 +1,35 @@
-bases:
-  - ../../base
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: solutions
 
 resources:
-  - translator-client-config.yaml
-  - translator-client-ingress.yml
+  - ../../base
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: translator-client-config
+    patch: |-
+      - op: replace
+        path: /data/ENVIRONMENT
+        value: "staging"
+      - op: replace
+        path: /data/API_ENDPOINT
+        value: "https://translator.contextsuite.dev"
+  - target:
+      kind: Ingress
+      name: translator-client
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: "translator-client.contextsuite.dev"
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "translator-client.contextsuite.dev"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "translator-client-contextsuite-dev-tls"
+      - op: add
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"

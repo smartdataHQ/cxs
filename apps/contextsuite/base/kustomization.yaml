@@ -1,3 +1,6 @@
+namespace: solutions
 resources:
   - contextsuite-deployment.yaml
   - contextsuite-service.yaml
+  - contextsuite-ingress.yaml
+  - contextsuite-config.yaml

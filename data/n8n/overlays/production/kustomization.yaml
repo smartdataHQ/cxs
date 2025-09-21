@@ -1,3 +1,5 @@
+namespace: data
+
 resources:
   - n8n-main.yaml
   - n8n-webhooks.yaml

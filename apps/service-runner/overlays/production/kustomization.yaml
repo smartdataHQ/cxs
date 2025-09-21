@@ -1,0 +1,4 @@
+namespace: solutions
+resources:
+  - ../../base
+  - service-runner-config.yaml

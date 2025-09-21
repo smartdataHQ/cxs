@@ -19,3 +19,62 @@ The base configuration defines the following Kubernetes resources:
 - `cxs-services-service.yaml`: Exposes the CXS Services internally within the cluster.
 - `cxs-services-volumes.yaml`: Defines volume configurations for CXS Services, if any.
 - `kustomization.yaml`: Defines the Kustomize configuration for the base layer.
+
+## Minio 
+This service depends on minio for the following:
+
+1. A bucket called `rag-content-processing`
+2. A User 
+3. An Access Key and Secret Key for this User
+2. The following policy on this bucket assigned to the User:
+    ```.json
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "s3:PutObject",
+                    "s3:PutObjectTagging",
+                    "s3:GetObject",
+                    "s3:ListBucket"
+                ],
+                "Resource": [
+                    "arn:aws:s3:::rag-content-processing",
+                    "arn:aws:s3:::rag-content-processing/*"
+                ]
+            }
+        ]
+    }
+    ```
+3. These need to be represented in a Secret inside the cluster with the following keys:
+
+```.yaml
+apiVersion: v1
+kind: Secret
+type: Opaque
+metadata:
+  name: cxs-services-minio
+  namespace: solutions
+data:
+  MINIO_ACCESS_KEY: KXiI2NNFwDnGNEUssx1d
+  MINIO_SECRET_KEY: 5hdexsncEV0ZlUV2UyJtFpDCMxEq8lvQHYzLRRMZ
+  MINIO_BUCKET_NAME: rag-content-processing
+  MINIO_ENDPOINT: minio.data
+```
+
+```bash
+export BUCKET_NAME="rag-content-processing"
+export ENDPOINT="minio.data"
+export MINIO_ACCESS_KEY=<access key>
+export MINIO_SECRET_KEY=<secret key>
+# Generate the secret
+kubectl create secret generic cxs-services-minio \
+  --namespace=solutions \
+  --from-literal=MINIO_ACCESS_KEY="$MINIO_ACCESS_KEY" \
+  --from-literal=MINIO_SECRET_KEY="$MINIO_SECRET_KEY" \
+  --from-literal=MINIO_BUCKET_NAME="$BUCKET_NAME" \
+  --from-literal=MINIO_ENDPOINT="$ENDPOINT" \
+  --from-literal=MINIO_SECURE="false"
+```
+

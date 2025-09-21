@@ -1,0 +1,28 @@
+namespace: data
+
+
+helmCharts:
+  - name: kafka
+    repo: oci://registry-1.docker.io/bitnamicharts
+    version: 28.0.1
+    namespace: data
+    releaseName: kafka
+    # valuesFile: kafka-production.values.yaml
+    # SRC: https://github.com/bitnami/charts/blob/kafka/28.0.1/bitnami/kafka/values.yaml
+
+    valuesInline:
+      broker:
+        replicaCount: 3 # Increase the number of replicas to 3
+        heapOpts:  -Xmx8192m -Xms4096m # Increase the max heap size to 8GB
+      controller:
+        replicaCount: 0
+      kraft:
+        enabled: false
+      resourcesPreset: large # Set a preset profile or define resources
+
+      externalZookeeper:
+        servers: [zookeeper.data.svc.cluster.local]
+
+      sasl:  # prevent the regeneration of kafka passwords
+        existingSecret: "kafka-user-passwords"
+

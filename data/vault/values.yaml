@@ -2,3 +2,4 @@ server:
   service:
     annotations:
       tailscale.com/expose: "true"
+      tailscale.com/hostname: data-vault-dev

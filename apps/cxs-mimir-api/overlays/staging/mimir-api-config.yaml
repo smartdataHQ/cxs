@@ -12,11 +12,11 @@ data:
   ENV: "prod"
   REDIS_HOST: "redis-master.data"
 
-  BACKEND_BASE_URL: "https://agents.contextsuite.com"
+  BACKEND_BASE_URL: "https://agents.contextsuite.dev"
 
-  EVENTS_ENDPOINT: "https://in.contextsuite.com/api/s/s2s/track"
+  EVENTS_ENDPOINT: "https://in.contextsuite.dev/api/s/s2s/track"
 
-  CLICKHOUSE_HOST: "10.180.122.32"
+  CLICKHOUSE_HOST: "clickhouse.data.svc.cluster.local"
   CLICKHOUSE_PORT: "8123"
   CLICKHOUSE_USER: "default"
 

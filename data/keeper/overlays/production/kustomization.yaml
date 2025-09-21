@@ -1,4 +1,0 @@
-resources:
-  - keeper-stateful.yaml
-  - keeper-config.yaml
-  - keeper-service.yaml

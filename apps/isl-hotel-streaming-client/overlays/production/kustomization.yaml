@@ -1,0 +1,8 @@
+namespace: ingestion
+bases:
+  - ../../base
+
+resources:
+  - isl-hotel-streaming-client-pv.yaml
+
+

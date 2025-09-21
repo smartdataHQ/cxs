@@ -29,9 +29,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations:
-        kubectl.kubernetes.io/restartedAt: "2025-07-16T10:08:05Z"
-      creationTimestamp: null
       labels:
         app.kubernetes.io/name: synmetrix-hasura-plus
     spec:
@@ -81,5 +78,5 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       terminationGracePeriodSeconds: 30
-      
+
 

@@ -1,5 +1,71 @@
-bases:
-  - ../../base
+# images:
+#   - name: quicklookup/cxs-services
+#     newTag: a3e3ee3
 
 resources:
-  - cxs-services-config.yaml
+  - ../../base
+
+
+secretGenerator:
+  - name: cxs-services-kafka
+    namespace: solutions
+    literals:
+      - KAFKA_HOSTS=kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092
+      - KAFKA_REFRESH_TOPIC=content_refresh_jobs
+      - KAFKA_SCRAPE_TOPIC=content_processing_jobs
+      - KAFKA_USER=user1
+      - NUM_WORKERS=20
+
+patches:
+  - path: data-credentials.yaml
+  - target:
+      kind: ConfigMap
+      name: cxs-services-config
+    patch: |
+      - op: replace
+        path: /data/CLICKHOUSE_HOST
+        value: "clickhouse.data.svc.cluster.local"
+
+  - target:
+      kind: Ingress
+      name: cxsservices-services
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/rules/0/host
+        value: &fqdn services.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: *fqdn
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "cxs-services-services-tls"
+
+  - target:
+      kind: Ingress
+      name: cxsservices-cxs
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/rules/0/host
+        value: &fqdn2 cxs.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: *fqdn2
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "cxs-services-cxs-tls"
+
+  - target:
+      kind: Service
+      name: cxsservices
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          tailscale.com/expose: "true"
+          tailscale.com/hostname: solutions-cxs-services-dev

@@ -1,0 +1,25 @@
+namespace: data
+
+resources:
+  - ../../base
+  - clickhouse-nodeport-service.yaml
+  - clickhouse-ingress.yaml
+
+# Create patch that removes the nodeAffinity section from the StatefulSet
+patches:
+  - target:
+      kind: StatefulSet
+      name: clickhouse
+    patch: |
+      - "op": remove
+        "path": /spec/template/spec/affinity/nodeAffinity
+
+  - target:
+      kind: Service
+      name: clickhouse
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          tailscale.com/expose: "true"
+          tailscale.com/hostname: data-clickhouse-dev

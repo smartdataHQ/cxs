@@ -1,0 +1,7 @@
+namespace: data
+
+resources:
+  - clickhouse-stateful.yaml
+  - clickhouse-service.yaml
+  - clickhouse-config.yaml
+  # - ch-lb.yaml

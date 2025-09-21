@@ -1,6 +1,97 @@
-bases:
-  - ../../base
+# images:
+#   - name: quicklookup/gpt-api
+#     newTag: 2998c0d  # Using the same tag as in production for now
 
 resources:
-  - gpt-api-config.yaml
-  - gpt-api-ingress.yml
+  - ../../base
+
+namespace: solutions
+
+patches:
+  - path: gpt-api-staging-config.yaml
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: gpt-api
+      spec:
+        template:
+          spec:
+            containers:
+            - name: node
+              env:
+              - name: REDIS_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: redis-auth
+                    key: redis-password
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: gpt-api
+    patch: |
+      - op: replace
+        path: /spec/maxReplicas
+        value: 2
+      - op: replace
+        path: /spec/minReplicas
+        value: 1
+      - op: replace
+        path: /spec/targetCPUUtilizationPercentage
+        value: 80
+  - target:
+      kind: Ingress
+      name: gpt-api
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "gpt-api-tls"
+      - op: replace
+        path: /spec/rules/0/host
+        value: chat.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: chat.contextsuite.dev
+        
+  # Fix for matplotlib/fontconfig filesystem issues on Ubuntu 24.04 nodes
+  # The hurricane node (staging) has different filesystem permissions/AppArmor policies
+  # compared to production nodes (Ubuntu 22.04), causing cache directory creation failures
+  - target:
+      kind: Deployment
+      name: gpt-api
+    patch: |
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: MPLCONFIGDIR
+          value: /cache/matplotlib
+          # Direct matplotlib to use the mounted /cache volume instead of /nonexistent/.config/matplotlib
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: FONTCONFIG_PATH
+          value: /usr/local/share/fonts
+          # Point fontconfig to the mounted fonts volume to avoid cache directory errors
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: FONTCONFIG_CACHE
+          value: /cache/fontconfig
+          # Set writable cache directory for fontconfig
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: XDG_CACHE_HOME
+          value: /cache
+          # Set XDG cache directory for applications to use writable cache
+      # Increase probe delays for Ubuntu 24.04 slower startup due to matplotlib/fontconfig initialization
+      - op: replace
+        path: /spec/template/spec/containers/0/livenessProbe/initialDelaySeconds
+        value: 30
+        # Increased from 5s to 30s to allow matplotlib/fontconfig setup time
+      - op: replace
+        path: /spec/template/spec/containers/0/readinessProbe/initialDelaySeconds
+        value: 45
+        # Increased from 15s to 45s to ensure application is fully ready

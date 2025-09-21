@@ -16,7 +16,7 @@ data:
   AZURE_DEPLOYMENT_NAME_gpt_4: "Turbo-Thor"
   AZURE_DEPLOYMENT_NAME_gpt_4_32k: "Uber-Thor"
 
-  ENV: "prod"
+  ENV: "staging"
   REDIS_URL: "redis://redis-master.data.svc.cluster.local:6379"
   FRESHDESK_BASE_URL: "https://arctic-adventures.freshdesk.com"
   FRESHDESK_OUTBOUND_EMAIL_ID: "103000132039"
@@ -25,14 +25,14 @@ data:
   FRESHCHAT_CHANNEL_ID: "1f909ba8-a6f5-4d6d-bc65-1fdab508bd4f"
   FRESHCHAT_GROUP_ID: "82c37fba-cf1e-44dd-9870-58c6b571ecce"
 
-  BACKEND_BASE_URL: "https://mimir.contextsuite.com"
+  BACKEND_BASE_URL: "https://mimir.contextsuite.dev"
 
-  EVENTS_ENDPOINT: "https://in.contextsuite.com/api/s/s2s/track"
+  EVENTS_ENDPOINT: "https://in.contextsuite.dev/api/s/s2s/track"
 
   EMBEDDINGS_MODEL: "text-embedding-3-small"
   AWS_ACCESS_KEY_ID: "AKIAXXAZOWGCOUZT3DMM"
 
-  CLICKHOUSE_HOST: "10.180.122.32"
+  CLICKHOUSE_HOST: "clickhouse.data.svc.cluster.local"
   CLICKHOUSE_PORT: "8123"
   CLICKHOUSE_USER: "default"
 

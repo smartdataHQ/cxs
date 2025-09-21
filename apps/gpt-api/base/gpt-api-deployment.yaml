@@ -162,6 +162,10 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: TRAVIA_API_KEY
+            - name: MPLCONFIGDIR
+              value: /cache/matplotlib
+            - name: FONTCONFIG_PATH
+              value: /usr/local/share/fonts
                   
           envFrom:
             - configMapRef:

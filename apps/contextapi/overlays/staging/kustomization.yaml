@@ -1,0 +1,26 @@
+# images:
+#   - name: quicklookup/contextapi
+#     newTag: 6c2bad8
+
+resources:
+  - ../../base
+patches:
+  - path: contextapi-config.yaml
+  - path: database-migration.yaml
+  - target:
+      kind: Ingress
+      name: contextapi
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "contextapi-tls"
+      - "op": replace
+        "path": /spec/rules/0/host
+        "value": &fqdn app.contextsuite.dev
+      - "op": replace
+        "path": /spec/tls/0/hosts/0
+        "value": *fqdn  # <- this is a YAML anchor
+      

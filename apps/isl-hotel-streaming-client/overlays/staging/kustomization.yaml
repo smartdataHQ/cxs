@@ -1,6 +1,11 @@
-bases:
-  - ../../base
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: ingestion
 
 resources:
-  - isl-hotel-streaming-client-configmap.yaml
-  - isl-hotel-streaming-client-persistentvolume.yaml
+  - ../../base
+  - override-pvc.yaml
+
+patches:
+  - path: override-data-credentials.yaml

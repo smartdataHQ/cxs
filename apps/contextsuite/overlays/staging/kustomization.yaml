@@ -1,0 +1,40 @@
+# images:
+#   - name: quicklookup/contextsuite
+#     newTag: c721d76
+
+resources:
+  - ../../base
+patches:
+  - path: contextsuite-config.yaml
+  - patch: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: contextsuite
+      spec:
+        template:
+          spec:
+            containers:
+            - name: node
+              env:
+              - name: REDIS_PASSWORD
+                valueFrom:
+                  secretKeyRef:
+                    name: redis-auth
+                    key: redis-password
+  - target:
+      kind: Ingress
+      name: contextsuite
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "contextsuite-tls"
+      - op: replace
+        path: /spec/rules/0/host
+        value: &fqdn app.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: *fqdn  # <- this is a YAML anchor

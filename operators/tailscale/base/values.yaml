@@ -1,0 +1,42 @@
+# Base Tailscale Operator Configuration
+# Common settings for all environments
+
+# Install CRDs
+installCRDs: true
+
+# Operator configuration
+operatorConfig:
+  # Image settings
+  image:
+    repository: tailscale/k8s-operator
+    tag: v1.70.0
+    pullPolicy: Always
+  
+  # Logging level
+  logging: info
+  
+  # Node selector for Linux nodes
+  nodeSelector:
+    kubernetes.io/os: linux
+  
+  # Base resource limits (can be overridden per environment)
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Proxy configuration
+proxyConfig:
+  # Firewall mode for proxied services
+  firewallMode: auto
+
+# API Server proxy configuration
+apiServerProxyConfig:
+  # Disable by default, can be enabled per environment
+  mode: "false"
+
+# Image pull secrets (if needed)
+imagePullSecrets: []

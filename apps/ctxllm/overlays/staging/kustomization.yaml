@@ -1,6 +1,24 @@
-bases:
-  - ../../base
+# images:
+#   - name: quicklookup/ctxllm
+#     newTag: 95a2104
 
 resources:
-  - ctxllm-config.yaml
-  - ctxllm-ingress.yaml
+  - ../../base
+patches:
+  - path: ctxllm-config.yaml
+  - target:
+      kind: Ingress
+      name: ctxllm
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "ctxllm-tls"
+      - "op": replace
+        "path": /spec/rules/0/host
+        "value": &fqdn llm.contextsuite.dev
+      - "op": replace
+        "path": /spec/tls/0/hosts/0
+        "value": *fqdn  # <- this is a YAML anchor

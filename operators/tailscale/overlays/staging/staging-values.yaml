@@ -1,0 +1,63 @@
+# Staging Tailscale Operator Configuration
+# Overrides for staging environment with dev prefixes
+
+# Install CRDs
+installCRDs: true
+
+# OAuth configuration - use separate staging OAuth secret
+# Note: You'll need to create a separate OAuth app in Tailscale for staging
+# The secret 'operator-oauth' must be created manually with:
+# kubectl create secret generic operator-oauth \
+#   --namespace=tailscale \
+#   --from-literal=client_id="YOUR_STAGING_CLIENT_ID" \
+#   --from-literal=client_secret="YOUR_STAGING_CLIENT_SECRET" \
+#   --context=cxs-staging
+
+# Use existing secret (same name as production, but different namespace and credentials)
+oauthSecretVolume:
+  secret:
+    secretName: operator-oauth
+
+# Operator configuration
+operatorConfig:
+  # Staging ACL tags with dev prefix
+  defaultTags:
+    - tag:dev-k8s-operator
+    - tag:dev-k8s
+  
+  # Staging operator hostname with dev prefix
+  hostname: dev-tailscale-operator
+  
+  # Image settings
+  image:
+    repository: tailscale/k8s-operator
+    tag: v1.70.0
+    pullPolicy: Always
+  
+  # Logging level
+  logging: debug
+  
+  # Node selector for Linux nodes
+  nodeSelector:
+    kubernetes.io/os: linux
+  
+  # Staging resource limits (smaller for dev)
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# Proxy configuration
+proxyConfig:
+  # Staging proxy tags with dev prefix
+  defaultTags: tag:dev-k8s
+  
+  # Staging firewall mode
+  firewallMode: auto
+
+
+# Image pull secrets (if needed)
+imagePullSecrets: []

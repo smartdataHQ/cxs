@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: appset-monitoring
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: [ missingkey=error ]
+  generators:
+    - git:
+        repoURL: https://github.com/smartdataHQ/cxs.git
+        revision: &gitops_branch staging
+        directories: # production is default
+          - path: monitoring/*/overlays/production
+  template:
+    metadata:
+      name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
+      labels:
+        part-of: cxs-monitoring
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/smartdataHQ/cxs.git
+        targetRevision: *gitops_branch
+        path: "{{.path.path}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: ""  # this is left each application's to kustomization.yaml
+
+      syncPolicy:
+        syncOptions:
+          - PreserveResourcesOnDeletion=true
+        # automated:
+        #   prune: true
+        #   selfHeal: true

@@ -1,0 +1,5 @@
+namespace: monitoring
+
+# Helm configuration is moved to the overlays 
+# because of the limitations of the Kustomize Helm support
+# we can't override the values from the base Helm chart in overlays

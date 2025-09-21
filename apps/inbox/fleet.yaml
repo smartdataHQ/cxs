@@ -1,11 +1,2 @@
-defaultNamespace: inbox
-namespace: ingress
-
-targetCustomizations:
-
-  - name: production
-    clusterSelector:
-      matchLabels:
-        role: production
-    kustomize:
-      dir: overlays/production
+# This file is deprecated - migrating to ArgoCD
+# Will be replaced with ArgoCD Application manifests

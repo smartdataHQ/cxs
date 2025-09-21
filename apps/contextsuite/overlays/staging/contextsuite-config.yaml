@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contextsuite-config
+  # NO SECRETS SHOULD BE STORED IN CONFIGMAPS [See the docs](/README.md))
+data:
+
+  SENTRY_ENVIRONMENT: 'contextsuite-production'
+  NEXT_PUBLIC_SENTRY_DSN: ''# 'https://97964f08ea76422f830fba0618967fc4@o982223.ingest.sentry.io/5937160'
+  SENTRY_DSN: '' # 'https://97964f08ea76422f830fba0618967fc4@o982223.ingest.sentry.io/5937160'
+
+  NEXTAUTH_URL: 'https://app.contextsuite.dev'
+
+
+  REACT_APP_JITSU_DEPLOY_DOMAIN: 'events.contextsuite.dev'
+  CONTEXTSUITE_ADMIN_URL: 'https://admin.contextsuite.dev'
+  NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL: 'https://admin.contextsuite.dev'
+  NEXT_PUBLIC_CHAT_WSS_ENDPOINT: 'ws://chat.contextsuite.dev:8088/api/table_chat'

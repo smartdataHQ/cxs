@@ -1,0 +1,39 @@
+apiVersion: minio.min.io/v2
+kind: Tenant
+metadata:
+  name: minio
+  namespace: data
+spec:
+  configuration:
+    name: minio-tenant-config
+  buckets:
+    - name: rag-content-processing
+  pools:
+  - servers: 1
+    name: pool-0
+    volumesPerServer: 1
+    volumeClaimTemplate:
+      metadata:
+        name: data
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Gi
+        storageClassName: longhorn
+  requestAutoCert: false
+  # Disable S3 API TLS for internal cluster communication
+  externalCaCertSecret: []
+  externalCertSecret: []
+
+  serviceMetadata:
+    minioServiceAnnotations: 
+      tailscale.com/expose: "true"
+      tailscale.com/hostname: "data-minio-dev"
+    
+    consoleServiceAnnotations:
+      tailscale.com/expose: "true"
+      tailscale.com/hostname: "data-minio-console-dev"
+  # minioServiceType: ClusterIP
+  # consoleServiceType: ClusterIP

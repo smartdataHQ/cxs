@@ -1,6 +1,9 @@
-bases:
-  - ../../base
+# images:
+#   - name: quicklookup/contextsuite
+#     newTag: c721d76
 
 resources:
-  - contextsuite-config.yaml
-  - contextsuite-ingress.yml
+  - ../../base
+
+patches:
+  - path: contextsuite-config.yaml

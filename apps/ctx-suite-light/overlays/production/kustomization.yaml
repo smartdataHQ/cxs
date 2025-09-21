@@ -1,6 +1,6 @@
-bases:
-  - ../../base
+namespace: solutions
 
 resources:
+  - ../../base
   - ctx-suite-light-config.yaml
   - ctx-suite-light-ingress.yml

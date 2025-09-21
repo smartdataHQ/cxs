@@ -1,0 +1,25 @@
+# images:
+#   - name: quicklookup/formapi
+#     newTag: bd7d4a6
+
+resources:
+  - ../../base
+patches:
+  - path: formapi-config.yaml
+  - path: database-migration.yaml
+  - target:
+      kind: Ingress
+      name: formapi
+    patch: |
+      - op: replace
+        path: /metadata/annotations/cert-manager.io~1cluster-issuer
+        value: "letsencrypt-prod"
+      - op: replace
+        path: /spec/tls/0/secretName
+        value: "formapi-tls"
+      - op: replace
+        path: /spec/rules/0/host
+        value: &fqdn forms-api.contextsuite.dev
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: *fqdn  # <- this is a YAML anchor
