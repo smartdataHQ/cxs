@@ -14,10 +14,10 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: argocd.contextsuite.dev
+        value: argo.contextsuite.dev
       - op: replace
         path: /spec/tls/0/hosts/0
-        value: argocd.contextsuite.dev
+        value: argo.contextsuite.dev
       - op: replace
         path: /metadata/annotations
         value:
@@ -31,7 +31,7 @@ patches:
     patch: |-
       - op: add
         path: /data/url
-        value: https://argocd.contextsuite.dev
+        value: https://argo.contextsuite.dev
       - op: add
         path: /data/oidc.config
         value: |

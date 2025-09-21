@@ -2,11 +2,11 @@
 global:
     domain: argo.contextsuite.com
 
-
 configs:
   params:
     server.insecure: true
   cm:
+    kustomize.buildOptions: --enable-helm
     # OIDC configuration
     oidc.config: |
       name: Microsoft Entra
