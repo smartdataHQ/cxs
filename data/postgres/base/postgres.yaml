@@ -100,7 +100,7 @@ spec:
   instances:
     - name: instance1
       replicas: 3
-      resources : {}
+#      resources : {}
 
       affinity:
         podAntiAffinity:
