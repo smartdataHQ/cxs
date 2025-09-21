@@ -2,7 +2,6 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: data-layer-nodes
-  namespace: cattle-monitoring-system
   labels:
     release: rancher-monitoring
 spec:

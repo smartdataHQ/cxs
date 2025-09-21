@@ -2,7 +2,6 @@ apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: data-layer-alerts
-  namespace: cattle-monitoring-system
   labels:
     release: rancher-monitoring
 spec:

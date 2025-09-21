@@ -2,7 +2,6 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: longhorn-monitor
-  namespace: longhorn-system
   labels:
     release: rancher-monitoring 
 spec:

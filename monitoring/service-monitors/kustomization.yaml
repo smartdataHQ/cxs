@@ -1,7 +1,0 @@
-namespace: cattle-monitoring-system
-
-resources:
-  - base
-  - data-layer-service-monitor.yaml
-  - data-layer-prometheus-rule.yaml
-  - minio-prometheus-secret.yaml

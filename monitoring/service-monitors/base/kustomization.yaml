@@ -1,3 +1,5 @@
-namespace: longhorn-system
+namespace: cattle-monitoring-system
 resources:
   - longhorn-service-monitor.yaml
+  - data-layer-prometheus-rule.yaml
+  - data-layer-service-monitor.yaml
