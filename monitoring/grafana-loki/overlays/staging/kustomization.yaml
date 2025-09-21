@@ -14,3 +14,15 @@ helmCharts:
     version: 6.27.0
     namespace: grafana
     valuesFile: values.yaml
+
+
+patches:
+  - target:
+      kind: StatefulSet
+      name: loki-backend
+    patch: |-
+      - op: replace
+        path: /spec/persistentVolumeClaimRetentionPolicy
+        value:
+          whenDeleted: Retain
+          whenScaled: Retain
