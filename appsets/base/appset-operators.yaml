@@ -9,7 +9,7 @@ spec:
   generators:
     - git:
         repoURL: https://github.com/smartdataHQ/cxs.git
-        revision: &gitops_branch staging
+        revision: &gitops_branch main
         directories: # production is default
           - path: operators/*/overlays/production
   template:
@@ -30,6 +30,6 @@ spec:
       syncPolicy:
         syncOptions:
           - PreserveResourcesOnDeletion=true
-        # automated:
-        #   prune: true
-        #   selfHeal: true
+        automated:
+          prune: true
+          selfHeal: true

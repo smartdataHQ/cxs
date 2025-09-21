@@ -7,16 +7,16 @@ This repository contains the configuration for our Kubernetes clusters and the s
 The primary purpose of this project is to manage the deployment and configuration of the **Quick Lookup and Context Suite** applications and their associated backend services. Our architecture relies on the following key technologies:
 
 *   **Kubernetes:** An open-source system for automating deployment, scaling, and management of containerized applications.
+*   **ArgoCD:** A declarative GitOps continuous delivery tool for Kubernetes that synchronizes application state from this Git repository to our clusters. ArgoCD has replaced Fleet as our GitOps engine. See [argocd/README.md](argocd/README.md) for detailed information about our ArgoCD setup and workflow.
 *   **Rancher:** A platform for managing multiple Kubernetes clusters. We use Rancher to oversee all our clusters, regardless of the underlying cloud provider.
-*   **Fleet:** A GitOps tool by Rancher that monitors this repository. When changes are pushed to this repository, Fleet automatically detects them and applies the necessary updates to the respective Kubernetes clusters. This ensures that our deployed infrastructure and applications always reflect the state defined in this repository.
 *   **Helm:** A package manager for Kubernetes that allows us to define, install, and upgrade even the most complex Kubernetes applications using charts. We use Helm to package and deploy our services.
-*   **Docker Hub:** We store our container images in Docker Hub. Our CI/CD pipelines (primarily Github Actions) build our application code, containerize it into Docker images, and push these images to Docker Hub. Fleet then fetches these images based on the tags specified in the deployment configurations within this repository.
+*   **Docker Hub:** We store our container images in Docker Hub. Our CI/CD pipelines (primarily Github Actions) build our application code, containerize it into Docker images, and push these images to Docker Hub. ArgoCD then fetches these images based on the tags specified in the deployment configurations within this repository.
 
 The overall workflow is as follows:
 1.  Application code is developed and pushed to its respective Github repository.
 2.  Github Actions build the code, create a Docker image, and push it to Docker Hub.
 3.  Configuration changes for deployments (e.g., updating an image tag, changing resource limits, or deploying a new service) are made in this repository.
-4.  Fleet detects these changes and applies them to the target Kubernetes cluster, pulling the specified Docker images from Docker Hub and deploying them according to the Helm charts and other Kubernetes manifests.
+4.  ArgoCD detects these changes and applies them to the target Kubernetes cluster, pulling the specified Docker images from Docker Hub and deploying them according to the Helm charts and other Kubernetes manifests.
 
 ### Index
 
@@ -59,13 +59,18 @@ This repository is organized as follows:
 
 *   `README.md`: This file, providing an overview of the project.
 *   `VPN.md`: Documentation related to VPN setup using Tailscale.
-*   `apps/`: Contains the Kubernetes manifests (deployments, services, etc.) and Fleet configuration for all our applications (e.g., Context API, Context Suite, Quick Lookup components). Each application typically has a `base/` directory for common Kustomize configurations and an `overlays/` directory for environment-specific configurations (e.g., `production`, `staging`).
-*   `authentication/`: Configuration related to authentication mechanisms, currently housing Tailscale setup via Fleet.
-*   `data/`: Contains configurations for our data stores and related services, such as ClickHouse, Kafka, Neo4j, PostgreSQL, Solr, and object storage mappings (e.g., `c00dbmappings` for S3). It also includes documentation and deployment files for these services.
+*   `ansible/`: Infrastructure automation and monitoring setup for bare-metal servers using Ansible playbooks and roles.
+*   `apps/`: Contains the Kubernetes manifests (deployments, services, etc.) and ArgoCD configuration for all our applications (e.g., Context API, Context Suite, Quick Lookup components). Each application typically has a `base/` directory for common Kustomize configurations and an `overlays/` directory for environment-specific configurations (e.g., `production`, `staging`).
+*   `appsets/`: ArgoCD ApplicationSet definitions that automatically discover and create Applications based on directory structure patterns.
+*   `argocd/`: ArgoCD deployment configuration and documentation. See `argocd/README.md` for detailed GitOps workflow information.
+*   `data/`: Contains configurations for our data stores and related services, such as ClickHouse, Kafka, Neo4j, PostgreSQL, Redis, and backup configurations. It also includes documentation and deployment files for these services.
 *   `db_restore/`: Scripts and configuration files related to database restore procedures.
-*   `monitoring/`: Configuration for our monitoring stack, including Grafana for dashboards and alerting, Loki for log aggregation, and Prometheus service monitors.
+*   `docs/`: Documentation including infrastructure analysis, migration plans, and operational guides.
+*   `migration-plan/`: Specific documentation and planning materials for infrastructure migrations.
+*   `monitoring/`: Configuration for our monitoring stack, including Grafana for dashboards and alerting, Loki for log aggregation, Prometheus service monitors, and data layer monitoring.
 *   `operators/`: Kubernetes operators that extend the functionality of our clusters, such as Cert-Manager for managing TLS certificates and OpenTelemetry (otel) for observability.
-*   `pipelines/`: Configuration for data pipelines and workflow automation tools like Apache Airflow and Apache NiFi.
+*   `pipelines/`: Configuration for data pipelines and workflow automation tools like Apache Airflow.
+*   `scripts/`: Utility scripts for various operational tasks and automation.
 
 ## Development Environment and Contribution
 

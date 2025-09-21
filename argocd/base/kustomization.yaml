@@ -3,9 +3,6 @@ kind: Kustomization
 
 namespace: argocd
 
-# resources:
-#   - manifests/azure-gitops-secret.yaml
-
 helmCharts:
   - name: argo-cd
     repo: https://argoproj.github.io/argo-helm
