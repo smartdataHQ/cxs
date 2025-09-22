@@ -10,6 +10,8 @@ loki:
       secretAccessKey: ${S3_LOKI_SECRET_ACCESS_KEY}
       s3ForcePathStyle: true
       insecure: true
+      http_config:
+        insecure_skip_verify: true
     bucketNames:
       chunks: "loki-chunks"
       ruler: "loki-ruler"
