@@ -1,6 +1,9 @@
-# images:
-#   - name: quicklookup/gpt-api
-#     newTag: 2998c0d  # Production tag
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+images:
+  - name: quicklookup/gpt-api
+    newTag: 050f677
 
 resources:
   - ../../base

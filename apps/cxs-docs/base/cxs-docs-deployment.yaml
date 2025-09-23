@@ -30,7 +30,7 @@ spec:
             - sh
             - -c
             - /app/init-data.sh && node /app/server.js --hostname 0.0.0.0
-          image: quicklookup/cxs-utils:ce8f
+          image: quicklookup/cxs-utils # Image tag managed in overlays/*/kustomization.yaml
           resources:
             requests:
               cpu: 100m

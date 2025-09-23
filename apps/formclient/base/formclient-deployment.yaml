@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/formclient:e172f0b
+          image: quicklookup/formclient # Image tag managed in overlays/*/kustomization.yaml
           resources:
             requests:
               cpu: 200m

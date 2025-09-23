@@ -4,9 +4,8 @@ kind: Kustomization
 namespace: solutions
 
 images:
-  - name: quicklookup/service-runner
-    newTag: ffd71f0
+  - name: quicklookup/cxs-utils
+    newTag: ce8f
 
 resources:
   - ../../base
-  - service-runner-config.yaml

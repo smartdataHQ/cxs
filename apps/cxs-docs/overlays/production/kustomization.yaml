@@ -3,6 +3,10 @@ kind: Kustomization
 
 namespace: solutions
 
+images:
+  - name: quicklookup/cxs-utils
+    newTag: ce8f
+
 resources:
   - ../../base
   - cxs-docs-ingress.yaml

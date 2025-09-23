@@ -1,8 +1,13 @@
-bases:
-  - ../../base
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
 namespace: solutions
 
+images:
+  - name: quicklookup/cxs-mimir-api
+    newTag: 8906a7e
+
 resources:
+  - ../../base
   - mimir-api-config.yaml
   - mimir-api-ingress.yml

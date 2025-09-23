@@ -4,9 +4,8 @@ kind: Kustomization
 namespace: solutions
 
 images:
-  - name: quicklookup/service-runner
-    newTag: ffd71f0
+  - name: quicklookup/cxs-mimir-api
+    newTag: 8906a7e
 
 resources:
   - ../../base
-  - service-runner-config.yaml

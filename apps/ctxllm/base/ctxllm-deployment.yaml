@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/ctxllm:95a2104
+          image: quicklookup/ctxllm
+          # Image tag managed in overlays/*/kustomization.yaml
           resources:
             requests:
               cpu: 200m

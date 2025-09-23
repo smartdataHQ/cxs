@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/mimir-chat:25fa89e
+          image: quicklookup/mimir-chat # Image tag managed in overlays/*/kustomization.yaml
           args:
             - npm
             - start

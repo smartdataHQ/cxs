@@ -3,6 +3,10 @@ kind: Kustomization
 
 namespace: solutions
 
+images:
+  - name: quicklookup/mimir-chat
+    newTag: 25fa89e
+
 resources:
   - ../../base
   - mimir-chat-config.yaml

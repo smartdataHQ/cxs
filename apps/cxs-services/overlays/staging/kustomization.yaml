@@ -1,6 +1,11 @@
-# images:
-#   - name: quicklookup/cxs-services
-#     newTag: a3e3ee3
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: solutions
+
+images:
+  - name: quicklookup/cxs-services
+    newTag: 66f999f
 
 resources:
   - ../../base

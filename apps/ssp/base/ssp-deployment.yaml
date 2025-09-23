@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/ssp:4d15966
+          image: quicklookup/ssp # Image tag managed in overlays/*/kustomization.yaml
           resources:
             requests:
               cpu: 200m

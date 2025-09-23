@@ -4,9 +4,8 @@ kind: Kustomization
 namespace: solutions
 
 images:
-  - name: quicklookup/service-runner
-    newTag: ffd71f0
+  - name: quicklookup/cxs-onenote
+    newTag: bbdb97e
 
 resources:
   - ../../base
-  - service-runner-config.yaml

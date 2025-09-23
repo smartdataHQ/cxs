@@ -3,6 +3,10 @@ kind: Kustomization
 
 namespace: solutions
 
+images:
+  - name: quicklookup/mimir-api
+    newTag: 7c943b2
+
 resources:
   - ../../base
   - mimir-api-config.yaml

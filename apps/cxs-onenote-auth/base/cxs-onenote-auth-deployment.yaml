@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/cxs-onenote:bbdb97e
+          image: quicklookup/cxs-onenote # Image tag managed in overlays/*/kustomization.yaml
           ports:
             - containerPort: 8000
           livenessProbe:

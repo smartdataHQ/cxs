@@ -2,6 +2,11 @@
 
 This repository contains the configuration for our Kubernetes clusters and the services that run on them. We utilize a GitOps approach, where this repository is the single source of truth for our infrastructure and application deployments.
 
+---
+
+**NOTE: For application deployment workflows and image management, see [apps/README.md](apps/README.md)**
+
+---
 ## Project Purpose and Architecture
 
 The primary purpose of this project is to manage the deployment and configuration of the **Quick Lookup and Context Suite** applications and their associated backend services. Our architecture relies on the following key technologies:

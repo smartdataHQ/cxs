@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/translator-api:f709490
+          image: quicklookup/translator-api # Image tag managed in overlays/*/kustomization.yaml
           resources:
             requests:
               cpu: 200m

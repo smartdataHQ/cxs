@@ -23,7 +23,7 @@ AUTO_OPEN_DIFF=false
 DIFF_VIEWER="delta -s"
 NAMESPACE_OVERRIDE=""
 KUBE_CONTEXT=""
-IGNORE_ANNOTATIONS="argocd.argoproj.io/tracking-id,tailscale.com/hostname"
+IGNORE_ANNOTATIONS="argocd.argoproj.io/tracking-id,tailscale.com/hostname,deployment.kubernetes.io/revision,field.cattle.io/publicEndpoints,autoscaling.alpha.kubernetes.io/conditions,meta.helm.sh/release-namespace,objectset.rio.cattle.io/id,app.kubernetes.io/managed-by,objectset.rio.cattle.io/hash,kubectl.kubernetes.io/last-applied-configuration"
 
 # Colors for output
 RED='\033[0;31m'
@@ -55,7 +55,7 @@ OPTIONS:
     -d, --save-diffs        Save diff output to files for inspection with diff tools
     --auto-open             Automatically open diff with viewer (first diff found)
     --viewer=TOOL           Diff viewer tool (default: delta -s)
-    --ignore-annotations=LIST  Comma-separated list of annotations to ignore (default: argocd.argoproj.io/tracking-id,tailscale.com/hostname)
+    --ignore-annotations=LIST  Comma-separated list of annotations/fields to ignore (default: runtime/operational fields)
     -h, --help             Show this help message
 
 EXAMPLES:
@@ -207,7 +207,7 @@ log_error() {
 mark_completed() {
     local app="$1"
     if [[ "$MARK_COMPLETED" == "true" ]]; then
-        local completion_path="$SCRIPT_DIR/../$COMPLETION_DIR"
+        local completion_path="$SCRIPT_DIR/../../$COMPLETION_DIR"
         mkdir -p "$completion_path"
         echo "$(date -Iseconds)" > "$completion_path/${app}.completed"
         log_info "Marked $app as validated"
@@ -217,7 +217,7 @@ mark_completed() {
 # Function to check if app is already completed
 is_completed() {
     local app="$1"
-    local completion_path="$SCRIPT_DIR/../$COMPLETION_DIR"
+    local completion_path="$SCRIPT_DIR/../../$COMPLETION_DIR"
     [[ -f "$completion_path/${app}.completed" ]]
 }
 
@@ -250,7 +250,7 @@ get_default_namespace_for_directory() {
 }
 
 
-# Function to filter out ignored annotations from kubectl diff output
+# Function to filter out ignored annotations and metadata fields from kubectl diff output
 filter_annotations() {
     local diff_content="$1"
     local annotations_to_ignore="$2"
@@ -263,24 +263,24 @@ filter_annotations() {
     # Convert comma-separated list to array
     IFS=',' read -ra ignore_list <<< "$annotations_to_ignore"
     
-    # Build sed pattern to remove annotation diff lines
-    local sed_pattern=""
+    # Apply filters sequentially to avoid sed pattern complexity
+    local filtered_content="$diff_content"
     for annotation in "${ignore_list[@]}"; do
         annotation=$(echo "$annotation" | xargs) # trim whitespace
-        # Escape special regex characters
-        annotation_escaped=$(echo "$annotation" | sed 's/[[\.*^$()+?{|]/\\&/g')
-        
-        # Add pattern to remove lines showing annotation changes
+        # Use grep -v to remove lines with the annotation/field, being more robust
         # This removes lines like: +    argocd.argoproj.io/tracking-id: xyz
         # and: -    argocd.argoproj.io/tracking-id: abc
-        if [[ -n "$sed_pattern" ]]; then
-            sed_pattern="${sed_pattern};"
-        fi
-        sed_pattern="${sed_pattern}/^[+-].*${annotation_escaped}:/d"
+        # Also handles metadata fields like generation:
+        filtered_content=$(echo "$filtered_content" | grep -v -F "$annotation:")
     done
     
-    # Apply the filter
-    echo "$diff_content" | sed "$sed_pattern"
+    # Also filter out common runtime metadata changes that aren't annotation-based
+    filtered_content=$(echo "$filtered_content" | grep -v -E "^[+-]\s+generation: [0-9]+$")
+    filtered_content=$(echo "$filtered_content" | grep -v -E "^[+-]\s+resourceVersion: ")
+    filtered_content=$(echo "$filtered_content" | grep -v -E "^[+-]\s+uid: ")
+    filtered_content=$(echo "$filtered_content" | grep -v -E "^[+-]\s+creationTimestamp: ")
+    
+    echo "$filtered_content"
 }
 
 # Function to extract namespace from kustomization files
@@ -456,7 +456,11 @@ validate_app() {
                 
                 # Save filtered diff to file if requested
                 if [[ "$SAVE_DIFFS" == "true" ]]; then
-                    local diff_file="$SCRIPT_DIR/../$DIFF_OUTPUT_DIR/${app_name}.diff"
+                    local diff_dir="$SCRIPT_DIR/../../$DIFF_OUTPUT_DIR"
+                    local diff_file="$diff_dir/${app_name}.diff"
+                    
+                    # Ensure diff directory exists
+                    mkdir -p "$diff_dir"
                     
                     # Create a more readable diff by replacing temp file paths and apply filtering
                     echo "$filtered_diff" | sed -E "

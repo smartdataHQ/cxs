@@ -3,6 +3,10 @@ kind: Kustomization
 
 namespace: solutions
 
+images:
+  - name: quicklookup/service-runner
+    newTag: ffd71f0
+
 resources:
   - ../../base
   - service-runner-config.yaml

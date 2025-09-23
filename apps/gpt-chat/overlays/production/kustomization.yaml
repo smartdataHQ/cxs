@@ -3,6 +3,10 @@ kind: Kustomization
 
 namespace: solutions
 
+images:
+  - name: quicklookup/gpt-chat
+    newTag: 84e0db6
+
 resources:
   - ../../base
 

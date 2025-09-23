@@ -3,6 +3,10 @@ kind: Kustomization
 
 namespace: api
 
+images:
+  - name: quicklookup/ssp
+    newTag: 4d15966
+
 resources:
   - ../../base
   - ssp-config.yaml

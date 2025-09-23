@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/contextsuite:12a22d1
+          image: quicklookup/contextsuite
+          # Image tag managed in overlays/*/kustomization.yaml
           resources:
             requests:
               cpu: 200m

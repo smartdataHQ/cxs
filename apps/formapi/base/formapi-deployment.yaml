@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/formapi:61e115c
+          image: quicklookup/formapi # Image tag managed in overlays/*/kustomization.yaml
           resources:
             requests:
               cpu: 200m

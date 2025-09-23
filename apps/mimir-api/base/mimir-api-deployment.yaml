@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/mimir-api:7c943b2
+          image: quicklookup/mimir-api # Image tag managed in overlays/*/kustomization.yaml
           resources:
             requests:
               cpu: 200m

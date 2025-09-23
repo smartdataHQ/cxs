@@ -3,6 +3,10 @@ kind: Kustomization
 
 namespace: solutions
 
+images:
+  - name: quicklookup/translator-api
+    newTag: f709490
+
 resources:
   - ../../base
 

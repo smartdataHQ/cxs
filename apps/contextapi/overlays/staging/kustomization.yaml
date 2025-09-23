@@ -1,6 +1,6 @@
-# images:
-#   - name: quicklookup/contextapi
-#     newTag: 6c2bad8
+images:
+  - name: quicklookup/contextapi
+    newTag: b6aa116
 
 resources:
   - ../../base
