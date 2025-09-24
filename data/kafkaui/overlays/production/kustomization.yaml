@@ -3,5 +3,5 @@ namespace: data
 
 resources:
   - ../../base
-  - kafkaui-config.yaml
+
 

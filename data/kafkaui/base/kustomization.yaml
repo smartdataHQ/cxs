@@ -1,3 +1,4 @@
 resources:
   - kafkaui-deployment.yaml
   - kafkaui-service.yaml
+  - kafkaui-config.yaml

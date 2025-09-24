@@ -1,0 +1,18 @@
+namespace: data
+
+
+resources:
+  - ../../base
+
+
+# patch tailscale annotation
+patches:
+  - target:
+      kind: Service
+      name: kafkaui
+    patch: |-
+      - op: add
+        path: /metadata/annotations
+        value:
+          tailscale.com/expose: "true"
+          tailscale.com/hostname: data-kafkaui-dev
