@@ -2,3 +2,6 @@ namespace: solutions
 resources:
   - mimir-chat-deployment.yaml
   - mimir-chat-service.yaml
+  - mimir-chat-config.yaml
+  - mimir-chat-ingress.yml
+  - mimir-chat-logreglan-ingress.yaml

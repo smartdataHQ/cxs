@@ -1,9 +1,30 @@
-bases:
-  - ../../base
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
 namespace: solutions
 
+images:
+  - name: quicklookup/mimir-chat
+    newTag: 25fa89e
+
 resources:
-  - mimir-chat-config.yaml
-  - mimir-chat-ingress.yml
-  - mimir-chat-logreglan-ingress.yaml
+  - ../../base
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: cxs-mimir-web-config
+    patch: |
+      - op: replace
+        path: /data/BROWSER_CHAT_API
+        value: "https://agents.contextsuite.dev"
+      - op: replace
+        path: /data/BROWSER_APP_API
+        value: "https://agents.contextsuite.dev"
+      - op: replace
+        path: /data/MIMIR_SERVER_API
+        value: "https://agents.contextsuite.dev"
+      - op: replace
+        path: /data/BROWSER_CHAT_WSS_API
+        value: "wss://agents.contextsuite.dev"
+

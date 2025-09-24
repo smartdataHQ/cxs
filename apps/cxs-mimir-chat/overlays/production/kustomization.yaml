@@ -1,0 +1,9 @@
+bases:
+  - ../../base
+
+namespace: solutions
+
+images:
+  - name: quicklookup/mimir-chat
+    newTag: 25fa89e
+

@@ -8,7 +8,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: leo.logreglan.contextsuite.dev
+    - host: leo.logreglan.is
       http:
         paths:
           # Static assets - NO rewrite
@@ -42,7 +42,7 @@ spec:
                   number: 3000
   tls:
     - hosts:
-        - leo.logreglan.contextsuite.dev
+        - leo.logreglan.is
       secretName: leo-logreglan-is-tls
 ---
 # Root path rewrite - no trailing slash
@@ -57,7 +57,7 @@ metadata:
     cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   rules:
-    - host: leo.logreglan.contextsuite.dev
+    - host: leo.logreglan.is
       http:
         paths:
           # Root path only - rewrite to /logreglan (no trailing slash)
@@ -70,5 +70,5 @@ spec:
                   number: 3000
   tls:
     - hosts:
-        - leo.logreglan.contextsuite.dev
+        - leo.logreglan.is
       secretName: leo-logreglan-is-tls
