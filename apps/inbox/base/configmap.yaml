@@ -37,7 +37,7 @@ data:
   NEO4J_USER: 'admin'
   NEO4J_DATABASE: 'contextsuite'
 
-  S3_ENDPOINT: 'http://s-darz.cloud.gcore.lu:4566'
+  S3_ENDPOINT: 'https://s-darz.cloud.gcore.lu'
   S3_REGION: 's-darz'
   GEOIP_BUCKET_NAME: 'geoip-bucket'
   GEOIP_FILE_NAME: 'GeoIP2-City.mmdb'
