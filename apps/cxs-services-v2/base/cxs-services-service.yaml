@@ -7,6 +7,7 @@ metadata:
     tier: api
   annotations:
     tailscale.com/expose: "true"
+    tailscale.com/hostname: "solutions-cxsservices-v2"
 spec:
   type: NodePort
   ports:
