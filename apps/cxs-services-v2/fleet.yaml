@@ -1,0 +1,16 @@
+namespace: solutions
+
+targetCustomizations:
+
+  - name: production
+    clusterSelector:
+      matchLabels:
+        role: production
+    kustomize:
+      dir: overlays/production
+  - name: staging
+    clusterSelector:
+      matchLabels:
+        role: staging
+    kustomize:
+      dir: overlays/staging
