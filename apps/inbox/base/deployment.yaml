@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: inbox
-        image: quicklookup/inbox:v1.0.13
+        image: quicklookup/inbox:v1.0.15
         resources:
           requests:
             cpu: 100m
@@ -26,6 +26,22 @@ spec:
           name: http
         - containerPort: 2222
           name: sftp
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 9090
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 500
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 9090
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
         env:
           - name: POSTGRES_PASSWORD
             valueFrom:
