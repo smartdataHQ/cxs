@@ -290,11 +290,13 @@ setup_env_files() {
   local target_dir="$1"
   local non_sensitive=".env.non-sensitive"
   local sensitive=".env.sensitive"
+  local example_non=".env.example.non-sensitive"
+  local example_sensitive=".env.example.sensitive"
   
   # Download non-sensitive example and copy (ready with defaults)
-  download_example ".env.example.non-sensitive" "$non_sensitive"
+  download_example ".env.example.non-sensitive" "$example_non"
   if [ ! -f "$non_sensitive" ]; then
-    cp "$non_sensitive" "$non_sensitive"
+    cp "$example_non" "$non_sensitive"
     echo "✅ Created $non_sensitive with safe defaults."
   fi
   
@@ -568,12 +570,14 @@ fi
 COMPOSE_ARGS=()
 for env_file in "${ENV_FILES_ABS[@]}"; do
   COMPOSE_ARGS+=("--env-file" "$env_file")  # Absolute paths ensure compose finds them
+  echo "Using env file: $env_file"  # Debug: Show which files are being used
 done
 COMPOSE_ARGS+=("-f" "docker-compose.mimir.onprem.yml" "up" "-d")
 
 pushd "$STACK_TARGET" >/dev/null
 
-echo "Running docker compose up..."
+echo "Running docker compose up from $STACK_TARGET..."
+echo "Compose args: ${COMPOSE_ARGS[*]}"  # Debug: Show full command
 "${COMPOSE_BIN[@]}" "${COMPOSE_ARGS[@]}"
 
 popd >/dev/null

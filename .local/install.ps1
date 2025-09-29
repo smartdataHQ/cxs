@@ -337,11 +337,13 @@ function Setup-EnvFiles {
     )
     $nonSensitive = '.env.non-sensitive'
     $sensitive = '.env.sensitive'
+    $exampleNon = '.env.example.non-sensitive'
+    $exampleSensitive = '.env.example.sensitive'
 
     # Download non-sensitive example and copy (ready with defaults)
-    Download-Example "$githubPath/.env.example.non-sensitive" $nonSensitive
+    Download-Example "$githubPath/.env.example.non-sensitive" $exampleNon
     if (-not (Test-Path $nonSensitive)) {
-        Copy-Item $nonSensitive $nonSensitive
+        Copy-Item $exampleNon $nonSensitive
         Write-Host "✅ Created $nonSensitive with safe defaults."
     }
 
