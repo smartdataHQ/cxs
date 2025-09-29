@@ -11,10 +11,11 @@
      ```
      - **Copy Tip**: Highlight the command above, copy (Ctrl+C), open PowerShell, paste (right-click or Ctrl+V), and press Enter. The script handles the rest.
 
-2. **Fill Secrets When Prompted**:
-   - The script auto-downloads env templates and opens an editor (nano/Notepad) for .env.sensitive.
-   - Fill required values (e.g., DOCKER_PAT, OPENAI_API_KEY from provided secure info).
-   - Save and press Enter in the terminal to continue (skips if pre-filled with --no-interactive).
+2. **Answer Simple Questions About Your Setup**:
+   - The script will ask you for each secret one by one (no confusing editor).
+   - For passwords: Just press Enter to auto-generate strong ones.
+   - For API keys: Enter the keys provided to you (e.g., DOCKER_PAT, OPENAI_API_KEY).
+   - Takes 2-3 minutes with helpful prompts and validation.
 
 3. **Access**:
    - UI: http://localhost (or https://localhost if TLS enabled).

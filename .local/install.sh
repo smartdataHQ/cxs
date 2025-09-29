@@ -114,44 +114,27 @@ download_example() {
   fi
 }
 
-# Setup env files interactively/frictionless (cross-platform compatible)
+# Setup env files with interactive prompts (smoothest experience)
 setup_env_files() {
   local target_dir="$1"
   local non_sensitive=".env.non-sensitive"
   local sensitive=".env.sensitive"
-  local example_non="${GITHUB_PATH}/.env.example.non-sensitive"
-  local example_sensitive="${GITHUB_PATH}/.env.example.sensitive"
-
-  # Download examples if missing (frictionless)
-  download_example "$example_non" "$non_sensitive"
-  download_example "$example_sensitive" "$sensitive"
-
-  # Auto-copy non-sensitive (ready with defaults)
+  
+  # Download non-sensitive example and copy (ready with defaults)
+  download_example ".env.example.non-sensitive" "$non_sensitive"
   if [ ! -f "$non_sensitive" ]; then
-    echo "Created $non_sensitive with defaults. Edit if needed (e.g., ports)."
+    cp "$non_sensitive" "$non_sensitive"
+    echo "✅ Created $non_sensitive with safe defaults."
   fi
-
-  # For sensitive: Copy keys-only, prompt to edit if not interactive
-  if [ ! -f "$sensitive" ]; then
-    echo "Created $sensitive (keys-only template)."
-    if [ "$NON_INTERACTIVE" != "true" ]; then
-      # Open editor (prefer nano, fallback to vi; for Windows, user can use notepad externally)
-      if command -v nano >/dev/null 2>&1; then
-        nano "$sensitive"
-      elif command -v vi >/dev/null 2>&1; then
-        vi "$sensitive"
-      else
-        echo "No editor found (nano/vi). Edit $sensitive manually (fill secrets like DOCKER_PAT)."
-        if command -v notepad >/dev/null 2>&1; then
-          echo "On Windows, run 'notepad $sensitive' externally."
-        fi
-      fi
-      echo "After editing $sensitive (fill secrets like DOCKER_PAT), press Enter to continue."
-      read -r
-    else
-      echo "Run without --no-interactive, or fill $sensitive manually before rerun."
-      exit 1
-    fi
+  
+  # For sensitive: Interactive prompts instead of editor
+  if [ ! -f "$sensitive" ] && [ "$NON_INTERACTIVE" != "true" ]; then
+    prompt_for_secrets "$sensitive"
+  elif [ ! -f "$sensitive" ]; then
+    echo "Run without --no-interactive for guided setup, or create $sensitive manually." >&2
+    exit 1
+  else
+    echo "✅ Using existing $sensitive"
   fi
 
   # Set ENV_FILES_ABS to these local files (absolute for compose)
