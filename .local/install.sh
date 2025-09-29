@@ -201,16 +201,18 @@ EOF
   echo "REDIS_PASSWORD=\"$PROMPT_VALUE\"" >> "$sensitive_file"
   
   # AI/ML API Keys (Required)
-  echo "Step 3/6: AI/ML Service Keys"
+  echo "Step 3/8: AI/ML Service Keys"
   prompt_secret "OPENAI_API_KEY" "OpenAI API key (starts with sk-)" "" "true"
   echo "OPENAI_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
-  prompt_secret "VOYAGE_API_KEY" "Voyage AI embeddings key" "" "true"
-  echo "VOYAGE_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  prompt_secret "VOYAGE_API_KEY" "Voyage AI embeddings key (uses local model if not provided)" "" "false"
+  if [ -n "$PROMPT_VALUE" ]; then
+    echo "VOYAGE_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  fi
   prompt_secret "UNSTRUCTURED_API_KEY" "Unstructured.io document processing key" "" "true"
   echo "UNSTRUCTURED_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
   
   # Application Secrets (Required - Auto-generate)
-  echo "Step 4/6: Application Security Keys"
+  echo "Step 4/8: Application Security Keys"
   prompt_secret "SECRET_KEY" "Main application secret key" "AUTO_GENERATE:32" "true"
   echo "SECRET_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
   prompt_secret "TOKEN_SECRET_KEY" "Token signing key" "AUTO_GENERATE:24" "true"
@@ -219,7 +221,7 @@ EOF
   echo "FERNET_KEY_PATTERN=\"$PROMPT_VALUE\"" >> "$sensitive_file"
   
   # Optional API Keys
-  echo "Step 5/6: Optional API Keys (press Enter to skip)"
+  echo "Step 5/8: Optional API Keys (press Enter to skip)"
   prompt_secret "AZURE_OPENAI_API_KEY" "Azure OpenAI key (if using Azure)" "" "false"
   if [ -n "$PROMPT_VALUE" ]; then
     echo "AZURE_OPENAI_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
@@ -235,10 +237,6 @@ EOF
   prompt_secret "GOOGLE_MAPS_API_KEY" "Google Maps API key (if using location features)" "" "false"
   if [ -n "$PROMPT_VALUE" ]; then
     echo "GOOGLE_MAPS_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
-  fi
-  prompt_secret "EVENTS_SERVER_KEY" "Events tracking server key (for analytics)" "" "false"
-  if [ -n "$PROMPT_VALUE" ]; then
-    echo "EVENTS_SERVER_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
   fi
   
   # On-Prem Specific (Required)
@@ -537,7 +535,6 @@ fi
 CLICKHOUSE_PASSWORD=$(read_env_value "$last_env" "CLICKHOUSE_PASSWORD")
 REDIS_PASSWORD=$(read_env_value "$last_env" "REDIS_PASSWORD")
 OPENAI_API_KEY=$(read_env_value "$last_env" "OPENAI_API_KEY")
-VOYAGE_API_KEY=$(read_env_value "$last_env" "VOYAGE_API_KEY")
 UNSTRUCTURED_API_KEY=$(read_env_value "$last_env" "UNSTRUCTURED_API_KEY")
 SECRET_KEY=$(read_env_value "$last_env" "SECRET_KEY")
 ONPREM_WRITE_KEY=$(read_env_value "$last_env" "ONPREM_WRITE_KEY")
@@ -545,8 +542,8 @@ ONPREM_ORGANIZATION=$(read_env_value "$last_env" "ONPREM_ORGANIZATION")
 ONPREM_ORGANIZATION_GID=$(read_env_value "$last_env" "ONPREM_ORGANIZATION_GID")
 ONPREM_PARTITION=$(read_env_value "$last_env" "ONPREM_PARTITION")
 
-if [ -z "$CLICKHOUSE_PASSWORD" ] || [ -z "$REDIS_PASSWORD" ] || [ -z "$OPENAI_API_KEY" ] || [ -z "$VOYAGE_API_KEY" ] || [ -z "$UNSTRUCTURED_API_KEY" ] || [ -z "$SECRET_KEY" ] || [ -z "$ONPREM_WRITE_KEY" ] || [ -z "$ONPREM_ORGANIZATION" ] || [ -z "$ONPREM_ORGANIZATION_GID" ] || [ -z "$ONPREM_PARTITION" ]; then
-  echo "Required secrets missing in last env file ($last_env): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, VOYAGE_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY, ONPREM_WRITE_KEY, ONPREM_ORGANIZATION, ONPREM_ORGANIZATION_GID, ONPREM_PARTITION." >&2
+if [ -z "$CLICKHOUSE_PASSWORD" ] || [ -z "$REDIS_PASSWORD" ] || [ -z "$OPENAI_API_KEY" ] || [ -z "$UNSTRUCTURED_API_KEY" ] || [ -z "$SECRET_KEY" ] || [ -z "$ONPREM_WRITE_KEY" ] || [ -z "$ONPREM_ORGANIZATION" ] || [ -z "$ONPREM_ORGANIZATION_GID" ] || [ -z "$ONPREM_PARTITION" ]; then
+  echo "Required secrets missing in last env file ($last_env): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY, ONPREM_WRITE_KEY, ONPREM_ORGANIZATION, ONPREM_ORGANIZATION_GID, ONPREM_PARTITION." >&2
   echo "Fill .env.sensitive and rerun." >&2
   exit 1
 fi

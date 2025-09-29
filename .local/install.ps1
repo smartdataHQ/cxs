@@ -262,16 +262,16 @@ function Prompt-ForSecrets {
     "REDIS_PASSWORD=`"$redisPass`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
     
     # AI/ML API Keys (Required)
-    Write-Host "Step 3/6: AI/ML Service Keys" -ForegroundColor Blue
+    Write-Host "Step 3/8: AI/ML Service Keys" -ForegroundColor Blue
     $openaiKey = Prompt-Secret -VarName "OPENAI_API_KEY" -Description "OpenAI API key (starts with sk-)" -DefaultValue "" -IsRequired $true
     "OPENAI_API_KEY=`"$openaiKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
-    $voyageKey = Prompt-Secret -VarName "VOYAGE_API_KEY" -Description "Voyage AI embeddings key" -DefaultValue "" -IsRequired $true
-    "VOYAGE_API_KEY=`"$voyageKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    $voyageKey = Prompt-Secret -VarName "VOYAGE_API_KEY" -Description "Voyage AI embeddings key (uses local model if not provided)" -DefaultValue "" -IsRequired $false
+    if ($voyageKey) { "VOYAGE_API_KEY=`"$voyageKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
     $unstructuredKey = Prompt-Secret -VarName "UNSTRUCTURED_API_KEY" -Description "Unstructured.io document processing key" -DefaultValue "" -IsRequired $true
     "UNSTRUCTURED_API_KEY=`"$unstructuredKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
     
     # Application Secrets (Required - Auto-generate)
-    Write-Host "Step 4/6: Application Security Keys" -ForegroundColor Blue
+    Write-Host "Step 4/8: Application Security Keys" -ForegroundColor Blue
     $secretKey = Prompt-Secret -VarName "SECRET_KEY" -Description "Main application secret key" -DefaultValue "AUTO_GENERATE:32" -IsRequired $true
     "SECRET_KEY=`"$secretKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
     $tokenKey = Prompt-Secret -VarName "TOKEN_SECRET_KEY" -Description "Token signing key" -DefaultValue "AUTO_GENERATE:24" -IsRequired $true
@@ -280,7 +280,7 @@ function Prompt-ForSecrets {
     "FERNET_KEY_PATTERN=`"$fernetKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
     
     # Optional API Keys
-    Write-Host "Step 5/6: Optional API Keys (press Enter to skip)" -ForegroundColor Blue
+    Write-Host "Step 5/8: Optional API Keys (press Enter to skip)" -ForegroundColor Blue
     $azureKey = Prompt-Secret -VarName "AZURE_OPENAI_API_KEY" -Description "Azure OpenAI key (if using Azure)" -DefaultValue "" -IsRequired $false
     if ($azureKey) { "AZURE_OPENAI_API_KEY=`"$azureKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
     $azureBase = Prompt-Secret -VarName "AZURE_OPENAI_API_BASE" -Description "Azure OpenAI endpoint (if using Azure)" -DefaultValue "" -IsRequired $false
@@ -289,8 +289,6 @@ function Prompt-ForSecrets {
     if ($hfToken) { "HF_TOKEN=`"$hfToken`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
     $mapsKey = Prompt-Secret -VarName "GOOGLE_MAPS_API_KEY" -Description "Google Maps API key (if using location features)" -DefaultValue "" -IsRequired $false
     if ($mapsKey) { "GOOGLE_MAPS_API_KEY=`"$mapsKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
-    $eventsKey = Prompt-Secret -VarName "EVENTS_SERVER_KEY" -Description "Events tracking server key (for analytics)" -DefaultValue "" -IsRequired $false
-    if ($eventsKey) { "EVENTS_SERVER_KEY=`"$eventsKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
     
     # On-Prem Specific (Required)
     Write-Host "Step 6/8: On-Prem Configuration (Required)" -ForegroundColor Blue
@@ -470,7 +468,6 @@ try {
     $clickhousePass = Get-EnvValue -File $envFileForAuth -Key 'CLICKHOUSE_PASSWORD'
     $redisPass = Get-EnvValue -File $envFileForAuth -Key 'REDIS_PASSWORD'
     $openaiKey = Get-EnvValue -File $envFileForAuth -Key 'OPENAI_API_KEY'
-    $voyageKey = Get-EnvValue -File $envFileForAuth -Key 'VOYAGE_API_KEY'
     $unstructuredKey = Get-EnvValue -File $envFileForAuth -Key 'UNSTRUCTURED_API_KEY'
     $secretKey = Get-EnvValue -File $envFileForAuth -Key 'SECRET_KEY'
     $onpremWriteKey = Get-EnvValue -File $envFileForAuth -Key 'ONPREM_WRITE_KEY'
@@ -478,8 +475,8 @@ try {
     $onpremGid = Get-EnvValue -File $envFileForAuth -Key 'ONPREM_ORGANIZATION_GID'
     $onpremPartition = Get-EnvValue -File $envFileForAuth -Key 'ONPREM_PARTITION'
 
-    if (-not $clickhousePass -or -not $redisPass -or -not $openaiKey -or -not $voyageKey -or -not $unstructuredKey -or -not $secretKey -or -not $onpremWriteKey -or -not $onpremOrg -or -not $onpremGid -or -not $onpremPartition) {
-        throw "Required secrets missing in last env file ($envFileForAuth): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, VOYAGE_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY, ONPREM_WRITE_KEY, ONPREM_ORGANIZATION, ONPREM_ORGANIZATION_GID, ONPREM_PARTITION. Fill .env.sensitive and rerun."
+    if (-not $clickhousePass -or -not $redisPass -or -not $openaiKey -or -not $unstructuredKey -or -not $secretKey -or -not $onpremWriteKey -or -not $onpremOrg -or -not $onpremGid -or -not $onpremPartition) {
+        throw "Required secrets missing in last env file ($envFileForAuth): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY, ONPREM_WRITE_KEY, ONPREM_ORGANIZATION, ONPREM_ORGANIZATION_GID, ONPREM_PARTITION. Fill .env.sensitive and rerun."
     }
 
     Write-Host "Logging into Docker registry $dockerRegistry..."
