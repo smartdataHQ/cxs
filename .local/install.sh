@@ -286,10 +286,13 @@ EOF
 # Setup env files with interactive prompts (smoothest experience)
 setup_env_files() {
   local target_dir="$1"
-  local non_sensitive=".env.non-sensitive"
-  local sensitive=".env.sensitive"
-  local example_non=".env.example.non-sensitive"
-  local example_sensitive=".env.example.sensitive"
+  # Create env files in target directory for better organization
+  mkdir -p "$target_dir"
+  local target_abs="$(cd "$target_dir" && pwd)"
+  local non_sensitive="$target_abs/.env.non-sensitive"
+  local sensitive="$target_abs/.env.sensitive"
+  local example_non="$target_abs/.env.example.non-sensitive"
+  local example_sensitive="$target_abs/.env.example.sensitive"
   
   # Download non-sensitive example and copy (ready with defaults)
   download_example ".env.example.non-sensitive" "$example_non"
@@ -308,10 +311,10 @@ setup_env_files() {
     echo "✅ Using existing $sensitive"
   fi
 
-  # Set ENV_FILES_ABS to these local files (absolute for compose)
+  # Set ENV_FILES_ABS to these target directory files (absolute for compose)
   ENV_FILES_ABS=()
-  ENV_FILES_ABS+=("$(resolve_abs_path "$non_sensitive")")
-  ENV_FILES_ABS+=("$(resolve_abs_path "$sensitive")")
+  ENV_FILES_ABS+=("$non_sensitive")
+  ENV_FILES_ABS+=("$sensitive")
   ENV_FILES_FOR_AUTH=("${ENV_FILES_ABS[@]}")
 }
 
@@ -506,9 +509,30 @@ if [ "$RUN_COMPOSE" = false ]; then
 fi
 
 if ! command -v docker >/dev/null 2>&1; then
-  echo "Docker CLI is required" >&2
+  echo "❌ Docker CLI is required but not found. Please install Docker Desktop from https://docker.com" >&2
   exit 1
 fi
+
+# Check if Docker daemon is running
+echo "🔍 Checking Docker daemon..."
+if ! docker info >/dev/null 2>&1; then
+  echo "❌ Docker daemon is not running. Please start Docker Desktop and try again." >&2
+  echo "   On macOS: Open Docker Desktop app from Applications" >&2
+  echo "   On Linux: Run 'sudo systemctl start docker'" >&2
+  echo "   Test with: docker run hello-world" >&2
+  exit 1
+fi
+echo "✅ Docker daemon is running"
+
+# Test Docker functionality
+echo "🔍 Testing Docker functionality..."
+if ! docker run --rm hello-world >/dev/null 2>&1; then
+  echo "❌ Docker test failed. Please check Docker installation and permissions." >&2
+  echo "   Try running: docker run hello-world" >&2
+  echo "   If it fails, restart Docker Desktop or check permissions." >&2
+  exit 1
+fi
+echo "✅ Docker is working correctly"
 
 # Get last env file for auth/creds (bash 3.2 compatible)
 if [ ${#ENV_FILES_FOR_AUTH[@]} -eq 0 ]; then
@@ -565,16 +589,15 @@ if ! docker compose version >/dev/null 2>&1; then
 fi
 
 COMPOSE_ARGS=()
-for env_file in "${ENV_FILES_ABS[@]}"; do
-  COMPOSE_ARGS+=("--env-file" "$env_file")  # Absolute paths ensure compose finds them
-  echo "Using env file: $env_file"  # Debug: Show which files are being used
-done
+# Use relative paths since env files are now in target directory
+COMPOSE_ARGS+=("--env-file" "../.env.non-sensitive")
+COMPOSE_ARGS+=("--env-file" "../.env.sensitive")
 COMPOSE_ARGS+=("-f" "docker-compose.mimir.onprem.yml" "up" "-d")
 
 pushd "$STACK_TARGET" >/dev/null
 
 echo "Running docker compose up from $STACK_TARGET..."
-echo "Compose args: ${COMPOSE_ARGS[*]}"  # Debug: Show full command
+echo "Using env files: ../.env.non-sensitive, ../.env.sensitive"
 "${COMPOSE_BIN[@]}" "${COMPOSE_ARGS[@]}"
 
 popd >/dev/null

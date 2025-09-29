@@ -333,10 +333,15 @@ function Setup-EnvFiles {
     param(
         [string]$TargetDir
     )
-    $nonSensitive = '.env.non-sensitive'
-    $sensitive = '.env.sensitive'
-    $exampleNon = '.env.example.non-sensitive'
-    $exampleSensitive = '.env.example.sensitive'
+    # Create env files in target directory for better organization
+    if (-not (Test-Path $TargetDir)) {
+        New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
+    }
+    $targetAbs = (Resolve-Path $TargetDir).ProviderPath
+    $nonSensitive = Join-Path $targetAbs '.env.non-sensitive'
+    $sensitive = Join-Path $targetAbs '.env.sensitive'
+    $exampleNon = Join-Path $targetAbs '.env.example.non-sensitive'
+    $exampleSensitive = Join-Path $targetAbs '.env.example.sensitive'
 
     # Download non-sensitive example and copy (ready with defaults)
     Download-Example "$githubPath/.env.example.non-sensitive" $exampleNon
@@ -355,10 +360,10 @@ function Setup-EnvFiles {
         Write-Host "✅ Using existing $sensitive"
     }
 
-    # Set $envFilesResolved to these local files
+    # Set $envFilesResolved to these target directory files
     $script:envFilesResolved = @()
-    $script:envFilesResolved += (Resolve-Path $nonSensitive).ProviderPath
-    $script:envFilesResolved += (Resolve-Path $sensitive).ProviderPath
+    $script:envFilesResolved += $nonSensitive
+    $script:envFilesResolved += $sensitive
 }
 
 # Parse comma-separated EnvFile into array (user-provided)
@@ -448,8 +453,38 @@ try {
     }
 
     if (-not (Get-Command 'docker' -ErrorAction SilentlyContinue)) {
-        throw 'Docker CLI is required.'
+        throw '❌ Docker CLI is required but not found. Please install Docker Desktop from https://docker.com'
     }
+
+    # Check if Docker daemon is running
+    Write-Host "🔍 Checking Docker daemon..." -ForegroundColor Yellow
+    try {
+        docker info *> $null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Docker daemon check failed"
+        }
+    } catch {
+        Write-Host "❌ Docker daemon is not running. Please start Docker Desktop and try again." -ForegroundColor Red
+        Write-Host "   On Windows: Start Docker Desktop from Start Menu" -ForegroundColor Gray
+        Write-Host "   Test with: docker run hello-world" -ForegroundColor Gray
+        throw "Docker daemon not available"
+    }
+    Write-Host "✅ Docker daemon is running" -ForegroundColor Green
+
+    # Test Docker functionality
+    Write-Host "🔍 Testing Docker functionality..." -ForegroundColor Yellow
+    try {
+        docker run --rm hello-world *> $null
+        if ($LASTEXITCODE -ne 0) {
+            throw "Docker test failed"
+        }
+    } catch {
+        Write-Host "❌ Docker test failed. Please check Docker installation and permissions." -ForegroundColor Red
+        Write-Host "   Try running: docker run hello-world" -ForegroundColor Gray
+        Write-Host "   If it fails, restart Docker Desktop or check permissions." -ForegroundColor Gray
+        throw "Docker functionality test failed"
+    }
+    Write-Host "✅ Docker is working correctly" -ForegroundColor Green
 
     if (-not $envFileForAuth) {
         throw 'Docker credentials must be supplied in an env file (last in -EnvFile list or .env).'
