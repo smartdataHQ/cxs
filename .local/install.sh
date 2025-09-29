@@ -81,6 +81,20 @@ PY
   fi
 }
 
+# Download example env file from GitHub if missing
+download_example() {
+  local example_name="$1"
+  local target_example="$2"
+  if [ ! -f "$target_example" ]; then
+    echo "Downloading $example_name from GitHub..."
+    curl -s -L "https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${DEFAULT_GITHUB_REF}/${GITHUB_PATH}/${example_name}" -o "$target_example"
+    if [ $? -ne 0 ]; then
+      echo "Failed to download $example_name. Check internet or GITHUB_REF." >&2
+      exit 1
+    fi
+  fi
+}
+
 # Generate random password/key
 generate_random() {
   local length="${1:-16}"
@@ -254,20 +268,6 @@ EOF
   echo
   echo "✅ Secrets configuration complete! Saved to $sensitive_file"
   echo
-}
-
-# Download example env file from GitHub if missing
-download_example() {
-  local example_name="$1"
-  local target_example="$2"
-  if [ ! -f "$target_example" ]; then
-    echo "Downloading $example_name from GitHub..."
-    curl -s -L "https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${DEFAULT_GITHUB_REF}/${GITHUB_PATH}/${example_name}" -o "$target_example"
-    if [ $? -ne 0 ]; then
-      echo "Failed to download $example_name. Check internet or GITHUB_REF." >&2
-      exit 1
-    fi
-  fi
 }
 
 # Setup env files with interactive prompts (smoothest experience)
