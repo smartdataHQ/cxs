@@ -110,10 +110,23 @@ kubectl apply -k cxs/apps/cxs-embeddings/
 
 ## Integration
 
+### Internal Service Communication
 The service is integrated with `cxs-services` via the environment variable:
 ```
 EMBEDDINGS_SERVICE_URL=http://cxs-embeddings.solutions.svc.cluster.local:8082
 ```
+
+### VPN Access (Tailscale)
+The service is exposed via Tailscale VPN for secure external access:
+
+**Production**: `http://solutions-cxs-embeddings-prod:8082`
+**Staging**: `http://solutions-cxs-embeddings-dev:8082`
+
+#### Tailscale Configuration
+- **Expose**: Service is exposed to Tailscale network
+- **Hostname**: Environment-specific hostnames
+- **Port**: 8082 (same as internal service port)
+- **Access**: Requires Tailscale VPN connection
 
 ## Monitoring
 
@@ -121,6 +134,12 @@ The service includes:
 - Horizontal Pod Autoscaler (1-1 replicas)
 - Health checks for both liveness and readiness
 - Proper logging configuration
+- Tailscale VPN exposure for secure external access
+
+### Health Check Endpoints
+- **Internal**: `http://cxs-embeddings.solutions.svc.cluster.local:8082/health`
+- **VPN Production**: `http://solutions-cxs-embeddings-prod:8082/health`
+- **VPN Staging**: `http://solutions-cxs-embeddings-dev:8082/health`
 
 ## Troubleshooting
 

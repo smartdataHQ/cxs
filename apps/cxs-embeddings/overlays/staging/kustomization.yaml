@@ -9,3 +9,12 @@ images:
 
 resources:
   - ../../base
+
+patches:
+  - target:
+      kind: Service
+      name: cxs-embeddings
+    patch: |-
+      - op: add
+        path: /metadata/annotations/tailscale.com~1hostname
+        value: solutions-cxs-embeddings-dev

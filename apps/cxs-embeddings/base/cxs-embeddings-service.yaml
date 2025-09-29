@@ -5,6 +5,8 @@ metadata:
   labels:
     app: cxs-embeddings
     tier: api
+  annotations:
+    tailscale.com/expose: "true"
 spec:
   type: ClusterIP
   ports:
