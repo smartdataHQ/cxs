@@ -17,6 +17,17 @@ spec:
         repo2-s3-uri-style: path         # Required for MinIO
         repo2-storage-verify-tls: "n"      # Use HTTP instead of HTTPS
       repos:
+        - name: repo1
+          schedules:
+            full: "0 0 * * 6"  # every Saturday at 00:00
+            differential: "0 0 * * 0-5"  # every day (except Saturday) at 00:00
+          volume:
+            volumeClaimSpec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 300Gi
         - name: repo2
           schedules:
             full: "0 2 * * 6"      # Saturday 02:00 (offset from repo1)
