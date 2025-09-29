@@ -2,6 +2,7 @@ Param(
     [string]$TargetDirectory = "mimir-onprem",
     [string]$EnvFile,
     [switch]$NoUp,
+    [switch]$NoInteractive,
     [string]$GitRef
 )
 
@@ -147,7 +148,60 @@ function Get-GitHubFolder {
     }
 }
 
-# Parse comma-separated EnvFile into array
+# Download example env file if missing (frictionless)
+function Download-Example {
+    param(
+        [string]$ExampleName,
+        [string]$TargetExample
+    )
+    $rawUrl = "https://raw.githubusercontent.com/$owner/$repo/$defaultRef/$githubPath/$ExampleName"
+    if (-not (Test-Path $TargetExample)) {
+        Write-Host "Downloading $ExampleName from GitHub..."
+        Invoke-WebRequest -Uri $rawUrl -OutFile $TargetExample -UseBasicParsing
+    }
+}
+
+# Setup env files interactively/frictionless
+function Setup-EnvFiles {
+    param(
+        [string]$TargetDir
+    )
+    $nonSensitive = '.env.non-sensitive'
+    $sensitive = '.env.sensitive'
+    $exampleNon = "$githubPath/.env.example.non-sensitive"
+    $exampleSensitive = "$githubPath/.env.example.sensitive"
+
+    # Download examples if missing
+    Download-Example $exampleNon $nonSensitive
+    Download-Example $exampleSensitive $sensitive
+
+    # Auto-copy non-sensitive (ready with defaults)
+    if (-not (Test-Path $nonSensitive)) {
+        Copy-Item $nonSensitive $nonSensitive  # Already downloaded
+        Write-Host "Created $nonSensitive with defaults. Edit if needed (e.g., ports)."
+    }
+
+    # For sensitive: Copy keys-only, prompt to edit
+    if (-not (Test-Path $sensitive)) {
+        Copy-Item $sensitive $sensitive  # Already downloaded
+        Write-Host "Created $sensitive (keys-only template)."
+        if (-not $NoInteractive) {
+            Write-Host "Opening Notepad for $sensitive. Fill secrets (e.g., DOCKER_PAT), save, then press Enter to continue."
+            notepad $sensitive
+            $null = Read-Host "After editing $sensitive, press Enter to continue"
+        } else {
+            Write-Host "Run without -NoInteractive, but fill $sensitive manually before rerun."
+            exit 1
+        }
+    }
+
+    # Set $envFilesResolved to these local files
+    $envFilesResolved = @()
+    $envFilesResolved += (Resolve-Path $nonSensitive).ProviderPath
+    $envFilesResolved += (Resolve-Path $sensitive).ProviderPath
+}
+
+# Parse comma-separated EnvFile into array (user-provided)
 $envFilesResolved = @()
 if ($EnvFile) {
     $envFileList = $EnvFile -split ','
@@ -160,10 +214,8 @@ if ($EnvFile) {
         }
     }
 } else {
-    # Backward compat: Look for single .env
-    if (Test-Path '.env') {
-        $envFilesResolved += (Resolve-Path -LiteralPath '.env').ProviderPath
-    }
+    # Frictionless: Auto-setup env files in current dir if not provided
+    Setup-EnvFiles $TargetDirectory
 }
 
 $envFilesForAuth = $envFilesResolved  # All for compose; last for auth/creds
@@ -206,20 +258,6 @@ try {
 
     Write-Host "Stack files ready in $stackTarget"
 
-    # Best practice: Remind to copy/fill examples if present (up to date check)
-    $nonSensitiveEx = Join-Path $stackTarget '.env.example.non-sensitive'
-    $sensitiveEx = Join-Path $stackTarget '.env.example.sensitive'
-    $customerEx = Join-Path $stackTarget '.env.example.customer'
-    if (Test-Path $nonSensitiveEx) {
-        Write-Host "Reminder: Copy $nonSensitiveEx to .env.non-sensitive and edit defaults (e.g., ports)."
-    }
-    if (Test-Path $sensitiveEx) {
-        Write-Host "Reminder: Copy $sensitiveEx to .env.sensitive and fill provided secrets (e.g., DOCKER_PAT)."
-    }
-    if (Test-Path $customerEx) {
-        Write-Host "Reminder: Copy $customerEx to .env.customer for full placeholders if needed."
-    }
-
     $composeArgs = @('-f', 'docker-compose.mimir.onprem.yml', 'up', '-d')
     $envFileForAuth = $null
 
@@ -235,7 +273,7 @@ try {
             $composeArgs = @('--env-file', $localEnv)
             $envFileForAuth = $localEnv
         } else {
-            if (Test-Path $sensitiveEx -or Test-Path $nonSensitiveEx -or Test-Path $customerEx) {
+            if (Test-Path (Join-Path $stackTarget '.env.example.sensitive') -or Test-Path (Join-Path $stackTarget '.env.example.non-sensitive')) {
                 Write-Warning "No env files present. Copy and fill .env.example.* to .env.non-sensitive and .env.sensitive before running docker compose."
             } else {
                 Write-Warning "No environment files provided. Setup .env.non-sensitive and .env.sensitive."
@@ -266,7 +304,7 @@ try {
         throw "DOCKER_USERNAME and DOCKER_PAT must be set in the last env file ($envFileForAuth)"
     }
 
-    # Validate key sensitive vars before up (best practice - up to date with all critical)
+    # Validate key sensitive vars before up (best practice)
     $clickhousePass = Get-EnvValue -File $envFileForAuth -Key 'CLICKHOUSE_PASSWORD'
     $redisPass = Get-EnvValue -File $envFileForAuth -Key 'REDIS_PASSWORD'
     $openaiKey = Get-EnvValue -File $envFileForAuth -Key 'OPENAI_API_KEY'

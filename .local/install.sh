@@ -17,6 +17,7 @@ Options:
   -t, --target <dir>     Target directory for the stack (default: mimir-onprem)
   -e, --env-file <file1,file2,...>  Comma-separated paths to environment files (non-sensitive first, sensitive last; overrides apply in order)
       --no-up            Download only; do not run docker compose up
+      --no-interactive   Skip interactive env setup (use existing files)
       --ref <git-ref>    Git ref (branch/tag/SHA) to fetch (defaults to env GITHUB_REF or main)
   -h, --help             Show this help text
 USAGE
@@ -98,9 +99,71 @@ parse_env_files() {
   printf '%s\n' "${abs_files[@]}"
 }
 
+# Download example env file from GitHub if missing
+download_example() {
+  local example_name="$1"
+  local target_example="$2"
+  if [ ! -f "$target_example" ]; then
+    echo "Downloading $example_name from GitHub..."
+    curl -s -L "https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${DEFAULT_GITHUB_REF}/${GITHUB_PATH}/${example_name}" -o "$target_example"
+    if [ $? -ne 0 ]; then
+      echo "Failed to download $example_name. Check internet or GITHUB_REF." >&2
+      exit 1
+    fi
+  fi
+}
+
+# Setup env files interactively/frictionless (cross-platform compatible)
+setup_env_files() {
+  local target_dir="$1"
+  local non_sensitive=".env.non-sensitive"
+  local sensitive=".env.sensitive"
+  local example_non="${GITHUB_PATH}/.env.example.non-sensitive"
+  local example_sensitive="${GITHUB_PATH}/.env.example.sensitive"
+
+  # Download examples if missing (frictionless)
+  download_example "$example_non" "$non_sensitive"
+  download_example "$example_sensitive" "$sensitive"
+
+  # Auto-copy non-sensitive (ready with defaults)
+  if [ ! -f "$non_sensitive" ]; then
+    echo "Created $non_sensitive with defaults. Edit if needed (e.g., ports)."
+  fi
+
+  # For sensitive: Copy keys-only, prompt to edit if not interactive
+  if [ ! -f "$sensitive" ]; then
+    echo "Created $sensitive (keys-only template)."
+    if [ "$NON_INTERACTIVE" != "true" ]; then
+      # Open editor (prefer nano, fallback to vi; for Windows, user can use notepad externally)
+      if command -v nano >/dev/null 2>&1; then
+        nano "$sensitive"
+      elif command -v vi >/dev/null 2>&1; then
+        vi "$sensitive"
+      else
+        echo "No editor found (nano/vi). Edit $sensitive manually (fill secrets like DOCKER_PAT)."
+        if command -v notepad >/dev/null 2>&1; then
+          echo "On Windows, run 'notepad $sensitive' externally."
+        fi
+      fi
+      echo "After editing $sensitive (fill secrets like DOCKER_PAT), press Enter to continue."
+      read -r
+    else
+      echo "Run without --no-interactive, or fill $sensitive manually before rerun."
+      exit 1
+    fi
+  fi
+
+  # Set ENV_FILES_ABS to these local files (absolute for compose)
+  ENV_FILES_ABS=()
+  ENV_FILES_ABS+=("$(resolve_abs_path "$non_sensitive")")
+  ENV_FILES_ABS+=("$(resolve_abs_path "$sensitive")")
+  ENV_FILES_FOR_AUTH=("${ENV_FILES_ABS[@]}")
+}
+
 TARGET_DIR="$DEFAULT_TARGET_DIR"
 ENV_FILES_INPUT=""
 RUN_COMPOSE=true
+NON_INTERACTIVE=false
 CLI_GITHUB_REF=""
 ENV_FILES_ABS=()
 ENV_FILES_FOR_AUTH=()
@@ -119,6 +182,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-up)
       RUN_COMPOSE=false
+      shift
+      ;;
+    --no-interactive)
+      NON_INTERACTIVE=true
       shift
       ;;
     --ref)
@@ -142,13 +209,8 @@ if [[ -n "$ENV_FILES_INPUT" ]]; then
   mapfile -t ENV_FILES_ABS < <(parse_env_files "$ENV_FILES_INPUT")
   ENV_FILES_FOR_AUTH=("${ENV_FILES_ABS[@]}")
 else
-  # Backward compat: Look for single .env in target or current
-  ENV_FILES_ABS=()
-  ENV_FILES_FOR_AUTH=()
-  if [ -f ".env" ]; then
-    ENV_FILES_ABS+=("$(resolve_abs_path .env)")
-    ENV_FILES_FOR_AUTH+=("${ENV_FILES_ABS[-1]}")
-  fi
+  # Frictionless: Auto-setup env files in cwd if not provided
+  setup_env_files "$TARGET_DIR"
 fi
 
 if ! command -v python3 >/dev/null 2>&1; then
@@ -273,28 +335,9 @@ tar -C "$STACK_SOURCE" -cf - . | tar -C "$STACK_TARGET" -xf -
 
 echo "Stack files ready in $STACK_TARGET"
 
-# Best practice: If examples exist, remind to copy/fill in target or cwd (up to date check)
+# Best practice: If examples exist in stack, remind to copy/fill (but auto-setup already handled cwd)
 if [ -f "$STACK_TARGET/.env.example.non-sensitive" ]; then
-  echo "Reminder: Copy $STACK_TARGET/.env.example.non-sensitive to .env.non-sensitive and edit defaults (e.g., ports)."
-fi
-if [ -f "$STACK_TARGET/.env.example.sensitive" ]; then
-  echo "Reminder: Copy $STACK_TARGET/.env.example.sensitive to .env.sensitive and fill provided secrets (e.g., DOCKER_PAT)."
-fi
-if [ -f "$STACK_TARGET/.env.example.customer" ]; then
-  echo "Reminder: Copy $STACK_TARGET/.env.example.customer to .env.customer for full placeholders."
-fi
-
-if [ ${#ENV_FILES_FOR_AUTH[@]} -eq 0 ]; then
-  if [ -f "$STACK_TARGET/.env" ]; then
-    ENV_FILES_FOR_AUTH=("$STACK_TARGET/.env")
-  else
-    if [ -f "$STACK_TARGET/.env.example.sensitive" ] || [ -f "$STACK_TARGET/.env.example.non-sensitive" ]; then
-      echo "No env files found. Copy and fill .env.example.* to .env.non-sensitive and .env.sensitive before running up." >&2
-    else
-      echo "No environment files provided. Setup .env.non-sensitive and .env.sensitive." >&2
-    fi
-    RUN_COMPOSE=false
-  fi
+  echo "Examples available in $STACK_TARGET. Use --no-interactive if env files already set."
 fi
 
 if [ "$RUN_COMPOSE" = false ]; then
@@ -307,7 +350,7 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-# Read Docker creds from last env file (sensitive/customer)
+# Read Docker creds from last env file (sensitive)
 DOCKER_REGISTRY=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "DOCKER_REGISTRY")
 DOCKER_USERNAME=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "DOCKER_USERNAME")
 DOCKER_PAT=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "DOCKER_PAT")
