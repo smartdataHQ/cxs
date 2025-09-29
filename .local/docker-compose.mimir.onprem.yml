@@ -4,9 +4,17 @@ x-logging: &default-logging
   driver: json-file
   options:
     max-size: "50m"
-    max-file: "3"
+    max-file: "3"  # Rotate logs to prevent disk fill (best practice)
 
-# Default env files for local runs. Compose only auto-loads .env from CWD; these make it explicit.
+x-resource-limits: &default-limits
+  deploy:
+    resources:
+      limits:
+        cpus: '1.0'  # Prevent CPU hogging (adjust for AI services)
+        memory: 2G   # Limit memory to avoid OOM (increase for embeddings)
+      reservations:
+        cpus: '0.5'
+        memory: 1G
 
 services:
   clickhouse:
@@ -14,10 +22,10 @@ services:
     platform: linux/amd64
     restart: unless-stopped
     ports:
-     - "8123:8123"
+      - "8123:8123"
     environment:
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-cst} # Optional: to create a default database
-      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1 # Required for setting user/password via env vars
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-cst}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
     volumes:
@@ -25,13 +33,20 @@ services:
     networks:
       - app
     logging: *default-logging
+    healthcheck:  # Best practice: Verify DB readiness (uses /ping endpoint)
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    <<: *default-limits
 
   redis:
     image: redis:8.2.1-alpine
     platform: linux/amd64
     restart: unless-stopped
     ports:
-     - "6379:6379"
+      - "6379:6379"
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
@@ -40,17 +55,102 @@ services:
       - app
     logging: *default-logging
     command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    healthcheck:  # Best practice: Ping Redis
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    <<: *default-limits
+
+  cxs-anonymization:
+    image: quicklookup/cxs-anonymization:09ff393
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "8081:8081"  # Expose for internal access if needed
+    environment:
+      ANONYMIZATION_HOST: 0.0.0.0
+      ANONYMIZATION_PORT: 8081
+      WORKERS: ${ANONYMIZATION_WORKERS:-1}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DEBUG: ${ANONYMIZATION_DEBUG:-false}
+      RELOAD: ${ANONYMIZATION_RELOAD:-false}
+      PYTORCH_NUM_THREADS: ${PYTORCH_NUM_THREADS:-8}
+      MAX_NER_TEXT_LENGTH: ${MAX_NER_TEXT_LENGTH:-512}
+      GLINER_MODEL_PATH: ${GLINER_MODEL_PATH:-ai_models/ner_transformer}
+      HEALTH_CHECK_TIMEOUT: ${HEALTH_CHECK_TIMEOUT:-30}
+      PYTHONPATH: /app
+      HF_HOME: /tmp/hf_cache
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      ENV: ${ENVIRONMENT:-onprem}
+    volumes:
+      - hf-cache:/tmp/hf_cache
+    networks:
+      - app
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8081/health || exit 1"]  # Assume /health endpoint; adjust if /ping
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s  # Allow model load
+    <<: *default-limits
+    profiles: ["ai"]  # Optional: Run with --profile ai
+
+  cxs-embeddings:
+    image: quicklookup/cxs-embeddings:dc803c7
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      EMBEDDINGS_HOST: 0.0.0.0
+      EMBEDDINGS_PORT: 8082
+      WORKERS: ${EMBEDDINGS_WORKERS:-1}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DEBUG: ${EMBEDDINGS_DEBUG:-false}
+      RELOAD: ${EMBEDDINGS_RELOAD:-false}
+      LOG_INPUT_TEXT: ${EMBEDDINGS_LOG_INPUT_TEXT:-false}
+      PYTORCH_NUM_THREADS: ${PYTORCH_NUM_THREADS:-8}
+      EMBEDDINGS_MODEL: ${EMBEDDINGS_MODEL:-Qwen/Qwen3-Embedding-0.6B}
+      EMBEDDINGS_MODEL_TYPE: ${EMBEDDINGS_MODEL_TYPE:-transformers}
+      EMBEDDINGS_QUERY_PREFIX: ${EMBEDDINGS_QUERY_PREFIX:-Represent this query for retrieving relevant documents:}
+      HF_HOME: /tmp/hf_cache
+      TORCH_HOME: /tmp/torch_cache
+      PYTHONPATH: /app
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+      ENV: ${ENVIRONMENT:-onprem}
+    volumes:
+      - hf-cache:/tmp/hf_cache
+      - torch-cache:/tmp/torch_cache
+    networks:
+      - app
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8082/health || exit 1"]  # Assume /health; adjust if needed
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    <<: *default-limits
+    profiles: ["ai"]
 
   cxsservices:
-    # image: quicklookup/cxs-services:ff2f102
-    build:
-      context: /Users/stefanbaxter/Development/cxs-pmr
-      dockerfile: DockerfileServices
+    image: quicklookup/cxs-services:ff2f102
     platform: linux/amd64
     restart: unless-stopped
     depends_on:
-      - clickhouse
-      - redis
+      clickhouse:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      cxs-anonymization:
+        condition: service_healthy
+      cxs-embeddings:
+        condition: service_healthy
     ports:
       - "8088:8088"
     environment:
@@ -58,15 +158,17 @@ services:
       NO_SSO: ${NO_SSO:-false}
       # Data services
       CLICKHOUSE_HOST: clickhouse
-      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT:-8123}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
       SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM}
       REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_DB: ${REDIS_DB:-0}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      ANONYMIZATION_SERVICE_URL: ${ANONYMIZATION_SERVICE_URL:-http://cxs-anonymization:8081}
+      EMBEDDINGS_SERVICE_URL: ${EMBEDDINGS_SERVICE_URL:-http://cxs-embeddings:8082}
       # Onprem-Setup
       ONPREM_WRITE_KEY: ${ONPREM_WRITE_KEY:-}
       ONPREM_ORGANIZATION: ${ONPREM_ORGANIZATION:-}
@@ -87,15 +189,24 @@ services:
     networks:
       - app
     logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8088/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    <<: *default-limits
 
   mimir-server:
     image: quicklookup/cxs-mimir-api:ff2f102
     platform: linux/amd64
     restart: unless-stopped
     depends_on:
-      - redis
-      - clickhouse
-      - cxsservices
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      cxsservices:
+        condition: service_healthy
     ports:
       - "8000:8000"
     environment:
@@ -104,10 +215,10 @@ services:
       NO_OBSERVABILITY: ${NO_OBSERVABILITY:-false}
       # Data services
       REDIS_HOST: redis
-      REDIS_PORT: 6379
+      REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       CLICKHOUSE_HOST: clickhouse
-      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT:-8123}
       CLICKHOUSE_USER: default
       CLICKHOUSE_PASSWORD_LLM: ${CLICKHOUSE_PASSWORD_LLM:-${CLICKHOUSE_PASSWORD}}
       # Internal services
@@ -137,25 +248,31 @@ services:
     networks:
       - app
     logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8000/health || exit 1"]  # Assume /health; adjust if /ping
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s  # Allow deps to start
+    <<: *default-limits
+    profiles: ["core"]
 
   mimir-ui:
-    # image: quicklookup/mimir-chat:5a6d071
-    build:
-      context: /Users/stefanbaxter/Development/mimir
-      dockerfile: DockerfileWeb
+    image: quicklookup/mimir-chat:5a6d071
     platform: linux/amd64
     restart: unless-stopped
     depends_on:
-      - mimir-server
+      mimir-server:
+        condition: service_healthy
     ports:
       - "3000:3000"
     command: ["npm", "run", "start"]
     environment:
-      AUTH_URL: ${NEAREST_MIMIR_UI_SERVER:-http://localhost:3000}
-      BROWSER_APP_API: ${NEAREST_MIMIR_UI_SERVER:-http://localhost:3000}
-      BROWSER_CHAT_API: ${NEAREST_MIMIR_SERVER:-http://localhost:8000}
-      BROWSER_CHAT_WSS_API: ${NEAREST_MIMIR_WS_SERVER:-ws://localhost:8000}
-      MIMIR_SERVER_API: ${NEAREST_MIMIR_SERVER:-http://mimir-server:8000}
+      AUTH_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      BROWSER_APP_API: ${PUBLIC_BASE_URL:-http://localhost:3000}
+      BROWSER_CHAT_API: ${PUBLIC_BASE_URL:-http://localhost:8000}
+      BROWSER_CHAT_WSS_API: ${PUBLIC_BASE_URL:-ws://localhost:8000}
+      MIMIR_SERVER_API: http://mimir-server:8000
       CONTEXTSUITE_ADMIN_API: ${NEAREST_CXS_ADMIN_URL:-https://admin.contextsuite.com}
       BOT_IDENTIFIER: ${BOT_IDENTIFIER:-skattur_agent_dev}
       AUTH_TRUST_HOST: true
@@ -163,13 +280,22 @@ services:
     networks:
       - app
     logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3000/health || exit 1"]  # Assume /health for UI
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    <<: *default-limits
+    profiles: ["core"]
 
   oauth2-proxy:
     image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
     platform: linux/amd64
     restart: unless-stopped
     depends_on:
-      - mimir-ui
+      mimir-ui:
+        condition: service_healthy
     environment:
       OAUTH2_PROXY_PROVIDER: oidc
       OAUTH2_PROXY_OIDC_ISSUER_URL: ${OIDC_ISSUER_URL}
@@ -191,15 +317,25 @@ services:
     networks:
       - app
     logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:4180/ping || exit 1"]  # OAuth2 /ping endpoint
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    <<: *default-limits
+    profiles: ["auth"]  # Optional profile for SSO
 
   mimir-nginx:
     image: nginx:1.27-alpine
     platform: linux/amd64
     restart: unless-stopped
     depends_on:
-      - mimir-server
-      - mimir-ui
-      - oauth2-proxy
+      mimir-server:
+        condition: service_healthy
+      mimir-ui:
+        condition: service_healthy
+      oauth2-proxy:
+        condition: service_healthy
     ports:
       - "80:80"
       - "443:443"
@@ -209,10 +345,22 @@ services:
     networks:
       - app
     logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    <<: *default-limits
 
 volumes:
   clickhouse-data:
+    driver: local  # Best practice: Explicit driver for portability
   redis-data:
+    driver: local
+  hf-cache:
+    driver: local
+  torch-cache:
+    driver: local
 
 networks:
   app:
