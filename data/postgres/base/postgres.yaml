@@ -150,7 +150,7 @@ spec:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 200Gi
+            storage: 300Gi
 
   proxy:
     pgBouncer:
