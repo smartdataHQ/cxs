@@ -289,17 +289,43 @@ function Prompt-ForSecrets {
     if ($hfToken) { "HF_TOKEN=`"$hfToken`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
     $mapsKey = Prompt-Secret -VarName "GOOGLE_MAPS_API_KEY" -Description "Google Maps API key (if using location features)" -DefaultValue "" -IsRequired $false
     if ($mapsKey) { "GOOGLE_MAPS_API_KEY=`"$mapsKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
+    $eventsKey = Prompt-Secret -VarName "EVENTS_SERVER_KEY" -Description "Events tracking server key (for analytics)" -DefaultValue "" -IsRequired $false
+    if ($eventsKey) { "EVENTS_SERVER_KEY=`"$eventsKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
+    
+    # On-Prem Specific (Required)
+    Write-Host "Step 6/8: On-Prem Configuration (Required)" -ForegroundColor Blue
+    $onpremWriteKey = Prompt-Secret -VarName "ONPREM_WRITE_KEY" -Description "On-premises write key (provided for your setup)" -DefaultValue "" -IsRequired $true
+    "ONPREM_WRITE_KEY=`"$onpremWriteKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    $onpremOrg = Prompt-Secret -VarName "ONPREM_ORGANIZATION" -Description "Organization name" -DefaultValue "" -IsRequired $true
+    "ONPREM_ORGANIZATION=`"$onpremOrg`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    $onpremGid = Prompt-Secret -VarName "ONPREM_ORGANIZATION_GID" -Description "Organization group ID" -DefaultValue "" -IsRequired $true
+    "ONPREM_ORGANIZATION_GID=`"$onpremGid`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    $onpremPartition = Prompt-Secret -VarName "ONPREM_PARTITION" -Description "Data partition identifier" -DefaultValue "" -IsRequired $true
+    "ONPREM_PARTITION=`"$onpremPartition`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
     
     # OIDC/SSO (Optional)
-    Write-Host "Step 6/6: Single Sign-On (Optional - press Enter to skip)" -ForegroundColor Blue
+    Write-Host "Step 7/8: Single Sign-On (Optional - press Enter to skip)" -ForegroundColor Blue
+    $onpremWriteKey = Prompt-Secret -VarName "ONPREM_WRITE_KEY" -Description "On-premises write key (provided for your setup)" -DefaultValue "" -IsRequired $true
+    "ONPREM_WRITE_KEY=`"$onpremWriteKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    $onpremOrg = Prompt-Secret -VarName "ONPREM_ORGANIZATION" -Description "Organization name" -DefaultValue "" -IsRequired $true
+    "ONPREM_ORGANIZATION=`"$onpremOrg`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    $onpremGid = Prompt-Secret -VarName "ONPREM_ORGANIZATION_GID" -Description "Organization group ID" -DefaultValue "" -IsRequired $true
+    "ONPREM_ORGANIZATION_GID=`"$onpremGid`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    $onpremPartition = Prompt-Secret -VarName "ONPREM_PARTITION" -Description "Data partition identifier" -DefaultValue "" -IsRequired $true
+    "ONPREM_PARTITION=`"$onpremPartition`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    
+    # OIDC/SSO (Optional)
+    Write-Host "Step 8/8: Single Sign-On (Optional - press Enter to skip)" -ForegroundColor Blue
     $oidcUrl = Prompt-Secret -VarName "OIDC_ISSUER_URL" -Description "OIDC provider URL (e.g., https://your-auth0.auth0.com)" -DefaultValue "" -IsRequired $false
-    if ($oidcUrl) { "OIDC_ISSUER_URL=`"$oidcUrl`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
-    $oidcId = Prompt-Secret -VarName "OIDC_CLIENT_ID" -Description "OIDC client ID" -DefaultValue "" -IsRequired $false
-    if ($oidcId) { "OIDC_CLIENT_ID=`"$oidcId`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
-    $oidcSecret = Prompt-Secret -VarName "OIDC_CLIENT_SECRET" -Description "OIDC client secret" -DefaultValue "" -IsRequired $false
-    if ($oidcSecret) { "OIDC_CLIENT_SECRET=`"$oidcSecret`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
-    $cookieSecret = Prompt-Secret -VarName "OAUTH2_PROXY_COOKIE_SECRET" -Description "OAuth2 cookie secret" -DefaultValue "AUTO_GENERATE:32" -IsRequired $false
-    if ($cookieSecret) { "OAUTH2_PROXY_COOKIE_SECRET=`"$cookieSecret`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
+    if ($oidcUrl) { 
+        "OIDC_ISSUER_URL=`"$oidcUrl`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 
+        $oidcId = Prompt-Secret -VarName "OIDC_CLIENT_ID" -Description "OIDC client ID" -DefaultValue "" -IsRequired $false
+        if ($oidcId) { "OIDC_CLIENT_ID=`"$oidcId`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
+        $oidcSecret = Prompt-Secret -VarName "OIDC_CLIENT_SECRET" -Description "OIDC client secret" -DefaultValue "" -IsRequired $false
+        if ($oidcSecret) { "OIDC_CLIENT_SECRET=`"$oidcSecret`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
+        $cookieSecret = Prompt-Secret -VarName "OAUTH2_PROXY_COOKIE_SECRET" -Description "OAuth2 cookie secret" -DefaultValue "AUTO_GENERATE:32" -IsRequired $false
+        if ($cookieSecret) { "OAUTH2_PROXY_COOKIE_SECRET=`"$cookieSecret`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
+    }
     
     # Add fixed values
     @"
@@ -456,9 +482,13 @@ try {
     $voyageKey = Get-EnvValue -File $envFileForAuth -Key 'VOYAGE_API_KEY'
     $unstructuredKey = Get-EnvValue -File $envFileForAuth -Key 'UNSTRUCTURED_API_KEY'
     $secretKey = Get-EnvValue -File $envFileForAuth -Key 'SECRET_KEY'
+    $onpremWriteKey = Get-EnvValue -File $envFileForAuth -Key 'ONPREM_WRITE_KEY'
+    $onpremOrg = Get-EnvValue -File $envFileForAuth -Key 'ONPREM_ORGANIZATION'
+    $onpremGid = Get-EnvValue -File $envFileForAuth -Key 'ONPREM_ORGANIZATION_GID'
+    $onpremPartition = Get-EnvValue -File $envFileForAuth -Key 'ONPREM_PARTITION'
 
-    if (-not $clickhousePass -or -not $redisPass -or -not $openaiKey -or -not $voyageKey -or -not $unstructuredKey -or -not $secretKey) {
-        throw "Required secrets missing in last env file ($envFileForAuth): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, VOYAGE_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY. Fill .env.sensitive and rerun."
+    if (-not $clickhousePass -or -not $redisPass -or -not $openaiKey -or -not $voyageKey -or -not $unstructuredKey -or -not $secretKey -or -not $onpremWriteKey -or -not $onpremOrg -or -not $onpremGid -or -not $onpremPartition) {
+        throw "Required secrets missing in last env file ($envFileForAuth): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, VOYAGE_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY, ONPREM_WRITE_KEY, ONPREM_ORGANIZATION, ONPREM_ORGANIZATION_GID, ONPREM_PARTITION. Fill .env.sensitive and rerun."
     }
 
     Write-Host "Logging into Docker registry $dockerRegistry..."

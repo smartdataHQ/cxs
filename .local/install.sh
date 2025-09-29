@@ -241,8 +241,19 @@ EOF
     echo "EVENTS_SERVER_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
   fi
   
+  # On-Prem Specific (Required)
+  echo "Step 6/8: On-Prem Configuration (Required)"
+  prompt_secret "ONPREM_WRITE_KEY" "On-premises write key (provided for your setup)" "" "true"
+  echo "ONPREM_WRITE_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  prompt_secret "ONPREM_ORGANIZATION" "Organization name" "" "true"
+  echo "ONPREM_ORGANIZATION=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  prompt_secret "ONPREM_ORGANIZATION_GID" "Organization group ID" "" "true"
+  echo "ONPREM_ORGANIZATION_GID=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  prompt_secret "ONPREM_PARTITION" "Data partition identifier" "" "true"
+  echo "ONPREM_PARTITION=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  
   # OIDC/SSO (Optional)
-  echo "Step 6/6: Single Sign-On (Optional - press Enter to skip)"
+  echo "Step 8/8: Single Sign-On (Optional - press Enter to skip)"
   prompt_secret "OIDC_ISSUER_URL" "OIDC provider URL (e.g., https://your-auth0.auth0.com)" "" "false"
   if [ -n "$PROMPT_VALUE" ]; then
     echo "OIDC_ISSUER_URL=\"$PROMPT_VALUE\"" >> "$sensitive_file"
@@ -520,16 +531,20 @@ if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PAT" ]; then
   exit 1
 fi
 
-# Validate key sensitive vars in last file before up (best practice - up to date with all critical)
+  # Validate key sensitive vars in last file before up (best practice - up to date with all critical)
 CLICKHOUSE_PASSWORD=$(read_env_value "$last_env" "CLICKHOUSE_PASSWORD")
 REDIS_PASSWORD=$(read_env_value "$last_env" "REDIS_PASSWORD")
 OPENAI_API_KEY=$(read_env_value "$last_env" "OPENAI_API_KEY")
 VOYAGE_API_KEY=$(read_env_value "$last_env" "VOYAGE_API_KEY")
 UNSTRUCTURED_API_KEY=$(read_env_value "$last_env" "UNSTRUCTURED_API_KEY")
 SECRET_KEY=$(read_env_value "$last_env" "SECRET_KEY")
+ONPREM_WRITE_KEY=$(read_env_value "$last_env" "ONPREM_WRITE_KEY")
+ONPREM_ORGANIZATION=$(read_env_value "$last_env" "ONPREM_ORGANIZATION")
+ONPREM_ORGANIZATION_GID=$(read_env_value "$last_env" "ONPREM_ORGANIZATION_GID")
+ONPREM_PARTITION=$(read_env_value "$last_env" "ONPREM_PARTITION")
 
-if [ -z "$CLICKHOUSE_PASSWORD" ] || [ -z "$REDIS_PASSWORD" ] || [ -z "$OPENAI_API_KEY" ] || [ -z "$VOYAGE_API_KEY" ] || [ -z "$UNSTRUCTURED_API_KEY" ] || [ -z "$SECRET_KEY" ]; then
-  echo "Required secrets missing in last env file ($last_env): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, VOYAGE_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY." >&2
+if [ -z "$CLICKHOUSE_PASSWORD" ] || [ -z "$REDIS_PASSWORD" ] || [ -z "$OPENAI_API_KEY" ] || [ -z "$VOYAGE_API_KEY" ] || [ -z "$UNSTRUCTURED_API_KEY" ] || [ -z "$SECRET_KEY" ] || [ -z "$ONPREM_WRITE_KEY" ] || [ -z "$ONPREM_ORGANIZATION" ] || [ -z "$ONPREM_ORGANIZATION_GID" ] || [ -z "$ONPREM_PARTITION" ]; then
+  echo "Required secrets missing in last env file ($last_env): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, VOYAGE_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY, ONPREM_WRITE_KEY, ONPREM_ORGANIZATION, ONPREM_ORGANIZATION_GID, ONPREM_PARTITION." >&2
   echo "Fill .env.sensitive and rerun." >&2
   exit 1
 fi
