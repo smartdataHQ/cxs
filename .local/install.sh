@@ -81,12 +81,13 @@ PY
   fi
 }
 
-# Parse comma-separated env files into array
+# Parse comma-separated env files into array (bash 3.2 compatible)
 parse_env_files() {
   local env_input="$1"
-  IFS=',' read -ra ENV_FILES <<< "$env_input"
+  local -a env_files
+  IFS=',' read -ra temp_files <<< "$env_input"
   local abs_files=()
-  for file in "${ENV_FILES[@]}"; do
+  for file in "${temp_files[@]}"; do
     local abs_file
     abs_file="$(resolve_abs_path "$file")"
     if [ -n "$abs_file" ] && [ -f "$abs_file" ]; then
@@ -96,7 +97,7 @@ parse_env_files() {
       exit 1
     fi
   done
-  printf '%s\n' "${abs_files[@]}"
+  abs_files
 }
 
 # Download example env file from GitHub if missing
@@ -206,7 +207,19 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -n "$ENV_FILES_INPUT" ]]; then
-  mapfile -t ENV_FILES_ABS < <(parse_env_files "$ENV_FILES_INPUT")
+  local -a abs_files
+  IFS=',' read -ra temp_files <<< "$ENV_FILES_INPUT"
+  for file in "${temp_files[@]}"; do
+    local abs_file
+    abs_file="$(resolve_abs_path "$file")"
+    if [ -n "$abs_file" ] && [ -f "$abs_file" ]; then
+      ENV_FILES_ABS+=("$abs_file")
+    else
+      echo "Environment file not found or invalid: $file" >&2
+      exit 1
+    fi
+  done
+  ENV_FILES_ABS=("${abs_files[@]}")
   ENV_FILES_FOR_AUTH=("${ENV_FILES_ABS[@]}")
 else
   # Frictionless: Auto-setup env files in cwd if not provided
@@ -350,27 +363,31 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
+# Get last env file for auth/creds (bash 3.2 compatible)
+last_env_index=$(( ${#ENV_FILES_FOR_AUTH[@]} - 1 ))
+last_env="${ENV_FILES_FOR_AUTH[$last_env_index]}"
+
 # Read Docker creds from last env file (sensitive)
-DOCKER_REGISTRY=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "DOCKER_REGISTRY")
-DOCKER_USERNAME=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "DOCKER_USERNAME")
-DOCKER_PAT=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "DOCKER_PAT")
+DOCKER_REGISTRY=$(read_env_value "$last_env" "DOCKER_REGISTRY")
+DOCKER_USERNAME=$(read_env_value "$last_env" "DOCKER_USERNAME")
+DOCKER_PAT=$(read_env_value "$last_env" "DOCKER_PAT")
 DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
 
 if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PAT" ]; then
-  echo "DOCKER_USERNAME and DOCKER_PAT must be set in the last env file (${ENV_FILES_FOR_AUTH[-1]})" >&2
+  echo "DOCKER_USERNAME and DOCKER_PAT must be set in the last env file ($last_env)" >&2
   exit 1
 fi
 
 # Validate key sensitive vars in last file before up (best practice - up to date with all critical)
-CLICKHOUSE_PASSWORD=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "CLICKHOUSE_PASSWORD")
-REDIS_PASSWORD=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "REDIS_PASSWORD")
-OPENAI_API_KEY=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "OPENAI_API_KEY")
-VOYAGE_API_KEY=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "VOYAGE_API_KEY")
-UNSTRUCTURED_API_KEY=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "UNSTRUCTURED_API_KEY")
-SECRET_KEY=$(read_env_value "${ENV_FILES_FOR_AUTH[-1]}" "SECRET_KEY")
+CLICKHOUSE_PASSWORD=$(read_env_value "$last_env" "CLICKHOUSE_PASSWORD")
+REDIS_PASSWORD=$(read_env_value "$last_env" "REDIS_PASSWORD")
+OPENAI_API_KEY=$(read_env_value "$last_env" "OPENAI_API_KEY")
+VOYAGE_API_KEY=$(read_env_value "$last_env" "VOYAGE_API_KEY")
+UNSTRUCTURED_API_KEY=$(read_env_value "$last_env" "UNSTRUCTURED_API_KEY")
+SECRET_KEY=$(read_env_value "$last_env" "SECRET_KEY")
 
 if [ -z "$CLICKHOUSE_PASSWORD" ] || [ -z "$REDIS_PASSWORD" ] || [ -z "$OPENAI_API_KEY" ] || [ -z "$VOYAGE_API_KEY" ] || [ -z "$UNSTRUCTURED_API_KEY" ] || [ -z "$SECRET_KEY" ]; then
-  echo "Required secrets missing in last env file (${ENV_FILES_FOR_AUTH[-1]}): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, VOYAGE_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY." >&2
+  echo "Required secrets missing in last env file ($last_env): CLICKHOUSE_PASSWORD, REDIS_PASSWORD, OPENAI_API_KEY, VOYAGE_API_KEY, UNSTRUCTURED_API_KEY, SECRET_KEY." >&2
   echo "Fill .env.sensitive and rerun." >&2
   exit 1
 fi

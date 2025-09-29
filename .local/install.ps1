@@ -161,7 +161,7 @@ function Download-Example {
     }
 }
 
-# Setup env files interactively/frictionless
+# Setup env files interactively/frictionless (cross-platform compatible)
 function Setup-EnvFiles {
     param(
         [string]$TargetDir
@@ -181,7 +181,7 @@ function Setup-EnvFiles {
         Write-Host "Created $nonSensitive with defaults. Edit if needed (e.g., ports)."
     }
 
-    # For sensitive: Copy keys-only, prompt to edit
+    # For sensitive: Copy keys-only, prompt to edit if not interactive
     if (-not (Test-Path $sensitive)) {
         Copy-Item $sensitive $sensitive  # Already downloaded
         Write-Host "Created $sensitive (keys-only template)."
