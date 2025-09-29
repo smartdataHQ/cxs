@@ -9,7 +9,7 @@ patches:
       # Change storage size from 200Gi to 64Gi
       - op: replace
         path: /spec/instances/0/dataVolumeClaimSpec/resources/requests/storage
-        value: "64Gi"
+        value: "128Gi"
       
       # Add expose annotations for main cluster
       - op: add
