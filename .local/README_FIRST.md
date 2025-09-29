@@ -2,6 +2,7 @@
 
 1. **Download and Run Script** (No clone needed; auto-handles env for all platforms):
    - **Prerequisites**: Make sure Docker Desktop is installed and running (download from https://docker.com)
+     - **System Requirements**: 8GB+ RAM recommended (AI services use ~20GB total for models)
    - **macOS/Linux**:
      ```
      curl -L -o install.sh https://raw.githubusercontent.com/smartdataHQ/cxs/main/.local/install.sh && chmod +x install.sh && ./install.sh --target mimir-onprem
@@ -12,6 +13,7 @@
      ```
      - **Copy Tip**: Highlight the command above, copy (Ctrl+C), open PowerShell, paste (right-click or Ctrl+V), and press Enter. The script handles the rest.
    - The script will check Docker availability and test functionality before proceeding.
+   - **What Gets Installed**: Chat UI, API server, databases (ClickHouse/Redis), and AI services (anonymization, embeddings).
 
 2. **Answer Simple Questions About Your Setup** (6 easy steps):
    - The script walks you through each secret with clear prompts and progress indicators.
@@ -21,10 +23,11 @@
    - Takes 2-3 minutes with helpful descriptions, auto-generation, and format validation.
 
 3. **Access**:
-   - UI: http://localhost (or https://localhost if TLS enabled).
-   - API: http://localhost/api/.
-   - Verify: From mimir-onprem/.local, `docker compose --env-file ../.env.non-sensitive --env-file ../.env.sensitive ps` (all healthy?).
-   - Logs: `docker compose --env-file ../.env.non-sensitive --env-file ../.env.sensitive logs -f mimir-server`.
-   - Stop: `docker compose --env-file ../.env.non-sensitive --env-file ../.env.sensitive down` from mimir-onprem/.local.
+   - **UI**: http://localhost (or https://localhost if TLS enabled) - MimIR chat interface
+   - **API**: http://localhost/api/ - REST API with AI features (anonymization, embeddings)
+   - **Verify**: From mimir-onprem/.local, `docker compose --env-file ../.env.non-sensitive --env-file ../.env.sensitive ps` (all 6 services healthy?)
+   - **Logs**: `docker compose --env-file ../.env.non-sensitive --env-file ../.env.sensitive logs -f mimir-server`
+   - **Stop**: `docker compose --env-file ../.env.non-sensitive --env-file ../.env.sensitive down` from mimir-onprem/.local
+   - **Note**: First startup takes 5-10 minutes as AI models download (~10GB total)
 
 Done! Script handles fetch, env setup, and start. For help, see script usage.

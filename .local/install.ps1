@@ -224,6 +224,15 @@ function Prompt-Secret {
                 Write-Host "   ⚠️  Warning: OpenAI API key should start with 'sk-'" -ForegroundColor Yellow
             }
         }
+        "FERNET_KEY_PATTERN" {
+            if ($value -and $value.Length -ne 44) {
+                Write-Host "   ❌ Error: Fernet key must be exactly 44 base64 characters" -ForegroundColor Red
+                Write-Host "   Current length: $($value.Length)" -ForegroundColor Gray
+                Write-Host "   Auto-generating a valid key..." -ForegroundColor Yellow
+                $value = Generate-Random -Length 32
+                Write-Host "   Generated: $value" -ForegroundColor Green
+            }
+        }
     }
     
     return $value
@@ -250,14 +259,18 @@ function Prompt-ForSecrets {
 "@ | Out-File -FilePath $SensitiveFile -Encoding UTF8
     
     # Docker Authentication (Required)
-    Write-Host "Step 1/6: Docker Authentication" -ForegroundColor Blue
+    Write-Host "Step 1/8: Docker Authentication" -ForegroundColor Blue
     $dockerPat = Prompt-Secret -VarName "DOCKER_PAT" -Description "Docker Personal Access Token (provided to you)" -DefaultValue "" -IsRequired $true
     "DOCKER_PAT=`"$dockerPat`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
-    
+
     # Database Passwords (Required - Auto-generate)
-    Write-Host "Step 2/6: Database Passwords" -ForegroundColor Blue
+    Write-Host "Step 2/8: Database Passwords" -ForegroundColor Blue
     $clickhousePass = Prompt-Secret -VarName "CLICKHOUSE_PASSWORD" -Description "ClickHouse database password" -DefaultValue "AUTO_GENERATE:16" -IsRequired $true
     "CLICKHOUSE_PASSWORD=`"$clickhousePass`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    $clickhouseLlmPass = Prompt-Secret -VarName "CLICKHOUSE_PASSWORD_LLM" -Description "ClickHouse LLM user password (press Enter to use main password)" -DefaultValue $clickhousePass -IsRequired $false
+    if ($clickhouseLlmPass -and $clickhouseLlmPass -ne $clickhousePass) {
+        "CLICKHOUSE_PASSWORD_LLM=`"$clickhouseLlmPass`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+    }
     $redisPass = Prompt-Secret -VarName "REDIS_PASSWORD" -Description "Redis cache password" -DefaultValue "AUTO_GENERATE:16" -IsRequired $true
     "REDIS_PASSWORD=`"$redisPass`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
     
@@ -281,6 +294,10 @@ function Prompt-ForSecrets {
     
     # Optional API Keys
     Write-Host "Step 5/8: Optional API Keys (press Enter to skip)" -ForegroundColor Blue
+    $tavilyKey = Prompt-Secret -VarName "TAVILY_API_KEY" -Description "Tavily API key (for web search)" -DefaultValue "" -IsRequired $false
+    if ($tavilyKey) { "TAVILY_API_KEY=`"$tavilyKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
+    $firecrawlKey = Prompt-Secret -VarName "FIRECRAWL_API_KEY" -Description "FireCrawl API key (for web scraping)" -DefaultValue "" -IsRequired $false
+    if ($firecrawlKey) { "FIRECRAWL_API_KEY=`"$firecrawlKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
     $azureKey = Prompt-Secret -VarName "AZURE_OPENAI_API_KEY" -Description "Azure OpenAI key (if using Azure)" -DefaultValue "" -IsRequired $false
     if ($azureKey) { "AZURE_OPENAI_API_KEY=`"$azureKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
     $azureBase = Prompt-Secret -VarName "AZURE_OPENAI_API_BASE" -Description "Azure OpenAI endpoint (if using Azure)" -DefaultValue "" -IsRequired $false
@@ -300,9 +317,18 @@ function Prompt-ForSecrets {
     "ONPREM_ORGANIZATION_GID=`"$onpremGid`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
     $onpremPartition = Prompt-Secret -VarName "ONPREM_PARTITION" -Description "Data partition identifier" -DefaultValue "" -IsRequired $true
     "ONPREM_PARTITION=`"$onpremPartition`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
-    
+
+    # SFTP Integration (Optional)
+    Write-Host "Step 7/8: SFTP Integration (Optional - press Enter to skip)" -ForegroundColor Blue
+    $sftpUser = Prompt-Secret -VarName "SFTP_USERNAME" -Description "SFTP username for file uploads (if using SFTP)" -DefaultValue "" -IsRequired $false
+    if ($sftpUser) {
+        "SFTP_USERNAME=`"$sftpUser`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
+        $sftpPass = Prompt-Secret -VarName "SFTP_PASSWORD" -Description "SFTP password" -DefaultValue "" -IsRequired $false
+        if ($sftpPass) { "SFTP_PASSWORD=`"$sftpPass`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 }
+    }
+
     # OIDC/SSO (Optional)
-    Write-Host "Step 7/8: Single Sign-On (Optional - press Enter to skip)" -ForegroundColor Blue
+    Write-Host "Step 8/8: Single Sign-On (Optional - press Enter to skip)" -ForegroundColor Blue
     $oidcUrl = Prompt-Secret -VarName "OIDC_ISSUER_URL" -Description "OIDC provider URL (e.g., https://your-auth0.auth0.com)" -DefaultValue "" -IsRequired $false
     if ($oidcUrl) { 
         "OIDC_ISSUER_URL=`"$oidcUrl`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 
@@ -322,9 +348,31 @@ DOCKER_REGISTRY="docker.io"
 DOCKER_USERNAME="quicklookup"
 CLICKHOUSE_USER="default"
 "@ | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
-    
+
     Write-Host ""
     Write-Host "✅ Secrets configuration complete! Saved to $SensitiveFile" -ForegroundColor Green
+    Write-Host ""
+
+    # TLS Configuration Guidance
+    Write-Host "🔒 TLS/SSL Configuration (Optional)" -ForegroundColor Cyan
+    Write-Host "═══════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host "By default, MimIR runs on HTTP (http://localhost)."
+    Write-Host "For production deployments, enable HTTPS:"
+    Write-Host ""
+    Write-Host "1. Generate or obtain TLS certificates:" -ForegroundColor Yellow
+    Write-Host "   # PowerShell (self-signed for testing):" -ForegroundColor Gray
+    Write-Host "   New-SelfSignedCertificate -DnsName 'your-domain.com' -CertStoreLocation 'Cert:\CurrentUser\My'" -ForegroundColor Gray
+    Write-Host "   # Or use OpenSSL:" -ForegroundColor Gray
+    Write-Host "   mkdir .local\certs" -ForegroundColor Gray
+    Write-Host "   openssl req -x509 -newkey rsa:2048 -nodes -keyout .local\certs\privkey.pem -out .local\certs\fullchain.pem -days 365 -subj '/CN=your-domain.com'" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "2. Edit .env.non-sensitive:" -ForegroundColor Yellow
+    Write-Host "   TLS_ENABLED=`"true`"" -ForegroundColor Gray
+    Write-Host "   PUBLIC_BASE_URL=`"https://your-domain.com`"" -ForegroundColor Gray
+    Write-Host "   TLS_CERTS_DIR=`".local/certs`"" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "3. Restart containers:" -ForegroundColor Yellow
+    Write-Host "   cd .local && docker compose down && docker compose up -d" -ForegroundColor Gray
     Write-Host ""
 }
 
@@ -423,14 +471,14 @@ try {
 
     Write-Host "Stack files ready in $stackTarget"
 
-    $composeArgs = @('-f', 'docker-compose.mimir.onprem.yml', 'up', '-d')
+    $composeArgs = @()
     $envFileForAuth = $null
 
     if ($envFilesResolved.Count -gt 0) {
-        $composeArgs = @()
         foreach ($env in $envFilesResolved) {
             $composeArgs += '--env-file', $env  # Absolute paths ensure compose finds them
         }
+        $composeArgs += '-f', 'docker-compose.mimir.onprem.yml', 'up', '-d'
         $envFileForAuth = $envFilesResolved[-1]  # Last for auth
     } else {
         $localEnv = Join-Path $stackTarget '.env'
@@ -471,6 +519,29 @@ try {
     }
     Write-Host "✅ Docker daemon is running" -ForegroundColor Green
 
+    # Check available disk space
+    Write-Host "🔍 Checking disk space..." -ForegroundColor Yellow
+    try {
+        $drive = (Get-Item $targetRoot).PSDrive
+        $freeSpaceGB = [math]::Round($drive.Free / 1GB, 1)
+        if ($freeSpaceGB -lt 30) {
+            Write-Host "⚠️  Warning: Only ${freeSpaceGB}GB disk space available." -ForegroundColor Yellow
+            Write-Host "   Recommended: 50GB+ for AI models and data storage." -ForegroundColor Gray
+            Write-Host "   Required space breakdown:" -ForegroundColor Gray
+            Write-Host "     - Docker images: ~8GB" -ForegroundColor Gray
+            Write-Host "     - AI models (HuggingFace): ~10GB" -ForegroundColor Gray
+            Write-Host "     - Database storage: ~5-50GB (usage-dependent)" -ForegroundColor Gray
+            $response = Read-Host "   Continue anyway? (y/N)"
+            if ($response -notmatch '^[Yy]$') {
+                throw "Installation cancelled. Please free up disk space and try again."
+            }
+        } else {
+            Write-Host "✅ Sufficient disk space available (${freeSpaceGB}GB+)" -ForegroundColor Green
+        }
+    } catch {
+        Write-Verbose "Could not check disk space: $_"
+    }
+
     # Test Docker functionality
     Write-Host "🔍 Testing Docker functionality..." -ForegroundColor Yellow
     try {
@@ -485,6 +556,35 @@ try {
         throw "Docker functionality test failed"
     }
     Write-Host "✅ Docker is working correctly" -ForegroundColor Green
+
+    # Check Docker memory allocation
+    Write-Host "🔍 Checking Docker memory allocation..." -ForegroundColor Yellow
+    try {
+        $dockerMemBytes = docker info --format '{{.MemTotal}}' 2>$null
+        if ($dockerMemBytes -and $LASTEXITCODE -eq 0) {
+            $dockerMemGB = [math]::Round([long]$dockerMemBytes / 1GB, 1)
+            if ($dockerMemGB -lt 12) {
+                Write-Host "⚠️  Warning: Docker has only ${dockerMemGB}GB RAM allocated." -ForegroundColor Yellow
+                Write-Host "   Recommended: 16GB+ for AI services (embeddings, anonymization)." -ForegroundColor Gray
+                Write-Host "   Current requirements:" -ForegroundColor Gray
+                Write-Host "     - cxs-embeddings: 6-12GB" -ForegroundColor Gray
+                Write-Host "     - cxs-anonymization: 4-8GB" -ForegroundColor Gray
+                Write-Host "     - Other services: ~4GB" -ForegroundColor Gray
+                Write-Host "   Containers may crash with OOM (Out of Memory) errors." -ForegroundColor Gray
+                Write-Host "   To increase: Docker Desktop > Settings > Resources > Memory" -ForegroundColor Gray
+                $response = Read-Host "   Continue anyway? (y/N)"
+                if ($response -notmatch '^[Yy]$') {
+                    throw "Installation cancelled. Please increase Docker memory and try again."
+                }
+            } else {
+                Write-Host "✅ Sufficient Docker memory allocated (${dockerMemGB}GB+)" -ForegroundColor Green
+            }
+        } else {
+            Write-Host "⚠️  Could not determine Docker memory allocation. Proceeding..." -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Verbose "Docker memory check failed: $_"
+    }
 
     if (-not $envFileForAuth) {
         throw 'Docker credentials must be supplied in an env file (last in -EnvFile list or .env).'
@@ -545,7 +645,56 @@ try {
         Pop-Location
     }
 
-    Write-Host 'Installation complete. Verify with "docker compose ps" from '$stackTarget'.'
+    Write-Host ''
+    Write-Host '🎉 Installation complete!' -ForegroundColor Green
+    Write-Host ''
+
+    # Post-install health check
+    Write-Host '⏳ Waiting for services to start (this may take 5-10 minutes for AI model downloads)...' -ForegroundColor Yellow
+    Start-Sleep -Seconds 30
+
+    Push-Location $stackTarget
+    try {
+        Write-Host 'Checking service status...'
+        $healthy = 0
+        $unhealthy = 0
+        $starting = 0
+
+        if ($useComposePlugin) {
+            $psOutput = docker compose ps 2>$null
+        } else {
+            $psOutput = docker-compose ps 2>$null
+        }
+
+        if ($psOutput) {
+            foreach ($line in $psOutput) {
+                if ($line -match '\(healthy\)') { $healthy++ }
+                elseif ($line -match '\(unhealthy\)') { $unhealthy++ }
+                elseif ($line -match '\(starting\)') { $starting++ }
+            }
+        }
+
+        Write-Host ''
+        if ($healthy -gt 0) {
+            Write-Host "✅ $healthy services healthy" -ForegroundColor Green
+        }
+        if ($starting -gt 0) {
+            Write-Host "⏳ $starting services still starting (check again in a few minutes)" -ForegroundColor Yellow
+        }
+        if ($unhealthy -gt 0) {
+            Write-Host "⚠️  $unhealthy services unhealthy" -ForegroundColor Yellow
+            Write-Host "   Check logs: cd $stackTarget && docker compose logs -f" -ForegroundColor Gray
+        }
+    } finally {
+        Pop-Location
+    }
+
+    Write-Host ''
+    Write-Host '🌐 Access your MimIR setup at: http://localhost' -ForegroundColor Cyan
+    Write-Host "📊 Check status: cd $stackTarget && docker compose ps" -ForegroundColor Gray
+    Write-Host "📝 View logs: cd $stackTarget && docker compose logs -f [service-name]" -ForegroundColor Gray
+    Write-Host ''
+    Write-Host '⚠️  Note: First startup may take 5-10 minutes as AI models download (~10GB)' -ForegroundColor Yellow
 }
 finally {
     Cleanup

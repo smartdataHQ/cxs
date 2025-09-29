@@ -162,6 +162,15 @@ prompt_secret() {
         echo "   ⚠️  Warning: OpenAI API key should start with 'sk-'"
       fi
       ;;
+    FERNET_KEY_PATTERN)
+      if [ -n "$value" ] && [ ${#value} -ne 44 ]; then
+        echo "   ❌ Error: Fernet key must be exactly 44 base64 characters"
+        echo "   Current length: ${#value}"
+        echo "   Auto-generating a valid key..."
+        value=$(generate_random 32)
+        echo "   Generated: $value"
+      fi
+      ;;
   esac
   
   # Set global variable for caller to use
@@ -189,17 +198,22 @@ prompt_for_secrets() {
 EOF
   
   # Docker Authentication (Required)
-  echo "Step 1/6: Docker Authentication"
+  echo "Step 1/8: Docker Authentication"
   prompt_secret "DOCKER_PAT" "Docker Personal Access Token (provided to you)" "" "true"
   echo "DOCKER_PAT=\"$PROMPT_VALUE\"" >> "$sensitive_file"
-  
+
   # Database Passwords (Required - Auto-generate)
-  echo "Step 2/6: Database Passwords"
+  echo "Step 2/8: Database Passwords"
   prompt_secret "CLICKHOUSE_PASSWORD" "ClickHouse database password" "AUTO_GENERATE:16" "true"
-  echo "CLICKHOUSE_PASSWORD=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  clickhouse_pass="$PROMPT_VALUE"
+  echo "CLICKHOUSE_PASSWORD=\"$clickhouse_pass\"" >> "$sensitive_file"
+  prompt_secret "CLICKHOUSE_PASSWORD_LLM" "ClickHouse LLM user password (press Enter to use main password)" "$clickhouse_pass" "false"
+  if [ -n "$PROMPT_VALUE" ] && [ "$PROMPT_VALUE" != "$clickhouse_pass" ]; then
+    echo "CLICKHOUSE_PASSWORD_LLM=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  fi
   prompt_secret "REDIS_PASSWORD" "Redis cache password" "AUTO_GENERATE:16" "true"
   echo "REDIS_PASSWORD=\"$PROMPT_VALUE\"" >> "$sensitive_file"
-  
+
   # AI/ML API Keys (Required)
   echo "Step 3/8: AI/ML Service Keys"
   prompt_secret "OPENAI_API_KEY" "OpenAI API key (starts with sk-)" "" "true"
@@ -222,6 +236,14 @@ EOF
   
   # Optional API Keys
   echo "Step 5/8: Optional API Keys (press Enter to skip)"
+  prompt_secret "TAVILY_API_KEY" "Tavily API key (for web search)" "" "false"
+  if [ -n "$PROMPT_VALUE" ]; then
+    echo "TAVILY_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  fi
+  prompt_secret "FIRECRAWL_API_KEY" "FireCrawl API key (for web scraping)" "" "false"
+  if [ -n "$PROMPT_VALUE" ]; then
+    echo "FIRECRAWL_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  fi
   prompt_secret "AZURE_OPENAI_API_KEY" "Azure OpenAI key (if using Azure)" "" "false"
   if [ -n "$PROMPT_VALUE" ]; then
     echo "AZURE_OPENAI_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
@@ -249,7 +271,18 @@ EOF
   echo "ONPREM_ORGANIZATION_GID=\"$PROMPT_VALUE\"" >> "$sensitive_file"
   prompt_secret "ONPREM_PARTITION" "Data partition identifier" "" "true"
   echo "ONPREM_PARTITION=\"$PROMPT_VALUE\"" >> "$sensitive_file"
-  
+
+  # SFTP Integration (Optional)
+  echo "Step 7/8: SFTP Integration (Optional - press Enter to skip)"
+  prompt_secret "SFTP_USERNAME" "SFTP username for file uploads (if using SFTP)" "" "false"
+  if [ -n "$PROMPT_VALUE" ]; then
+    echo "SFTP_USERNAME=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+    prompt_secret "SFTP_PASSWORD" "SFTP password" "" "false"
+    if [ -n "$PROMPT_VALUE" ]; then
+      echo "SFTP_PASSWORD=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+    fi
+  fi
+
   # OIDC/SSO (Optional)
   echo "Step 8/8: Single Sign-On (Optional - press Enter to skip)"
   prompt_secret "OIDC_ISSUER_URL" "OIDC provider URL (e.g., https://your-auth0.auth0.com)" "" "false"
@@ -277,9 +310,32 @@ DOCKER_REGISTRY="docker.io"
 DOCKER_USERNAME="quicklookup"
 CLICKHOUSE_USER="default"
 EOF
-  
+
   echo
   echo "✅ Secrets configuration complete! Saved to $sensitive_file"
+  echo
+
+  # TLS Configuration Guidance
+  echo "🔒 TLS/SSL Configuration (Optional)"
+  echo "═══════════════════════════════════════════════"
+  echo "By default, MimIR runs on HTTP (http://localhost)."
+  echo "For production deployments, enable HTTPS:"
+  echo
+  echo "1. Generate or obtain TLS certificates:"
+  echo "   # Self-signed (for testing):"
+  echo "   mkdir -p $target_dir/.local/certs"
+  echo "   openssl req -x509 -newkey rsa:2048 -nodes \\"
+  echo "     -keyout $target_dir/.local/certs/privkey.pem \\"
+  echo "     -out $target_dir/.local/certs/fullchain.pem \\"
+  echo "     -days 365 -subj \"/CN=your-domain.com\""
+  echo
+  echo "2. Edit $target_dir/.env.non-sensitive:"
+  echo "   TLS_ENABLED=\"true\""
+  echo "   PUBLIC_BASE_URL=\"https://your-domain.com\""
+  echo "   TLS_CERTS_DIR=\".local/certs\""
+  echo
+  echo "3. Restart containers:"
+  echo "   cd $target_dir/.local && docker compose down && docker compose up -d"
   echo
 }
 
@@ -524,6 +580,35 @@ if ! docker info >/dev/null 2>&1; then
 fi
 echo "✅ Docker daemon is running"
 
+# Check available disk space
+echo "🔍 Checking disk space..."
+if command -v df >/dev/null 2>&1; then
+  if df -BG "$TARGET_DIR_ABS" >/dev/null 2>&1; then
+    available_gb=$(df -BG "$TARGET_DIR_ABS" | awk 'NR==2 {print $4}' | sed 's/G//')
+  elif df -k "$TARGET_DIR_ABS" >/dev/null 2>&1; then
+    # macOS doesn't support -BG, use -k and convert
+    available_kb=$(df -k "$TARGET_DIR_ABS" | awk 'NR==2 {print $4}')
+    available_gb=$((available_kb / 1024 / 1024))
+  fi
+
+  if [ -n "$available_gb" ] && [ "$available_gb" -lt 30 ]; then
+    echo "⚠️  Warning: Only ${available_gb}GB disk space available." >&2
+    echo "   Recommended: 50GB+ for AI models and data storage." >&2
+    echo "   Required space breakdown:" >&2
+    echo "     - Docker images: ~8GB" >&2
+    echo "     - AI models (HuggingFace): ~10GB" >&2
+    echo "     - Database storage: ~5-50GB (usage-dependent)" >&2
+    printf "   Continue anyway? (y/N): "
+    read -r response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+      echo "Installation cancelled. Please free up disk space and try again." >&2
+      exit 1
+    fi
+  else
+    echo "✅ Sufficient disk space available (${available_gb}GB+)"
+  fi
+fi
+
 # Test Docker functionality
 echo "🔍 Testing Docker functionality..."
 if ! docker run --rm hello-world >/dev/null 2>&1; then
@@ -533,6 +618,32 @@ if ! docker run --rm hello-world >/dev/null 2>&1; then
   exit 1
 fi
 echo "✅ Docker is working correctly"
+
+# Check Docker memory allocation
+echo "🔍 Checking Docker memory allocation..."
+if docker_mem=$(docker info --format '{{.MemTotal}}' 2>/dev/null); then
+  docker_mem_gb=$((docker_mem / 1073741824))
+  if [ "$docker_mem_gb" -lt 12 ]; then
+    echo "⚠️  Warning: Docker has only ${docker_mem_gb}GB RAM allocated." >&2
+    echo "   Recommended: 16GB+ for AI services (embeddings, anonymization)." >&2
+    echo "   Current requirements:" >&2
+    echo "     - cxs-embeddings: 6-12GB" >&2
+    echo "     - cxs-anonymization: 4-8GB" >&2
+    echo "     - Other services: ~4GB" >&2
+    echo "   Containers may crash with OOM (Out of Memory) errors." >&2
+    echo "   To increase: Docker Desktop > Settings > Resources > Memory" >&2
+    printf "   Continue anyway? (y/N): "
+    read -r response
+    if [[ ! "$response" =~ ^[Yy]$ ]]; then
+      echo "Installation cancelled. Please increase Docker memory and try again." >&2
+      exit 1
+    fi
+  else
+    echo "✅ Sufficient Docker memory allocated (${docker_mem_gb}GB+)"
+  fi
+else
+  echo "⚠️  Could not determine Docker memory allocation. Proceeding..." >&2
+fi
 
 # Get last env file for auth/creds (bash 3.2 compatible)
 if [ ${#ENV_FILES_FOR_AUTH[@]} -eq 0 ]; then
@@ -589,18 +700,65 @@ if ! docker compose version >/dev/null 2>&1; then
 fi
 
 COMPOSE_ARGS=()
-# Use relative paths since env files are now in target directory
-COMPOSE_ARGS+=("--env-file" "../.env.non-sensitive")
-COMPOSE_ARGS+=("--env-file" "../.env.sensitive")
+# Use absolute paths for env files to avoid directory dependency issues
+for env_file in "${ENV_FILES_ABS[@]}"; do
+  COMPOSE_ARGS+=("--env-file" "$env_file")
+done
 COMPOSE_ARGS+=("-f" "docker-compose.mimir.onprem.yml" "up" "-d")
 
 pushd "$STACK_TARGET" >/dev/null
 
 echo "Running docker compose up from $STACK_TARGET..."
-echo "Using env files: ../.env.non-sensitive, ../.env.sensitive"
+echo "Using env files:"
+for env_file in "${ENV_FILES_ABS[@]}"; do
+  echo "  - $env_file"
+done
 "${COMPOSE_BIN[@]}" "${COMPOSE_ARGS[@]}"
 
 popd >/dev/null
 
-echo "🎉 Installation complete! Access your MimIR setup at http://localhost"
-echo "Verify with 'docker compose ps' from $STACK_TARGET."
+echo
+echo "🎉 Installation complete!"
+echo
+
+# Post-install health check
+echo "⏳ Waiting for services to start (this may take 5-10 minutes for AI model downloads)..."
+sleep 30
+
+pushd "$STACK_TARGET" >/dev/null
+echo "Checking service status..."
+healthy=0
+unhealthy=0
+starting=0
+
+# Count service health
+while IFS= read -r line; do
+  if echo "$line" | grep -q "(healthy)"; then
+    ((healthy++))
+  elif echo "$line" | grep -q "(unhealthy)"; then
+    ((unhealthy++))
+  elif echo "$line" | grep -q "(starting)"; then
+    ((starting++))
+  fi
+done < <("${COMPOSE_BIN[@]}" ps 2>/dev/null || true)
+
+echo
+if [ "$healthy" -gt 0 ]; then
+  echo "✅ $healthy services healthy"
+fi
+if [ "$starting" -gt 0 ]; then
+  echo "⏳ $starting services still starting (check again in a few minutes)"
+fi
+if [ "$unhealthy" -gt 0 ]; then
+  echo "⚠️  $unhealthy services unhealthy"
+  echo "   Check logs: cd $STACK_TARGET && docker compose logs -f"
+fi
+
+popd >/dev/null
+
+echo
+echo "🌐 Access your MimIR setup at: http://localhost"
+echo "📊 Check status: cd $STACK_TARGET && docker compose ps"
+echo "📝 View logs: cd $STACK_TARGET && docker compose logs -f [service-name]"
+echo
+echo "⚠️  Note: First startup may take 5-10 minutes as AI models download (~10GB)"

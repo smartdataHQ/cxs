@@ -63,6 +63,182 @@ services:
       start_period: 20s
     <<: *default-limits
 
+  cxs-anonymization:
+    image: quicklookup/cxs-anonymization:09ff393
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      # Server Configuration
+      ANONYMIZATION_HOST: "0.0.0.0"
+      ANONYMIZATION_PORT: "8081"
+      # Service Configuration
+      WORKERS: ${ANONYMIZATION_WORKERS:-1}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DEBUG: ${ANONYMIZATION_DEBUG:-false}
+      RELOAD: ${ANONYMIZATION_RELOAD:-false}
+      # Performance Settings
+      PYTORCH_NUM_THREADS: ${PYTORCH_NUM_THREADS:-8}
+      MAX_NER_TEXT_LENGTH: ${MAX_NER_TEXT_LENGTH:-512}
+      # Model Configuration
+      GLINER_MODEL_PATH: ${GLINER_MODEL_PATH:-ai_models/ner_transformer}
+      # Health Check Configuration
+      HEALTH_CHECK_TIMEOUT: ${HEALTH_CHECK_TIMEOUT:-30}
+      # Python Path and Environment
+      PYTHONPATH: "/app"
+      HF_HOME: "/tmp/hf_cache"
+      # Python security
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      ENV: ${ENVIRONMENT:-onprem}
+    volumes:
+      - hf-cache:/tmp/hf_cache
+    networks:
+      - app
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8081/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s  # Allow model loading
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'  # Higher for AI processing (from K8s: 16000m limit)
+          memory: 8G   # From K8s: 8000Mi limit
+        reservations:
+          cpus: '2.0'  # From K8s: 8000m requests
+          memory: 4G   # From K8s: 4000Mi requests
+
+  cxs-embeddings:
+    image: quicklookup/cxs-embeddings:dc803c7
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      # Service Configuration
+      EMBEDDINGS_HOST: "0.0.0.0"
+      EMBEDDINGS_PORT: "8082"
+      WORKERS: ${EMBEDDINGS_WORKERS:-1}
+      RELOAD: ${EMBEDDINGS_RELOAD:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DEBUG: ${EMBEDDINGS_DEBUG:-false}
+      # Logging Configuration
+      LOG_INPUT_TEXT: ${EMBEDDINGS_LOG_INPUT_TEXT:-false}
+      # PyTorch Configuration
+      PYTORCH_NUM_THREADS: ${PYTORCH_NUM_THREADS:-8}
+      # Model Configuration (Default: Qwen3-0.6B)
+      EMBEDDINGS_MODEL: ${EMBEDDINGS_MODEL:-Qwen/Qwen3-Embedding-0.6B}
+      EMBEDDINGS_MODEL_TYPE: ${EMBEDDINGS_MODEL_TYPE:-transformers}
+      EMBEDDINGS_QUERY_PREFIX: ${EMBEDDINGS_QUERY_PREFIX:-Represent this query for retrieving relevant documents:}
+      # Cache Directories
+      HF_HOME: "/tmp/hf_cache"
+      TORCH_HOME: "/tmp/torch_cache"
+      # Python Environment
+      PYTHONPATH: "/app"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+      ENV: ${ENVIRONMENT:-onprem}
+    volumes:
+      - hf-cache:/tmp/hf_cache
+      - torch-cache:/tmp/torch_cache
+    networks:
+      - app
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8082/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s  # Allow model loading
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'  # Higher for AI processing (from K8s: 16000m limit)
+          memory: 12G  # From K8s: 12000Mi limit
+        reservations:
+          cpus: '2.0'  # From K8s: 8000m requests
+          memory: 6G   # From K8s: 6000Mi requests
+
+  cxsservices:
+    image: quicklookup/cxs-services:66f999f
+    platform: linux/amd64
+    restart: unless-stopped
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      cxs-anonymization:
+        condition: service_healthy
+      cxs-embeddings:
+        condition: service_healthy
+    ports:
+      - "8088:8088"
+    environment:
+      # Environment
+      ENVIRONMENT: ${ENVIRONMENT:-onprem}
+      NO_SSO: ${NO_SSO:-false}
+      DEVELOPER: ${DEVELOPER:-onprem@localhost}
+      SERVER_VERSION: "0.1.0"
+      # Database Configuration
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: ${CLICKHOUSE_PORT:-8123}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_USER: ""
+      REDIS_URL: redis
+      # AI Services
+      ANONYMIZATION_SERVICE_URL: ${ANONYMIZATION_SERVICE_URL:-http://cxs-anonymization:8081}
+      EMBEDDINGS_SERVICE_URL: ${EMBEDDINGS_SERVICE_URL:-http://cxs-embeddings:8082}
+      # Vector/LLM Configuration
+      DEFAULT_VECTOR_PROVIDER: ${DEFAULT_VECTOR_PROVIDER:-Voyage}
+      DEFAULT_VECTOR_MODEL: ${DEFAULT_VECTOR_MODEL:-voyage-multilingual-2}
+      DEFAULT_VECTOR_API_KEY: ${VOYAGE_API_KEY:-}
+      OPENAI_LLM_COMBINED_EXTRACTION_PROMPT: "gpt-4o"
+      OPENAI_LLM_MAKE_DREAM_TOUR: "gpt_3_5_turbo"
+      # API Keys
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY:-}
+      UNSTRUCTURED_API_KEY: ${UNSTRUCTURED_API_KEY}
+      FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY:-}
+      # Security
+      SECRET_KEY: ${SECRET_KEY}
+      TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
+      FERNET_KEY_PATTERN: ${FERNET_KEY_PATTERN}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: "525600"
+      # File Processing
+      UNSTRUCTURED_API_URL: ${UNSTRUCTURED_API_URL:-https://api.unstructuredapp.io}
+      LOCAL_FILE_INPUT_DIR: "/tmp/input"
+      LOCAL_FILE_OUTPUT_DIR: "/tmp/output"
+      SCRAPER_TEMP_DIR: "/tmp"
+      MOCK_CONFIG_ROOT: "resources/mock-config"
+      # On-prem specific
+      ONPREM_WRITE_KEY: ${ONPREM_WRITE_KEY}
+      ONPREM_ORGANIZATION: ${ONPREM_ORGANIZATION}
+      ONPREM_ORGANIZATION_GID: ${ONPREM_ORGANIZATION_GID}
+      ONPREM_PARTITION: ${ONPREM_PARTITION}
+    volumes:
+      - cxs-services-cache:/cache
+      - cxs-services-data:/tmp
+    networks:
+      - app
+    logging: *default-logging
+    healthcheck:
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:8088/api/status/alive || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    <<: *default-limits
 
   mimir-server:
     image: quicklookup/cxs-mimir-api:ff2f102
@@ -72,6 +248,10 @@ services:
       redis:
         condition: service_healthy
       clickhouse:
+        condition: service_healthy
+      cxs-anonymization:
+        condition: service_healthy
+      cxs-embeddings:
         condition: service_healthy
     ports:
       - "8000:8000"
@@ -108,6 +288,10 @@ services:
       GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
       HF_TOKEN: ${HF_TOKEN:-}
       UNSTRUCTURED_API_URL: ${UNSTRUCTURED_API_URL:-https://api.unstructuredapp.io}
+      # Internal services
+      SERVICES_BACKEND_URL: ${SERVICES_BACKEND_URL:-http://cxsservices:8088}
+      ANONYMIZATION_SERVICE_URL: ${ANONYMIZATION_SERVICE_URL:-http://cxs-anonymization:8081}
+      EMBEDDINGS_SERVICE_URL: ${EMBEDDINGS_SERVICE_URL:-http://cxs-embeddings:8082}
       # On-prem specific
       ONPREM_WRITE_KEY: ${ONPREM_WRITE_KEY}
       ONPREM_ORGANIZATION: ${ONPREM_ORGANIZATION}
@@ -224,6 +408,10 @@ volumes:
   hf-cache:
     driver: local
   torch-cache:
+    driver: local
+  cxs-services-cache:
+    driver: local
+  cxs-services-data:
     driver: local
 
 networks:
