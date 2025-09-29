@@ -305,17 +305,6 @@ function Prompt-ForSecrets {
     
     # OIDC/SSO (Optional)
     Write-Host "Step 7/8: Single Sign-On (Optional - press Enter to skip)" -ForegroundColor Blue
-    $onpremWriteKey = Prompt-Secret -VarName "ONPREM_WRITE_KEY" -Description "On-premises write key (provided for your setup)" -DefaultValue "" -IsRequired $true
-    "ONPREM_WRITE_KEY=`"$onpremWriteKey`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
-    $onpremOrg = Prompt-Secret -VarName "ONPREM_ORGANIZATION" -Description "Organization name" -DefaultValue "" -IsRequired $true
-    "ONPREM_ORGANIZATION=`"$onpremOrg`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
-    $onpremGid = Prompt-Secret -VarName "ONPREM_ORGANIZATION_GID" -Description "Organization group ID" -DefaultValue "" -IsRequired $true
-    "ONPREM_ORGANIZATION_GID=`"$onpremGid`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
-    $onpremPartition = Prompt-Secret -VarName "ONPREM_PARTITION" -Description "Data partition identifier" -DefaultValue "" -IsRequired $true
-    "ONPREM_PARTITION=`"$onpremPartition`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
-    
-    # OIDC/SSO (Optional)
-    Write-Host "Step 8/8: Single Sign-On (Optional - press Enter to skip)" -ForegroundColor Blue
     $oidcUrl = Prompt-Secret -VarName "OIDC_ISSUER_URL" -Description "OIDC provider URL (e.g., https://your-auth0.auth0.com)" -DefaultValue "" -IsRequired $false
     if ($oidcUrl) { 
         "OIDC_ISSUER_URL=`"$oidcUrl`"" | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8 
