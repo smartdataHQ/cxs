@@ -147,10 +147,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      cxs-anonymization:
-        condition: service_healthy
-      cxs-embeddings:
-        condition: service_healthy
     ports:
       - "8088:8088"
     environment:
@@ -225,7 +221,7 @@ services:
       SERVICES_BACKEND_URL: http://cxsservices:8088
       # External endpoints
       EVENTS_ENDPOINT: ${INBOX_EVENTS_ENDPOINT:-https://inbox.contextsuite.com/api/s/s2s/track}
-      EVENTS_SERVER_KEY: ${EVENTS_SERVER_KEY}
+      EVENTS_SERVER_KEY: ${EVENTS_SERVER_KEY:-}
       # Public base URL (external hostname for UI/API)
       BACKEND_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
       # LLM providers (customer-configured)
@@ -298,10 +294,10 @@ services:
         condition: service_healthy
     environment:
       OAUTH2_PROXY_PROVIDER: oidc
-      OAUTH2_PROXY_OIDC_ISSUER_URL: ${OIDC_ISSUER_URL}
-      OAUTH2_PROXY_CLIENT_ID: ${OIDC_CLIENT_ID}
-      OAUTH2_PROXY_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
-      OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
+      OAUTH2_PROXY_OIDC_ISSUER_URL: ${OIDC_ISSUER_URL:-}
+      OAUTH2_PROXY_CLIENT_ID: ${OIDC_CLIENT_ID:-}
+      OAUTH2_PROXY_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-}
+      OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET:-}
       OAUTH2_PROXY_REDIRECT_URL: ${PUBLIC_BASE_URL}/oauth2/callback
       OAUTH2_PROXY_EMAIL_DOMAINS: '*'
       OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:4180
@@ -333,8 +329,6 @@ services:
       mimir-server:
         condition: service_healthy
       mimir-ui:
-        condition: service_healthy
-      oauth2-proxy:
         condition: service_healthy
     ports:
       - "80:80"

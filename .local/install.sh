@@ -236,24 +236,28 @@ EOF
   if [ -n "$PROMPT_VALUE" ]; then
     echo "GOOGLE_MAPS_API_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
   fi
+  prompt_secret "EVENTS_SERVER_KEY" "Events tracking server key (for analytics)" "" "false"
+  if [ -n "$PROMPT_VALUE" ]; then
+    echo "EVENTS_SERVER_KEY=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+  fi
   
   # OIDC/SSO (Optional)
   echo "Step 6/6: Single Sign-On (Optional - press Enter to skip)"
   prompt_secret "OIDC_ISSUER_URL" "OIDC provider URL (e.g., https://your-auth0.auth0.com)" "" "false"
   if [ -n "$PROMPT_VALUE" ]; then
     echo "OIDC_ISSUER_URL=\"$PROMPT_VALUE\"" >> "$sensitive_file"
-  fi
-  prompt_secret "OIDC_CLIENT_ID" "OIDC client ID" "" "false"
-  if [ -n "$PROMPT_VALUE" ]; then
-    echo "OIDC_CLIENT_ID=\"$PROMPT_VALUE\"" >> "$sensitive_file"
-  fi
-  prompt_secret "OIDC_CLIENT_SECRET" "OIDC client secret" "" "false"
-  if [ -n "$PROMPT_VALUE" ]; then
-    echo "OIDC_CLIENT_SECRET=\"$PROMPT_VALUE\"" >> "$sensitive_file"
-  fi
-  prompt_secret "OAUTH2_PROXY_COOKIE_SECRET" "OAuth2 cookie secret" "AUTO_GENERATE:32" "false"
-  if [ -n "$PROMPT_VALUE" ]; then
-    echo "OAUTH2_PROXY_COOKIE_SECRET=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+    prompt_secret "OIDC_CLIENT_ID" "OIDC client ID" "" "false"
+    if [ -n "$PROMPT_VALUE" ]; then
+      echo "OIDC_CLIENT_ID=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+    fi
+    prompt_secret "OIDC_CLIENT_SECRET" "OIDC client secret" "" "false"
+    if [ -n "$PROMPT_VALUE" ]; then
+      echo "OIDC_CLIENT_SECRET=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+    fi
+    prompt_secret "OAUTH2_PROXY_COOKIE_SECRET" "OAuth2 cookie secret" "AUTO_GENERATE:32" "false"
+    if [ -n "$PROMPT_VALUE" ]; then
+      echo "OAUTH2_PROXY_COOKIE_SECRET=\"$PROMPT_VALUE\"" >> "$sensitive_file"
+    fi
   fi
   
   # Add fixed values
