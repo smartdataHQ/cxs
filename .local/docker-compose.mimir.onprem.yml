@@ -1,0 +1,226 @@
+name: mimir-on-pre
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "50m"
+    max-file: "3"
+
+# Default env files for local runs. Compose only auto-loads .env from CWD; these make it explicit.
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.8.2.29-alpine
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+     - "8123:8123"
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-cst} # Optional: to create a default database
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1 # Required for setting user/password via env vars
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    networks:
+      - app
+    logging: *default-logging
+
+  redis:
+    image: redis:8.2.1-alpine
+    platform: linux/amd64
+    restart: unless-stopped
+    ports:
+     - "6379:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - app
+    logging: *default-logging
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+
+  cxsservices:
+    # image: quicklookup/cxs-services:ff2f102
+    build:
+      context: /Users/stefanbaxter/Development/cxs-pmr
+      dockerfile: DockerfileServices
+    platform: linux/amd64
+    restart: unless-stopped
+    depends_on:
+      - clickhouse
+      - redis
+    ports:
+      - "8088:8088"
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-onprem}
+      NO_SSO: ${NO_SSO:-false}
+      # Data services
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      # Onprem-Setup
+      ONPREM_WRITE_KEY: ${ONPREM_WRITE_KEY:-}
+      ONPREM_ORGANIZATION: ${ONPREM_ORGANIZATION:-}
+      ONPREM_ORGANIZATION_GID: ${ONPREM_ORGANIZATION_GID:-}
+      ONPREM_PARTITION: ${ONPREM_PARTITION:-}
+      # Vectors/providers
+      DEFAULT_VECTOR_PROVIDER: ${DEFAULT_VECTOR_PROVIDER:-Voyage}
+      DEFAULT_VECTOR_MODEL: ${DEFAULT_VECTOR_MODEL:-voyage-multilingual-2}
+      DEFAULT_VECTOR_API_KEY: ${VOYAGE_API_KEY}
+      UNSTRUCTURED_API_URL: ${UNSTRUCTURED_API_URL:-https://api.unstructuredapp.io}
+      # Optional secrets
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY}
+      UNSTRUCTURED_API_KEY: ${UNSTRUCTURED_API_KEY}
+      TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
+      FERNET_KEY_PATTERN: ${FERNET_KEY_PATTERN:-}
+      FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY:-}
+    networks:
+      - app
+    logging: *default-logging
+
+  mimir-server:
+    image: quicklookup/cxs-mimir-api:ff2f102
+    platform: linux/amd64
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - clickhouse
+      - cxsservices
+    ports:
+      - "8000:8000"
+    environment:
+      ENV: ${ENVIRONMENT:-prod}
+      NO_SSO: ${NO_SSO:-false}
+      NO_OBSERVABILITY: ${NO_OBSERVABILITY:-false}
+      # Data services
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD_LLM: ${CLICKHOUSE_PASSWORD_LLM:-${CLICKHOUSE_PASSWORD}}
+      # Internal services
+      SERVICES_BACKEND_URL: http://cxsservices:8088
+      # External endpoints
+      EVENTS_ENDPOINT: ${INBOX_EVENTS_ENDPOINT:-https://inbox.contextsuite.com/api/s/s2s/track}
+      EVENTS_SERVER_KEY: ${EVENTS_SERVER_KEY}
+      # Public base URL (external hostname for UI/API)
+      BACKEND_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      # LLM providers (customer-configured)
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+      AZURE_OPENAI_API_BASE: ${AZURE_OPENAI_API_BASE:-}
+      AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-}
+      AZURE_OPENAI_API_TYPE: ${AZURE_OPENAI_API_TYPE:-azure}
+      # Other secrets/integrations (optional)
+      CONTEXT_SUITE_JWT_SECRET_KEY: ${CONTEXT_SUITE_JWT_SECRET_KEY:-context-suite-f31a2a5f86f6cbc6a828110da9a4807d}
+      VOYAGE_API_KEY: ${VOYAGE_API_KEY}
+      UNSTRUCTURED_API_KEY: ${UNSTRUCTURED_API_KEY}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
+      SFTP_USERNAME: ${SFTP_USERNAME:-}
+      SFTP_PASSWORD: ${SFTP_PASSWORD:-}
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+      HF_TOKEN: ${HF_TOKEN:-}
+      UNSTRUCTURED_API_URL: ${UNSTRUCTURED_API_URL:-https://api.unstructuredapp.io}
+    networks:
+      - app
+    logging: *default-logging
+
+  mimir-ui:
+    # image: quicklookup/mimir-chat:5a6d071
+    build:
+      context: /Users/stefanbaxter/Development/mimir
+      dockerfile: DockerfileWeb
+    platform: linux/amd64
+    restart: unless-stopped
+    depends_on:
+      - mimir-server
+    ports:
+      - "3000:3000"
+    command: ["npm", "run", "start"]
+    environment:
+      AUTH_URL: ${NEAREST_MIMIR_UI_SERVER:-http://localhost:3000}
+      BROWSER_APP_API: ${NEAREST_MIMIR_UI_SERVER:-http://localhost:3000}
+      BROWSER_CHAT_API: ${NEAREST_MIMIR_SERVER:-http://localhost:8000}
+      BROWSER_CHAT_WSS_API: ${NEAREST_MIMIR_WS_SERVER:-ws://localhost:8000}
+      MIMIR_SERVER_API: ${NEAREST_MIMIR_SERVER:-http://mimir-server:8000}
+      CONTEXTSUITE_ADMIN_API: ${NEAREST_CXS_ADMIN_URL:-https://admin.contextsuite.com}
+      BOT_IDENTIFIER: ${BOT_IDENTIFIER:-skattur_agent_dev}
+      AUTH_TRUST_HOST: true
+      AUTH_SECRET: ${CUSTOMER_BASED_SECRET:-SomeSecretStringToReplace}
+    networks:
+      - app
+    logging: *default-logging
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.6.0
+    platform: linux/amd64
+    restart: unless-stopped
+    depends_on:
+      - mimir-ui
+    environment:
+      OAUTH2_PROXY_PROVIDER: oidc
+      OAUTH2_PROXY_OIDC_ISSUER_URL: ${OIDC_ISSUER_URL}
+      OAUTH2_PROXY_CLIENT_ID: ${OIDC_CLIENT_ID}
+      OAUTH2_PROXY_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      OAUTH2_PROXY_COOKIE_SECRET: ${OAUTH2_PROXY_COOKIE_SECRET}
+      OAUTH2_PROXY_REDIRECT_URL: ${PUBLIC_BASE_URL}/oauth2/callback
+      OAUTH2_PROXY_EMAIL_DOMAINS: '*'
+      OAUTH2_PROXY_HTTP_ADDRESS: 0.0.0.0:4180
+      OAUTH2_PROXY_UPSTREAMS: http://mimir-ui:3000
+      OAUTH2_PROXY_PASS_AUTHORIZATION_HEADER: 'true'
+      OAUTH2_PROXY_SET_AUTHORIZATION_HEADER: 'true'
+      OAUTH2_PROXY_COOKIE_SECURE: ${TLS_ENABLED:-false}
+      OAUTH2_PROXY_COOKIE_SAMESITE: lax
+      OAUTH2_PROXY_COOKIE_NAME: _mimir_sso
+      OAUTH2_PROXY_SCOPE: openid profile email
+      OAUTH2_PROXY_WHITELIST_DOMAINS: ${PUBLIC_HOSTNAME}
+      OAUTH2_PROXY_COOKIE_DOMAINS: ${PUBLIC_HOSTNAME}
+    networks:
+      - app
+    logging: *default-logging
+
+  mimir-nginx:
+    image: nginx:1.27-alpine
+    platform: linux/amd64
+    restart: unless-stopped
+    depends_on:
+      - mimir-server
+      - mimir-ui
+      - oauth2-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ${NGINX_CONF:-./nginx/default.conf}:/etc/nginx/conf.d/default.conf:ro
+      - ${TLS_CERTS_DIR:-./certs}:/etc/nginx/certs:ro
+    networks:
+      - app
+    logging: *default-logging
+
+volumes:
+  clickhouse-data:
+  redis-data:
+
+networks:
+  app:
+    name: mimir-on-pre-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${DOCKER_SUBNET:-172.31.250.0/24}
+          gateway: ${DOCKER_GATEWAY:-172.31.250.1}
+
+
