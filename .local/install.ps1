@@ -539,15 +539,13 @@ function Setup-EnvFiles {
         Write-Host "SUCCESS: Using existing $sensitive"
     }
 
-    # Set $envFilesResolved to these target directory files
-    $script:envFilesResolved = @()
-    $script:envFilesResolved += $nonSensitive
-    $script:envFilesResolved += $sensitive
+    # Set $envFilesResolved to these target directory files (script scope)
+    $script:envFilesResolved = @($nonSensitive, $sensitive)
 }
 
 # Parse comma-separated EnvFile into array (user-provided)
-$envFilesResolved = @()
 if ($EnvFile) {
+    $envFilesResolved = @()
     $envFileList = $EnvFile -split ','
     foreach ($file in $envFileList) {
         $resolved = (Resolve-Path -LiteralPath $file -ErrorAction Stop).ProviderPath
@@ -560,6 +558,13 @@ if ($EnvFile) {
 } else {
     # Frictionless: Auto-setup env files in current dir if not provided
     Setup-EnvFiles $TargetDirectory
+    # Use the script-level variable set by Setup-EnvFiles
+    $envFilesResolved = $script:envFilesResolved
+}
+
+Write-Host "Using env files:" -ForegroundColor Gray
+foreach ($f in $envFilesResolved) {
+    Write-Host "   - $f" -ForegroundColor Gray
 }
 
 $envFilesForAuth = $envFilesResolved  # All for compose; last for auth/creds
