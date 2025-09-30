@@ -575,10 +575,42 @@ try {
     }
     if (-not $githubRefFinal) { $githubRefFinal = $defaultRef }
 
-    Write-Host 'Downloading stack via GitHub API...'
-    Get-GitHubFolder -Owner $owner -Repo $repo -Path $githubPath -Destination $downloadRoot -Token $githubToken -Ref $githubRefFinal
+    # Download using tarball (avoids GitHub API rate limits)
+    Write-Host 'Downloading stack from GitHub...'
+    $tarballUrl = "https://github.com/$owner/$repo/archive/refs/heads/$githubRefFinal.tar.gz"
+    $tarballPath = Join-Path $tempDir "repo.tar.gz"
 
-    $stackSource = $downloadRoot
+    Write-Host "   URL: $tarballUrl"
+    try {
+        Invoke-WebRequest -Uri $tarballUrl -OutFile $tarballPath -UseBasicParsing -ErrorAction Stop
+    } catch {
+        Write-Host "ERROR: Failed to download from GitHub: $($_.Exception.Message)" -ForegroundColor Red
+        throw "GitHub download failed"
+    }
+
+    # Extract tarball (requires tar command on Windows 10+)
+    Write-Host "   Extracting archive..."
+    $extractRoot = Join-Path $tempDir "extracted"
+    New-Item -ItemType Directory -Path $extractRoot -Force | Out-Null
+
+    if (Get-Command tar -ErrorAction SilentlyContinue) {
+        tar -xzf $tarballPath -C $extractRoot
+    } else {
+        # Fallback: use .NET for zip (but GitHub gives us tar.gz)
+        # Try to use 7zip if available, otherwise fail gracefully
+        Write-Host "WARNING: 'tar' command not found. Trying alternative extraction..." -ForegroundColor Yellow
+        throw "tar command required but not found. Please install tar or use Windows 10+"
+    }
+
+    # Find the extracted folder (it will be named like "cxs-main")
+    $extractedRepo = Get-ChildItem -Path $extractRoot -Directory | Select-Object -First 1
+    $stackSourcePath = Join-Path $extractedRepo.FullName $githubPath
+
+    if (-not (Test-Path $stackSourcePath)) {
+        throw "Could not find .local directory in extracted archive"
+    }
+
+    $stackSource = $stackSourcePath
 
     if (-not (Test-Path $TargetDirectory)) {
         $null = New-Item -ItemType Directory -Path $TargetDirectory -Force
