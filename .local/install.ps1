@@ -403,9 +403,16 @@ function Parse-EnvTemplate {
 
 # Interactive setup for all customer secrets
 function Prompt-ForSecrets {
-    param([string]$SensitiveFile)
+    param(
+        [string]$SensitiveFile,
+        [string]$TemplateFile
+    )
 
-    $templateFile = Join-Path $PSScriptRoot ".env.example.sensitive"
+    if (-not $TemplateFile) {
+        $TemplateFile = Join-Path $PSScriptRoot ".env.example.sensitive"
+    }
+
+    $templateFile = $TemplateFile
 
     Write-Host ""
     Write-Host " MimIR Setup: Customer Secrets Configuration" -ForegroundColor Magenta
@@ -495,9 +502,12 @@ function Setup-EnvFiles {
         Write-Host "SUCCESS: Created $nonSensitive with safe defaults."
     }
 
+    # Download sensitive example template for prompts
+    Download-Example ".env.example.sensitive" $exampleSensitive
+
     # For sensitive: Interactive prompts instead of editor
     if (-not (Test-Path $sensitive) -and -not $NoInteractive) {
-        Prompt-ForSecrets $sensitive
+        Prompt-ForSecrets -SensitiveFile $sensitive -TemplateFile $exampleSensitive
     } elseif (-not (Test-Path $sensitive)) {
         Write-Host "Run without -NoInteractive for guided setup, or create $sensitive manually." -ForegroundColor Red
         exit 1
