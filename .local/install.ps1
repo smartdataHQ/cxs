@@ -117,16 +117,19 @@ function Get-GitHubFolder {
         [string]$Ref
     )
 
-    $uri = "https://api.github.com/repos/$Owner/$Repo/contents/$Path"
+    $apiUri = "https://api.github.com/repos/${Owner}/${Repo}/contents/${Path}"
     if ($Ref) {
-        $uri = "$uri?ref=$Ref"
+        $apiUri = "${apiUri}?ref=${Ref}"
     }
+
+    Write-Verbose "Fetching from URI: $apiUri"
 
     $headers = New-GitHubHeaders -Token $Token -Accept 'application/vnd.github.v3+json'
     try {
-        $items = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
+        $items = Invoke-RestMethod -Uri $apiUri -Headers $headers -Method Get
     } catch {
-        throw "GitHub request failed for ${uri}: $($_.Exception.Message)"
+        Write-Host "DEBUG: Owner=$Owner, Repo=$Repo, Path=$Path, Ref=$Ref, apiUri=$apiUri" -ForegroundColor Red
+        throw "GitHub request failed for ${apiUri}: $($_.Exception.Message)"
     }
 
     if ($items -isnot [System.Collections.IEnumerable]) {
@@ -409,7 +412,7 @@ function Setup-EnvFiles {
     $exampleSensitive = Join-Path $targetAbs '.env.example.sensitive'
 
     # Download non-sensitive example and copy (ready with defaults)
-    Download-Example "$githubPath/.env.example.non-sensitive" $exampleNon
+    Download-Example ".env.example.non-sensitive" $exampleNon
     if (-not (Test-Path $nonSensitive)) {
         Copy-Item $exampleNon $nonSensitive
         Write-Host "✅ Created $nonSensitive with safe defaults."
