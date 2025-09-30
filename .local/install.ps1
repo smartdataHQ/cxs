@@ -635,8 +635,14 @@ try {
     Write-Host "CHECK: Checking Docker daemon..." -ForegroundColor Yellow
     $dockerRunning = $false
 
-    $dockerInfoOutput = docker info 2>&1
+    # Temporarily allow warnings/errors from docker commands
+    $previousErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+
+    $dockerInfoOutput = docker info 2>&1 | Out-String
     $dockerExitCode = $LASTEXITCODE
+
+    $ErrorActionPreference = $previousErrorAction
 
     Write-Verbose "Docker info exit code: $dockerExitCode"
 
@@ -685,8 +691,14 @@ try {
     Write-Host "CHECK: Testing Docker functionality..." -ForegroundColor Yellow
     $dockerTestPassed = $false
 
-    $testOutput = docker run --rm hello-world 2>&1
+    # Temporarily allow warnings/errors from docker commands
+    $previousErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+
+    $testOutput = docker run --rm hello-world 2>&1 | Out-String
     $testExitCode = $LASTEXITCODE
+
+    $ErrorActionPreference = $previousErrorAction
 
     Write-Verbose "Docker test exit code: $testExitCode"
 
@@ -764,14 +776,17 @@ try {
     Invoke-DockerLogin -Registry $dockerRegistry -Username $dockerUsername -Token $dockerPat
 
     $useComposePlugin = $false
-    try {
-        docker compose version *> $null
-        if ($LASTEXITCODE -eq 0) {
-            $useComposePlugin = $true
-        }
-    } catch {
-        $useComposePlugin = $false
+
+    # Temporarily allow warnings/errors from docker commands
+    $previousErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+
+    docker compose version 2>&1 | Out-Null
+    if ($LASTEXITCODE -eq 0) {
+        $useComposePlugin = $true
     }
+
+    $ErrorActionPreference = $previousErrorAction
 
     if (-not $useComposePlugin) {
         if (-not (Get-Command 'docker-compose' -ErrorAction SilentlyContinue)) {
