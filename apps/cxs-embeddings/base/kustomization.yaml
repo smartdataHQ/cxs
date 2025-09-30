@@ -1,0 +1,3 @@
+resources:
+  - cxs-embeddings-deployment.yaml
+  - cxs-embeddings-service.yaml

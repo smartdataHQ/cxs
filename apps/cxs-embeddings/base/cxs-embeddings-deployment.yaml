@@ -1,0 +1,118 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxs-embeddings
+spec:
+  selector:
+    matchLabels:
+      app: cxs-embeddings
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: cxs-embeddings
+        tier: api
+    spec:
+      containers:
+        - name: embeddings
+          image: quicklookup/cxs-embeddings # Image tag managed in overlays/*/kustomization.yaml
+          resources:
+            requests:
+              cpu: 8000m
+              memory: 6000Mi
+            limits:
+              cpu: 16000m
+              memory: 12000Mi
+          ports:
+            - containerPort: 8082
+          livenessProbe:
+            httpGet:
+              port: 8082
+              path: /health
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              port: 8082
+              path: /health
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          env:
+            # Service Configuration
+            - name: EMBEDDINGS_PORT
+              value: "8082"
+            - name: EMBEDDINGS_HOST
+              value: "0.0.0.0"
+            - name: WORKERS
+              value: "1"
+            - name: RELOAD
+              value: "false"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: DEBUG
+              value: "false"
+
+            # Logging Configuration
+            - name: LOG_INPUT_TEXT
+              value: "false"
+
+            # PyTorch Configuration
+            - name: PYTORCH_NUM_THREADS
+              value: "8"
+
+            # Model Configuration (Default: Qwen3-0.6B)
+            - name: EMBEDDINGS_MODEL
+              value: "Qwen/Qwen3-Embedding-0.6B"
+            - name: EMBEDDINGS_MODEL_TYPE
+              value: "transformers"
+            - name: EMBEDDINGS_QUERY_PREFIX
+              value: "Represent this query for retrieving relevant documents:"
+
+            # Cache Directories
+            - name: HF_HOME
+              value: "/tmp/hf_cache"
+            - name: TORCH_HOME
+              value: "/tmp/torch_cache"
+
+            # Python Environment
+            - name: PYTHONPATH
+              value: "/app"
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            - name: ENV
+              value: "prod"
+          volumeMounts:
+            - name: hf-cache
+              mountPath: /tmp/hf_cache
+            - name: torch-cache
+              mountPath: /tmp/torch_cache
+
+      imagePullSecrets:
+        - name: dockerlock
+      volumes:
+        - name: hf-cache
+          emptyDir:
+            sizeLimit: 10Gi
+        - name: torch-cache
+          emptyDir:
+            sizeLimit: 5Gi
+
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cxs-embeddings
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cxs-embeddings
+  maxReplicas: 1
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 60
