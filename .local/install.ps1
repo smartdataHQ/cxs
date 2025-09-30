@@ -720,28 +720,51 @@ try {
     Write-Host "CHECK: Testing Docker functionality..." -ForegroundColor Yellow
     $dockerTestPassed = $false
 
-    # Run docker test and capture exit code, suppressing stderr warnings
-    try {
-        $null = & docker run --rm hello-world 2>$null
-        $testExitCode = $LASTEXITCODE
-    } catch {
-        $testExitCode = 1
-    }
+    # Use ProcessStartInfo to properly capture docker test output
+    $psiTest = New-Object System.Diagnostics.ProcessStartInfo
+    $psiTest.FileName = 'docker'
+    $psiTest.Arguments = 'run --rm hello-world'
+    $psiTest.RedirectStandardOutput = $true
+    $psiTest.RedirectStandardError = $true
+    $psiTest.UseShellExecute = $false
+    $psiTest.CreateNoWindow = $true
 
-    Write-Verbose "Docker test exit code: $testExitCode"
+    $processTest = New-Object System.Diagnostics.Process
+    $processTest.StartInfo = $psiTest
+    $processTest.Start() | Out-Null
+
+    $testStdout = $processTest.StandardOutput.ReadToEnd()
+    $testStderr = $processTest.StandardError.ReadToEnd()
+    $processTest.WaitForExit()
+    $testExitCode = $processTest.ExitCode
+
+    Write-Host "   Docker test exit code: $testExitCode" -ForegroundColor Gray
+
+    # Show error output if test failed
+    if ($testStderr -and $testStderr.Trim()) {
+        $testErrLines = ($testStderr -split "`n" | Where-Object { $_ } | Select-Object -First 5) -join "`n"
+        if ($testErrLines) {
+            Write-Host "   Error output:" -ForegroundColor Gray
+            Write-Host "      $testErrLines" -ForegroundColor DarkGray
+        }
+    }
 
     if ($testExitCode -eq 0) {
         $dockerTestPassed = $true
-    }
-
-    if (-not $dockerTestPassed) {
-        Write-Host "ERROR: Docker test failed. Please check Docker installation and permissions." -ForegroundColor Red
-        Write-Host "   Docker test exit code was: $testExitCode" -ForegroundColor Gray
-        Write-Host "   Try running: docker run hello-world" -ForegroundColor Gray
-        Write-Host "   If it fails, restart Docker Desktop or check permissions." -ForegroundColor Gray
+        Write-Host "SUCCESS: Docker is working correctly" -ForegroundColor Green
+    } else {
+        Write-Host "ERROR: Docker test failed (exit code: $testExitCode)" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "This usually means:" -ForegroundColor Yellow
+        Write-Host "   - Docker is still pulling the hello-world image" -ForegroundColor Gray
+        Write-Host "   - Network connectivity issue" -ForegroundColor Gray
+        Write-Host "   - Docker daemon needs restart" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "You can:" -ForegroundColor Yellow
+        Write-Host "   - Run 'docker run hello-world' manually to see full error" -ForegroundColor Gray
+        Write-Host "   - Use: .\install.ps1 -SkipDockerCheck (skip this test)" -ForegroundColor Gray
         throw "Docker functionality test failed"
     }
-    Write-Host "SUCCESS: Docker is working correctly" -ForegroundColor Green
 
     # Check Docker memory allocation
     Write-Host "CHECK: Checking Docker memory allocation..." -ForegroundColor Yellow
