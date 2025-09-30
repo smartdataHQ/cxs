@@ -325,7 +325,7 @@ function Process-StepPrompts {
 
         # Write to file if value provided
         if ($value) {
-            "`"$var`"=`"$value`"" | Out-File -FilePath $OutputFile -Append -Encoding UTF8
+            "$var=`"$value`"" | Out-File -FilePath $OutputFile -Append -Encoding UTF8
         }
     }
 }
@@ -923,10 +923,17 @@ try {
         $unhealthy = 0
         $starting = 0
 
+        # Build ps command with same env files and compose file
+        $psArgs = @()
+        foreach ($env in $envFilesResolved) {
+            $psArgs += '--env-file', $env
+        }
+        $psArgs += '-f', 'docker-compose.mimir.onprem.yml', 'ps'
+
         if ($useComposePlugin) {
-            $psOutput = docker compose ps 2>$null
+            $psOutput = docker compose @psArgs 2>$null
         } else {
-            $psOutput = docker-compose ps 2>$null
+            $psOutput = docker-compose @psArgs 2>$null
         }
 
         if ($psOutput) {
