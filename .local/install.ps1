@@ -832,12 +832,26 @@ try {
         throw 'Docker credentials must be supplied in an env file (last in -EnvFile list or .env).'
     }
 
+    Write-Host "Reading Docker credentials from: $envFileForAuth" -ForegroundColor Gray
+
     $dockerRegistry = Get-EnvValue -File $envFileForAuth -Key 'DOCKER_REGISTRY'
     if (-not $dockerRegistry) { $dockerRegistry = 'docker.io' }
     $dockerUsername = Get-EnvValue -File $envFileForAuth -Key 'DOCKER_USERNAME'
     $dockerPat = Get-EnvValue -File $envFileForAuth -Key 'DOCKER_PAT'
 
+    Write-Host "   DOCKER_REGISTRY: $($dockerRegistry -replace '.', '*')" -ForegroundColor Gray
+    Write-Host "   DOCKER_USERNAME: $(if ($dockerUsername) { $dockerUsername } else { '(not found)' })" -ForegroundColor Gray
+    Write-Host "   DOCKER_PAT: $(if ($dockerPat) { '***' + $dockerPat.Substring([Math]::Max(0, $dockerPat.Length - 4)) } else { '(not found)' })" -ForegroundColor Gray
+
     if (-not $dockerUsername -or -not $dockerPat) {
+        Write-Host ""
+        Write-Host "ERROR: Missing Docker credentials in $envFileForAuth" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Please check that your .env.sensitive file contains:" -ForegroundColor Yellow
+        Write-Host '   DOCKER_USERNAME="quicklookup"' -ForegroundColor Gray
+        Write-Host '   DOCKER_PAT="dckr_pat_..."' -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "File location: $envFileForAuth" -ForegroundColor Gray
         throw "DOCKER_USERNAME and DOCKER_PAT must be set in the last env file ($envFileForAuth)"
     }
 
