@@ -640,32 +640,56 @@ try {
         Write-Host "CHECK: Checking Docker daemon..." -ForegroundColor Yellow
     $dockerRunning = $false
 
-    # Run docker info and capture exit code, suppressing stderr warnings
-    try {
-        $null = & docker info 2>$null
-        $dockerExitCode = $LASTEXITCODE
-    } catch {
-        $dockerExitCode = 1
-    }
+    # Use ProcessStartInfo to properly capture docker info output
+    $psi = New-Object System.Diagnostics.ProcessStartInfo
+    $psi.FileName = 'docker'
+    $psi.Arguments = 'info'
+    $psi.RedirectStandardOutput = $true
+    $psi.RedirectStandardError = $true
+    $psi.UseShellExecute = $false
+    $psi.CreateNoWindow = $true
+
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $psi
+    $process.Start() | Out-Null
+
+    $stdout = $process.StandardOutput.ReadToEnd()
+    $stderr = $process.StandardError.ReadToEnd()
+    $process.WaitForExit()
+    $dockerExitCode = $process.ExitCode
 
     Write-Host "   Docker info exit code: $dockerExitCode" -ForegroundColor Gray
+
+    # Show output preview for debugging
+    if ($stderr -and $stderr.Trim()) {
+        $stderrLines = ($stderr -split "`n" | Where-Object { $_ } | Select-Object -First 3) -join "`n"
+        if ($stderrLines) {
+            Write-Host "   Error output:" -ForegroundColor Gray
+            Write-Host "      $stderrLines" -ForegroundColor DarkGray
+        }
+    }
+    if ($stdout -and $stdout.Trim()) {
+        $stdoutLines = ($stdout -split "`n" | Where-Object { $_ } | Select-Object -First 3) -join "`n"
+        if ($stdoutLines) {
+            Write-Host "   Output preview:" -ForegroundColor Gray
+            Write-Host "      $stdoutLines" -ForegroundColor DarkGray
+        }
+    }
 
     if ($dockerExitCode -eq 0) {
         $dockerRunning = $true
         Write-Host "SUCCESS: Docker daemon is running" -ForegroundColor Green
     } else {
-        Write-Host "ERROR: Docker daemon is not running (exit code: $dockerExitCode)" -ForegroundColor Red
+        Write-Host "ERROR: Docker daemon check failed (exit code: $dockerExitCode)" -ForegroundColor Red
         Write-Host ""
-        Write-Host "Troubleshooting steps:" -ForegroundColor Yellow
-        Write-Host "   1. Start Docker Desktop from the Start Menu" -ForegroundColor Gray
-        Write-Host "   2. Wait for it to fully start (Docker icon in system tray should be steady, not animating)" -ForegroundColor Gray
-        Write-Host "   3. Open PowerShell and test: docker info" -ForegroundColor Gray
-        Write-Host "   4. If 'docker info' works, re-run this script" -ForegroundColor Gray
+        Write-Host "Docker Desktop processes are running, but 'docker info' failed." -ForegroundColor Yellow
+        Write-Host "This usually means Docker is still initializing or has an issue." -ForegroundColor Yellow
         Write-Host ""
-        Write-Host "Common issues:" -ForegroundColor Yellow
-        Write-Host "   - Docker Desktop is still starting (wait 1-2 minutes)" -ForegroundColor Gray
-        Write-Host "   - Docker Desktop is in Settings mode (close Settings and let it start)" -ForegroundColor Gray
-        Write-Host "   - WSL 2 integration issue (restart Docker Desktop)" -ForegroundColor Gray
+        Write-Host "Try:" -ForegroundColor Yellow
+        Write-Host "   - Wait 1-2 minutes and re-run this script" -ForegroundColor Gray
+        Write-Host "   - Restart Docker Desktop completely" -ForegroundColor Gray
+        Write-Host "   - Run 'docker info' manually to see the error" -ForegroundColor Gray
+        Write-Host "   - Use: .\install.ps1 -SkipDockerCheck (to bypass)" -ForegroundColor Gray
         throw "Docker daemon not available"
     }
 
