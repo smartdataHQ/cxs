@@ -126,7 +126,7 @@ function Get-GitHubFolder {
     try {
         $items = Invoke-RestMethod -Uri $uri -Headers $headers -Method Get
     } catch {
-        throw "GitHub request failed for $uri: $($_.Exception.Message)"
+        throw "GitHub request failed for ${uri}: $($_.Exception.Message)"
     }
 
     if ($items -isnot [System.Collections.IEnumerable]) {
