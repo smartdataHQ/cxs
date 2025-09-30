@@ -318,19 +318,19 @@ EOF
   echo
   echo "1. Generate or obtain TLS certificates:"
   echo "   # Self-signed (for testing):"
-  echo "   mkdir -p \$target_dir/.local/certs"
+  echo "   mkdir -p certs"
   echo "   openssl req -x509 -newkey rsa:2048 -nodes \\"
-  echo "     -keyout \$target_dir/.local/certs/privkey.pem \\"
-  echo "     -out \$target_dir/.local/certs/fullchain.pem \\"
+  echo "     -keyout certs/privkey.pem \\"
+  echo "     -out certs/fullchain.pem \\"
   echo "     -days 365 -subj \"/CN=your-domain.com\""
   echo
   echo "2. Edit \$target_dir/.env.non-sensitive:"
   echo "   TLS_ENABLED=\"true\""
   echo "   PUBLIC_BASE_URL=\"https://your-domain.com\""
-  echo "   TLS_CERTS_DIR=\".local/certs\""
+  echo "   TLS_CERTS_DIR=\"./certs\""
   echo
   echo "3. Restart containers:"
-  echo "   cd \$target_dir/.local && docker compose down && docker compose up -d"
+  echo "   docker compose down && docker compose up -d"
   echo
 }
 
@@ -545,15 +545,15 @@ PY
 STACK_SOURCE="$DOWNLOAD_DIR"
 mkdir -p "$TARGET_DIR"
 TARGET_DIR_ABS="$(cd "$TARGET_DIR" && pwd)"
-STACK_TARGET="$TARGET_DIR_ABS/.local"
 
-echo "Preparing target directory at $STACK_TARGET"
-rm -rf "$STACK_TARGET"
-mkdir -p "$STACK_TARGET"
+echo "Preparing target directory at $TARGET_DIR_ABS"
 
-tar -C "$STACK_SOURCE" -cf - . | tar -C "$STACK_TARGET" -xf -
+# Copy all files directly to target root (flatter structure)
+tar -C "$STACK_SOURCE" -cf - . | tar -C "$TARGET_DIR_ABS" -xf -
 
-echo "Stack files ready in $STACK_TARGET"
+echo "Stack files ready in $TARGET_DIR_ABS"
+
+STACK_TARGET="$TARGET_DIR_ABS"
 
 if [ "$RUN_COMPOSE" = false ]; then
   echo "Skipping docker compose up."
@@ -747,14 +747,15 @@ if [ "$starting" -gt 0 ]; then
 fi
 if [ "$unhealthy" -gt 0 ]; then
   echo "⚠️  $unhealthy services unhealthy"
-  echo "   Check logs: cd $STACK_TARGET && docker compose logs -f"
+  echo "   Check logs: docker compose logs -f"
 fi
 
 popd >/dev/null
 
 echo
 echo "🌐 Access your MimIR setup at: http://localhost"
-echo "📊 Check status: cd $STACK_TARGET && docker compose ps"
-echo "📝 View logs: cd $STACK_TARGET && docker compose logs -f [service-name]"
+echo "📊 Check status: docker compose ps"
+echo "📝 View logs: docker compose logs -f [service-name]"
+echo "📂 Working directory: $STACK_TARGET"
 echo
 echo "⚠️  Note: First startup may take 5-10 minutes as AI models download (~10GB)"

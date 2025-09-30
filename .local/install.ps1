@@ -160,7 +160,15 @@ function Download-Example {
     $rawUrl = "https://raw.githubusercontent.com/$owner/$repo/$defaultRef/$githubPath/$ExampleName"
     if (-not (Test-Path $TargetExample)) {
         Write-Host "Downloading $ExampleName from GitHub..."
-        Invoke-WebRequest -Uri $rawUrl -OutFile $TargetExample -UseBasicParsing
+        Write-Verbose "URL: $rawUrl -> $TargetExample"
+        try {
+            Invoke-WebRequest -Uri $rawUrl -OutFile $TargetExample -UseBasicParsing -ErrorAction Stop
+            if (-not (Test-Path $TargetExample)) {
+                throw "File was not created at $TargetExample"
+            }
+        } catch {
+            throw "Failed to download $ExampleName from $rawUrl : $($_.Exception.Message)"
+        }
     }
 }
 
@@ -408,11 +416,18 @@ function Prompt-ForSecrets {
         [string]$TemplateFile
     )
 
+    Write-Verbose "Prompt-ForSecrets called with SensitiveFile=$SensitiveFile, TemplateFile=$TemplateFile"
+
     if (-not $TemplateFile) {
         $TemplateFile = Join-Path $PSScriptRoot ".env.example.sensitive"
+        Write-Verbose "Using fallback template path: $TemplateFile"
     }
 
     $templateFile = $TemplateFile
+
+    if (-not (Test-Path $templateFile)) {
+        throw "Template file not found at: $templateFile (SensitiveFile=$SensitiveFile, Original TemplateFile param=$($PSBoundParameters['TemplateFile']))"
+    }
 
     Write-Host ""
     Write-Host " MimIR Setup: Customer Secrets Configuration" -ForegroundColor Magenta
@@ -466,16 +481,16 @@ REDIS_DB=0
     Write-Host "   # PowerShell (self-signed for testing):" -ForegroundColor Gray
     Write-Host "   New-SelfSignedCertificate -DnsName 'your-domain.com' -CertStoreLocation 'Cert:\CurrentUser\My'" -ForegroundColor Gray
     Write-Host "   # Or use OpenSSL:" -ForegroundColor Gray
-    Write-Host "   mkdir .local\certs" -ForegroundColor Gray
-    Write-Host "   openssl req -x509 -newkey rsa:2048 -nodes -keyout .local\certs\privkey.pem -out .local\certs\fullchain.pem -days 365 -subj '/CN=your-domain.com'" -ForegroundColor Gray
+    Write-Host "   mkdir certs" -ForegroundColor Gray
+    Write-Host "   openssl req -x509 -newkey rsa:2048 -nodes -keyout certs\privkey.pem -out certs\fullchain.pem -days 365 -subj '/CN=your-domain.com'" -ForegroundColor Gray
     Write-Host ""
     Write-Host "2. Edit .env.non-sensitive:" -ForegroundColor Yellow
     Write-Host "   TLS_ENABLED=`"true`"" -ForegroundColor Gray
     Write-Host "   PUBLIC_BASE_URL=`"https://your-domain.com`"" -ForegroundColor Gray
-    Write-Host "   TLS_CERTS_DIR=`".local/certs`"" -ForegroundColor Gray
+    Write-Host "   TLS_CERTS_DIR=`"./certs`"" -ForegroundColor Gray
     Write-Host ""
     Write-Host "3. Restart containers:" -ForegroundColor Yellow
-    Write-Host "   cd .local && docker compose down && docker compose up -d" -ForegroundColor Gray
+    Write-Host "   docker compose down && docker compose up -d" -ForegroundColor Gray
     Write-Host ""
 }
 
@@ -503,10 +518,18 @@ function Setup-EnvFiles {
     }
 
     # Download sensitive example template for prompts
+    Write-Host "Downloading template file to: $exampleSensitive"
     Download-Example ".env.example.sensitive" $exampleSensitive
+
+    if (-not (Test-Path $exampleSensitive)) {
+        throw "ERROR: Template file was not downloaded successfully to $exampleSensitive. Check internet connection and GitHub access."
+    }
+
+    Write-Host "SUCCESS: Template file downloaded to $exampleSensitive"
 
     # For sensitive: Interactive prompts instead of editor
     if (-not (Test-Path $sensitive) -and -not $NoInteractive) {
+        Write-Host "Starting interactive prompts with template: $exampleSensitive"
         Prompt-ForSecrets -SensitiveFile $sensitive -TemplateFile $exampleSensitive
     } elseif (-not (Test-Path $sensitive)) {
         Write-Host "Run without -NoInteractive for guided setup, or create $sensitive manually." -ForegroundColor Red
@@ -560,15 +583,10 @@ try {
         $null = New-Item -ItemType Directory -Path $TargetDirectory -Force
     }
     $targetRoot = (Resolve-Path -LiteralPath $TargetDirectory).ProviderPath
-    $stackTarget = Join-Path $targetRoot '.local'
 
-    if (Test-Path $stackTarget) {
-        Remove-Item -LiteralPath $stackTarget -Recurse -Force
-    }
-    $null = New-Item -ItemType Directory -Path $stackTarget
-
+    # Copy all files directly to target root (flatter structure)
     Get-ChildItem -LiteralPath $stackSource -Force | ForEach-Object {
-        $destination = Join-Path $stackTarget $_.Name
+        $destination = Join-Path $targetRoot $_.Name
         if ($_.PSIsContainer) {
             Copy-Item -LiteralPath $_.FullName -Destination $destination -Recurse -Force
         } else {
@@ -576,7 +594,9 @@ try {
         }
     }
 
-    Write-Host "Stack files ready in $stackTarget"
+    Write-Host "Stack files ready in $targetRoot"
+
+    $stackTarget = $targetRoot
 
     $composeArgs = @()
     $envFileForAuth = $null
@@ -798,8 +818,9 @@ try {
 
     Write-Host ''
     Write-Host 'Access your MimIR setup at: http://localhost' -ForegroundColor Cyan
-    Write-Host "Check status: cd $stackTarget && docker compose ps" -ForegroundColor Gray
-    Write-Host "View logs: cd $stackTarget && docker compose logs -f [service-name]" -ForegroundColor Gray
+    Write-Host "Check status: docker compose ps" -ForegroundColor Gray
+    Write-Host "View logs: docker compose logs -f [service-name]" -ForegroundColor Gray
+    Write-Host "Working directory: $stackTarget" -ForegroundColor Gray
     Write-Host ''
     Write-Host 'Note: First startup may take 5-10 minutes as AI models download (approximately 10GB)' -ForegroundColor Yellow
 }

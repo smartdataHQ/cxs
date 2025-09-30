@@ -26,9 +26,9 @@
 3. **Access**:
    - **UI**: http://localhost (or https://localhost if TLS enabled) - MimIR chat interface
    - **API**: http://localhost/api/ - REST API with AI features (anonymization, embeddings)
-   - **Verify**: From mimir-onprem/.local, `docker compose --env-file ../.env.non-sensitive --env-file ../.env.sensitive ps` (all 8 services healthy?)
-   - **Logs**: `docker compose --env-file ../.env.non-sensitive --env-file ../.env.sensitive logs -f mimir-server`
-   - **Stop**: `docker compose --env-file ../.env.non-sensitive --env-file ../.env.sensitive down` from mimir-onprem/.local
+   - **Verify**: From mimir-onprem/, `docker compose ps` (all 8 services healthy?)
+   - **Logs**: `docker compose logs -f mimir-server`
+   - **Stop**: `docker compose down` from mimir-onprem/
    - **Note**: First startup takes 5-10 minutes as AI models download (~10GB total)
 
 Done! Script handles fetch, env setup, and start. For help, see script usage.
