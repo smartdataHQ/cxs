@@ -633,15 +633,27 @@ try {
 
     # Check if Docker daemon is running
     Write-Host "CHECK: Checking Docker daemon..." -ForegroundColor Yellow
-    try {
-        docker info *> $null
-        if ($LASTEXITCODE -ne 0) {
-            throw "Docker daemon check failed"
-        }
-    } catch {
+    $dockerRunning = $false
+
+    $dockerInfoOutput = docker info 2>&1
+    $dockerExitCode = $LASTEXITCODE
+
+    Write-Verbose "Docker info exit code: $dockerExitCode"
+
+    if ($dockerExitCode -eq 0) {
+        $dockerRunning = $true
+    }
+
+    if (-not $dockerRunning) {
         Write-Host "ERROR: Docker daemon is not running. Please start Docker Desktop and try again." -ForegroundColor Red
+        Write-Host "   Docker info exit code was: $dockerExitCode" -ForegroundColor Gray
         Write-Host "   On Windows: Start Docker Desktop from Start Menu" -ForegroundColor Gray
         Write-Host "   Test with: docker run hello-world" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "If Docker Desktop is installed:" -ForegroundColor Yellow
+        Write-Host "   1. Open Docker Desktop from the Start Menu" -ForegroundColor Gray
+        Write-Host "   2. Wait for it to fully start (icon in system tray should be steady)" -ForegroundColor Gray
+        Write-Host "   3. Re-run this script" -ForegroundColor Gray
         throw "Docker daemon not available"
     }
     Write-Host "SUCCESS: Docker daemon is running" -ForegroundColor Green
@@ -671,13 +683,20 @@ try {
 
     # Test Docker functionality
     Write-Host "CHECK: Testing Docker functionality..." -ForegroundColor Yellow
-    try {
-        docker run --rm hello-world *> $null
-        if ($LASTEXITCODE -ne 0) {
-            throw "Docker test failed"
-        }
-    } catch {
+    $dockerTestPassed = $false
+
+    $testOutput = docker run --rm hello-world 2>&1
+    $testExitCode = $LASTEXITCODE
+
+    Write-Verbose "Docker test exit code: $testExitCode"
+
+    if ($testExitCode -eq 0) {
+        $dockerTestPassed = $true
+    }
+
+    if (-not $dockerTestPassed) {
         Write-Host "ERROR: Docker test failed. Please check Docker installation and permissions." -ForegroundColor Red
+        Write-Host "   Docker test exit code was: $testExitCode" -ForegroundColor Gray
         Write-Host "   Try running: docker run hello-world" -ForegroundColor Gray
         Write-Host "   If it fails, restart Docker Desktop or check permissions." -ForegroundColor Gray
         throw "Docker functionality test failed"
