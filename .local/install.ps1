@@ -182,7 +182,7 @@ function Prompt-Secret {
     )
     
     Write-Host ""
-    Write-Host "📋 $VarName`: $Description" -ForegroundColor Cyan
+    Write-Host "$VarName`: $Description" -ForegroundColor Cyan
     
     if ($DefaultValue) {
         if ($DefaultValue.StartsWith("AUTO_GENERATE:")) {
@@ -205,33 +205,33 @@ function Prompt-Secret {
         if ($DefaultValue) {
             $value = $DefaultValue
         } elseif ($IsRequired) {
-            Write-Host "   ❌ This field is required. Please enter a value." -ForegroundColor Red
+            Write-Host "   ERROR: This field is required. Please enter a value." -ForegroundColor Red
             return Prompt-Secret -VarName $VarName -Description $Description -DefaultValue $DefaultValue -IsRequired $IsRequired
         }
     }
     
     # Validate based on var type
     switch -Regex ($VarName) {
-        "DOCKER_PAT" {
-            if ($value -and $value -notmatch "^(ghp_|dckr_)") {
-                Write-Host "   ⚠️  Warning: Docker PAT should start with 'ghp_' or 'dckr_'" -ForegroundColor Yellow
+        'DOCKER_PAT' {
+            if ($value -and $value -notmatch '^(ghp_|dckr_)') {
+                Write-Host '   Warning: Docker PAT should start with ghp_ or dckr_' -ForegroundColor Yellow
             }
         }
-        ".*_PASSWORD" {
+        '.*_PASSWORD' {
             if ($value -and $value.Length -lt 8) {
-                Write-Host "   ⚠️  Warning: Password should be at least 8 characters" -ForegroundColor Yellow
+                Write-Host '   Warning: Password should be at least 8 characters' -ForegroundColor Yellow
             }
         }
-        "OPENAI_API_KEY" {
-            if ($value -and $value -notmatch "^sk-") {
-                Write-Host "   ⚠️  Warning: OpenAI API key should start with 'sk-'" -ForegroundColor Yellow
+        'OPENAI_API_KEY' {
+            if ($value -and $value -notmatch '^sk-') {
+                Write-Host '   Warning: OpenAI API key should start with sk-' -ForegroundColor Yellow
             }
         }
-        "FERNET_KEY_PATTERN" {
+        'FERNET_KEY_PATTERN' {
             if ($value -and $value.Length -ne 44) {
-                Write-Host "   ❌ Error: Fernet key must be exactly 44 base64 characters" -ForegroundColor Red
+                Write-Host '   Error: Fernet key must be exactly 44 base64 characters' -ForegroundColor Red
                 Write-Host "   Current length: $($value.Length)" -ForegroundColor Gray
-                Write-Host "   Auto-generating a valid key..." -ForegroundColor Yellow
+                Write-Host '   Auto-generating a valid key...' -ForegroundColor Yellow
                 $value = Generate-Random -Length 32
                 Write-Host "   Generated: $value" -ForegroundColor Green
             }
@@ -328,12 +328,12 @@ function Prompt-ForSecrets {
     $templateFile = Join-Path $PSScriptRoot ".env.example.sensitive"
 
     Write-Host ""
-    Write-Host "🔐 MimIR Setup: Customer Secrets Configuration" -ForegroundColor Magenta
+    Write-Host " MimIR Setup: Customer Secrets Configuration" -ForegroundColor Magenta
     Write-Host "================================================" -ForegroundColor Magenta
     Write-Host "We'll walk through each required secret. You can:"
-    Write-Host "• Press Enter to use auto-generated values (for passwords)"
-    Write-Host "• Enter your own values (for API keys provided to you)"
-    Write-Host "• Press Enter to skip optional items"
+    Write-Host "- Press Enter to use auto-generated values (for passwords)"
+    Write-Host "- Enter your own values (for API keys provided to you)"
+    Write-Host "- Press Enter to skip optional items"
     Write-Host ""
 
     # Start building the env file
@@ -369,12 +369,12 @@ REDIS_DB=0
 "@ | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
 
     Write-Host ""
-    Write-Host "✅ Secrets configuration complete! Saved to $SensitiveFile" -ForegroundColor Green
+    Write-Host "SUCCESS: Secrets configuration complete! Saved to $SensitiveFile" -ForegroundColor Green
     Write-Host ""
 
     # TLS Configuration Guidance
-    Write-Host "🔒 TLS/SSL Configuration (Optional)" -ForegroundColor Cyan
-    Write-Host "═══════════════════════════════════════════════" -ForegroundColor Cyan
+    Write-Host " TLS/SSL Configuration (Optional)" -ForegroundColor Cyan
+    Write-Host "-----------------------------------------------" -ForegroundColor Cyan
     Write-Host "By default, MimIR runs on HTTP (http://localhost)."
     Write-Host "For production deployments, enable HTTPS:"
     Write-Host ""
@@ -415,7 +415,7 @@ function Setup-EnvFiles {
     Download-Example ".env.example.non-sensitive" $exampleNon
     if (-not (Test-Path $nonSensitive)) {
         Copy-Item $exampleNon $nonSensitive
-        Write-Host "✅ Created $nonSensitive with safe defaults."
+        Write-Host "SUCCESS: Created $nonSensitive with safe defaults."
     }
 
     # For sensitive: Interactive prompts instead of editor
@@ -425,7 +425,7 @@ function Setup-EnvFiles {
         Write-Host "Run without -NoInteractive for guided setup, or create $sensitive manually." -ForegroundColor Red
         exit 1
     } else {
-        Write-Host "✅ Using existing $sensitive"
+        Write-Host "SUCCESS: Using existing $sensitive"
     }
 
     # Set $envFilesResolved to these target directory files
@@ -521,31 +521,31 @@ try {
     }
 
     if (-not (Get-Command 'docker' -ErrorAction SilentlyContinue)) {
-        throw '❌ Docker CLI is required but not found. Please install Docker Desktop from https://docker.com'
+        throw 'ERROR: Docker CLI is required but not found. Please install Docker Desktop from https://docker.com'
     }
 
     # Check if Docker daemon is running
-    Write-Host "🔍 Checking Docker daemon..." -ForegroundColor Yellow
+    Write-Host "CHECK: Checking Docker daemon..." -ForegroundColor Yellow
     try {
         docker info *> $null
         if ($LASTEXITCODE -ne 0) {
             throw "Docker daemon check failed"
         }
     } catch {
-        Write-Host "❌ Docker daemon is not running. Please start Docker Desktop and try again." -ForegroundColor Red
+        Write-Host "ERROR: Docker daemon is not running. Please start Docker Desktop and try again." -ForegroundColor Red
         Write-Host "   On Windows: Start Docker Desktop from Start Menu" -ForegroundColor Gray
         Write-Host "   Test with: docker run hello-world" -ForegroundColor Gray
         throw "Docker daemon not available"
     }
-    Write-Host "✅ Docker daemon is running" -ForegroundColor Green
+    Write-Host "SUCCESS: Docker daemon is running" -ForegroundColor Green
 
     # Check available disk space
-    Write-Host "🔍 Checking disk space..." -ForegroundColor Yellow
+    Write-Host "CHECK: Checking disk space..." -ForegroundColor Yellow
     try {
         $drive = (Get-Item $targetRoot).PSDrive
         $freeSpaceGB = [math]::Round($drive.Free / 1GB, 1)
         if ($freeSpaceGB -lt 30) {
-            Write-Host "⚠️  Warning: Only ${freeSpaceGB}GB disk space available." -ForegroundColor Yellow
+            Write-Host "WARNING:  Warning: Only ${freeSpaceGB}GB disk space available." -ForegroundColor Yellow
             Write-Host "   Recommended: 50GB+ for AI models and data storage." -ForegroundColor Gray
             Write-Host "   Required space breakdown:" -ForegroundColor Gray
             Write-Host "     - Docker images: ~8GB" -ForegroundColor Gray
@@ -556,35 +556,35 @@ try {
                 throw "Installation cancelled. Please free up disk space and try again."
             }
         } else {
-            Write-Host "✅ Sufficient disk space available (${freeSpaceGB}GB+)" -ForegroundColor Green
+            Write-Host "SUCCESS: Sufficient disk space available (${freeSpaceGB}GB+)" -ForegroundColor Green
         }
     } catch {
         Write-Verbose "Could not check disk space: $_"
     }
 
     # Test Docker functionality
-    Write-Host "🔍 Testing Docker functionality..." -ForegroundColor Yellow
+    Write-Host "CHECK: Testing Docker functionality..." -ForegroundColor Yellow
     try {
         docker run --rm hello-world *> $null
         if ($LASTEXITCODE -ne 0) {
             throw "Docker test failed"
         }
     } catch {
-        Write-Host "❌ Docker test failed. Please check Docker installation and permissions." -ForegroundColor Red
+        Write-Host "ERROR: Docker test failed. Please check Docker installation and permissions." -ForegroundColor Red
         Write-Host "   Try running: docker run hello-world" -ForegroundColor Gray
         Write-Host "   If it fails, restart Docker Desktop or check permissions." -ForegroundColor Gray
         throw "Docker functionality test failed"
     }
-    Write-Host "✅ Docker is working correctly" -ForegroundColor Green
+    Write-Host "SUCCESS: Docker is working correctly" -ForegroundColor Green
 
     # Check Docker memory allocation
-    Write-Host "🔍 Checking Docker memory allocation..." -ForegroundColor Yellow
+    Write-Host "CHECK: Checking Docker memory allocation..." -ForegroundColor Yellow
     try {
         $dockerMemBytes = docker info --format '{{.MemTotal}}' 2>$null
         if ($dockerMemBytes -and $LASTEXITCODE -eq 0) {
             $dockerMemGB = [math]::Round([long]$dockerMemBytes / 1GB, 1)
             if ($dockerMemGB -lt 12) {
-                Write-Host "⚠️  Warning: Docker has only ${dockerMemGB}GB RAM allocated." -ForegroundColor Yellow
+                Write-Host "WARNING:  Warning: Docker has only ${dockerMemGB}GB RAM allocated." -ForegroundColor Yellow
                 Write-Host "   Recommended: 16GB+ for AI services (embeddings, anonymization)." -ForegroundColor Gray
                 Write-Host "   Current requirements:" -ForegroundColor Gray
                 Write-Host "     - cxs-embeddings: 6-12GB" -ForegroundColor Gray
@@ -597,10 +597,10 @@ try {
                     throw "Installation cancelled. Please increase Docker memory and try again."
                 }
             } else {
-                Write-Host "✅ Sufficient Docker memory allocated (${dockerMemGB}GB+)" -ForegroundColor Green
+                Write-Host "SUCCESS: Sufficient Docker memory allocated (${dockerMemGB}GB+)" -ForegroundColor Green
             }
         } else {
-            Write-Host "⚠️  Could not determine Docker memory allocation. Proceeding..." -ForegroundColor Yellow
+            Write-Host "WARNING:  Could not determine Docker memory allocation. Proceeding..." -ForegroundColor Yellow
         }
     } catch {
         Write-Verbose "Docker memory check failed: $_"
@@ -666,11 +666,11 @@ try {
     }
 
     Write-Host ''
-    Write-Host '🎉 Installation complete!' -ForegroundColor Green
+    Write-Host 'SUCCESS: Installation complete!' -ForegroundColor Green
     Write-Host ''
 
     # Post-install health check
-    Write-Host '⏳ Waiting for services to start (this may take 5-10 minutes for AI model downloads)...' -ForegroundColor Yellow
+    Write-Host 'WAIT: Waiting for services to start (this may take 5-10 minutes for AI model downloads)...' -ForegroundColor Yellow
     Start-Sleep -Seconds 30
 
     Push-Location $stackTarget
@@ -696,13 +696,13 @@ try {
 
         Write-Host ''
         if ($healthy -gt 0) {
-            Write-Host "✅ $healthy services healthy" -ForegroundColor Green
+            Write-Host "SUCCESS: $healthy services healthy" -ForegroundColor Green
         }
         if ($starting -gt 0) {
-            Write-Host "⏳ $starting services still starting (check again in a few minutes)" -ForegroundColor Yellow
+            Write-Host "WAIT: $starting services still starting (check again in a few minutes)" -ForegroundColor Yellow
         }
         if ($unhealthy -gt 0) {
-            Write-Host "⚠️  $unhealthy services unhealthy" -ForegroundColor Yellow
+            Write-Host "WARNING:  $unhealthy services unhealthy" -ForegroundColor Yellow
             Write-Host "   Check logs: cd $stackTarget && docker compose logs -f" -ForegroundColor Gray
         }
     } finally {
@@ -710,11 +710,11 @@ try {
     }
 
     Write-Host ''
-    Write-Host '🌐 Access your MimIR setup at: http://localhost' -ForegroundColor Cyan
-    Write-Host "📊 Check status: cd $stackTarget && docker compose ps" -ForegroundColor Gray
-    Write-Host "📝 View logs: cd $stackTarget && docker compose logs -f [service-name]" -ForegroundColor Gray
+    Write-Host 'Access your MimIR setup at: http://localhost' -ForegroundColor Cyan
+    Write-Host "Check status: cd $stackTarget && docker compose ps" -ForegroundColor Gray
+    Write-Host "View logs: cd $stackTarget && docker compose logs -f [service-name]" -ForegroundColor Gray
     Write-Host ''
-    Write-Host '⚠️  Note: First startup may take 5-10 minutes as AI models download (~10GB)' -ForegroundColor Yellow
+    Write-Host 'Note: First startup may take 5-10 minutes as AI models download (approximately 10GB)' -ForegroundColor Yellow
 }
 finally {
     Cleanup
