@@ -643,25 +643,26 @@ try {
         $dockerExitCode = 1
     }
 
-    Write-Verbose "Docker info exit code: $dockerExitCode"
+    Write-Host "   Docker info exit code: $dockerExitCode" -ForegroundColor Gray
 
     if ($dockerExitCode -eq 0) {
         $dockerRunning = $true
-    }
-
-    if (-not $dockerRunning) {
-        Write-Host "ERROR: Docker daemon is not running. Please start Docker Desktop and try again." -ForegroundColor Red
-        Write-Host "   Docker info exit code was: $dockerExitCode" -ForegroundColor Gray
-        Write-Host "   On Windows: Start Docker Desktop from Start Menu" -ForegroundColor Gray
-        Write-Host "   Test with: docker run hello-world" -ForegroundColor Gray
+        Write-Host "SUCCESS: Docker daemon is running" -ForegroundColor Green
+    } else {
+        Write-Host "ERROR: Docker daemon is not running (exit code: $dockerExitCode)" -ForegroundColor Red
         Write-Host ""
-        Write-Host "If Docker Desktop is installed:" -ForegroundColor Yellow
-        Write-Host "   1. Open Docker Desktop from the Start Menu" -ForegroundColor Gray
-        Write-Host "   2. Wait for it to fully start (icon in system tray should be steady)" -ForegroundColor Gray
-        Write-Host "   3. Re-run this script" -ForegroundColor Gray
+        Write-Host "Troubleshooting steps:" -ForegroundColor Yellow
+        Write-Host "   1. Start Docker Desktop from the Start Menu" -ForegroundColor Gray
+        Write-Host "   2. Wait for it to fully start (Docker icon in system tray should be steady, not animating)" -ForegroundColor Gray
+        Write-Host "   3. Open PowerShell and test: docker info" -ForegroundColor Gray
+        Write-Host "   4. If 'docker info' works, re-run this script" -ForegroundColor Gray
+        Write-Host ""
+        Write-Host "Common issues:" -ForegroundColor Yellow
+        Write-Host "   - Docker Desktop is still starting (wait 1-2 minutes)" -ForegroundColor Gray
+        Write-Host "   - Docker Desktop is in Settings mode (close Settings and let it start)" -ForegroundColor Gray
+        Write-Host "   - WSL 2 integration issue (restart Docker Desktop)" -ForegroundColor Gray
         throw "Docker daemon not available"
     }
-    Write-Host "SUCCESS: Docker daemon is running" -ForegroundColor Green
 
     # Check available disk space
     Write-Host "CHECK: Checking disk space..." -ForegroundColor Yellow
