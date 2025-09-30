@@ -104,29 +104,22 @@ NGINX_CONF=./nginx/default.nosso.conf
 - The network subnet can be customized to avoid conflicts (see `DOCKER_SUBNET`, `DOCKER_GATEWAY` in the env example)
 
 ## Start
-```
-# Option A: run from project root.
-# The compose file now explicitly loads .local/.env, .local/mimir-onprem.env and .local/secrets.env,
-# so you can simply edit/create those files under .local/ and run from the repo root.
-cp .local/mimir-onprem.env .local/.env  # or edit .local/.env directly
-DOCKER_HOST=${DOCKER_HOST:-} \
-docker compose --project-name mimir-on-pre \
-  -f .local/docker-compose.mimir.onprem.yml up -d
+After running the install script, all files are in your target directory (e.g., `mimir-onprem/`):
+
+```bash
+cd mimir-onprem
+docker compose up -d
 ```
 
-```
-# Option B: run from inside the .local directory using the same-directory env file
-cd .local
-cp mimir-onprem.env .env  # or use --env-file mimir-onprem.env
-DOCKER_HOST=${DOCKER_HOST:-} docker compose -f docker-compose.mimir.onprem.yml up -d
-# alternatively, without renaming:
-DOCKER_HOST=${DOCKER_HOST:-} docker compose -f docker-compose.mimir.onprem.yml --env-file mimir-onprem.env up -d
-```
+The env files (`.env.non-sensitive` and `.env.sensitive`) are automatically discovered by Docker Compose in the same directory.
 
-Or with explicit env file(s):
-```
-docker compose -f .local/docker-compose.mimir.onprem.yml \
-  --env-file .local/mimir-onprem.env up -d
+For manual setup without the install script:
+```bash
+# From the deployment directory
+docker compose -f docker-compose.mimir.onprem.yml \
+  --env-file .env.non-sensitive \
+  --env-file .env.sensitive \
+  up -d
 ```
 
 ## Verify
@@ -151,16 +144,19 @@ Notes
 - No Kafka or Postgres are used locally in this setup
 
 ## Operations
-- Logs: json‑file driver with rotation (50 MB × 3)
-- Stop: `docker compose -f .local/docker-compose.mimir.onprem.yml down`
-- Stop and remove data: add `-v` (removes ClickHouse/Redis volumes)
-- Inspect effective config: `docker compose -f .local/docker-compose.mimir.onprem.yml --env-file .local/mimir-onprem.env.example config`
+From your deployment directory (e.g., `mimir-onprem/`):
+
+- **View logs**: `docker compose logs -f [service-name]`
+- **Check status**: `docker compose ps`
+- **Stop**: `docker compose down`
+- **Stop and remove data**: `docker compose down -v` (removes ClickHouse/Redis volumes)
+- **Inspect config**: `docker compose config`
 
 ## Troubleshooting
-- If the site is unreachable, ensure your chosen `DOCKER_SUBNET` doesn’t conflict with LAN/VPN subnets
+- If the site is unreachable, ensure your chosen `DOCKER_SUBNET` doesn't conflict with LAN/VPN subnets
 - TLS errors: verify `fullchain.pem`/`privkey.pem` paths and hostname match `PUBLIC_BASE_URL`
 - SSO loops: double‑check OIDC issuer, client credentials, and redirect URI
-- Service status: `docker compose -f .local/docker-compose.mimir.onprem.yml ps` and `... logs -f <service>`
+- Service status: `docker compose ps` and `docker compose logs -f <service>`
 
 ## Notes
 - Images are pinned to amd64; on Apple Silicon, Docker will run them under emulation
