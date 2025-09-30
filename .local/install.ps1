@@ -3,6 +3,7 @@ Param(
     [string]$EnvFile,
     [switch]$NoUp,
     [switch]$NoInteractive,
+    [switch]$SkipDockerCheck,
     [string]$GitRef
 )
 
@@ -631,8 +632,12 @@ try {
         throw 'ERROR: Docker CLI is required but not found. Please install Docker Desktop from https://docker.com'
     }
 
-    # Check if Docker daemon is running
-    Write-Host "CHECK: Checking Docker daemon..." -ForegroundColor Yellow
+    if ($SkipDockerCheck) {
+        Write-Host "WARNING: Skipping Docker checks (--SkipDockerCheck specified)" -ForegroundColor Yellow
+        Write-Host "   Make sure Docker is running before starting containers!" -ForegroundColor Gray
+    } else {
+        # Check if Docker daemon is running
+        Write-Host "CHECK: Checking Docker daemon..." -ForegroundColor Yellow
     $dockerRunning = $false
 
     # Run docker info and capture exit code, suppressing stderr warnings
@@ -741,6 +746,7 @@ try {
         }
     } catch {
         Write-Verbose "Docker memory check failed: $_"
+    }
     }
 
     if (-not $envFileForAuth) {
