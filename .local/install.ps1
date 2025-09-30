@@ -635,14 +635,13 @@ try {
     Write-Host "CHECK: Checking Docker daemon..." -ForegroundColor Yellow
     $dockerRunning = $false
 
-    # Temporarily allow warnings/errors from docker commands
-    $previousErrorAction = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-
-    $dockerInfoOutput = docker info 2>&1 | Out-String
-    $dockerExitCode = $LASTEXITCODE
-
-    $ErrorActionPreference = $previousErrorAction
+    # Run docker info and capture exit code, suppressing stderr warnings
+    try {
+        $null = & docker info 2>$null
+        $dockerExitCode = $LASTEXITCODE
+    } catch {
+        $dockerExitCode = 1
+    }
 
     Write-Verbose "Docker info exit code: $dockerExitCode"
 
@@ -691,14 +690,13 @@ try {
     Write-Host "CHECK: Testing Docker functionality..." -ForegroundColor Yellow
     $dockerTestPassed = $false
 
-    # Temporarily allow warnings/errors from docker commands
-    $previousErrorAction = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-
-    $testOutput = docker run --rm hello-world 2>&1 | Out-String
-    $testExitCode = $LASTEXITCODE
-
-    $ErrorActionPreference = $previousErrorAction
+    # Run docker test and capture exit code, suppressing stderr warnings
+    try {
+        $null = & docker run --rm hello-world 2>$null
+        $testExitCode = $LASTEXITCODE
+    } catch {
+        $testExitCode = 1
+    }
 
     Write-Verbose "Docker test exit code: $testExitCode"
 
@@ -777,16 +775,15 @@ try {
 
     $useComposePlugin = $false
 
-    # Temporarily allow warnings/errors from docker commands
-    $previousErrorAction = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-
-    docker compose version 2>&1 | Out-Null
-    if ($LASTEXITCODE -eq 0) {
-        $useComposePlugin = $true
+    # Check if docker compose plugin is available
+    try {
+        $null = & docker compose version 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            $useComposePlugin = $true
+        }
+    } catch {
+        $useComposePlugin = $false
     }
-
-    $ErrorActionPreference = $previousErrorAction
 
     if (-not $useComposePlugin) {
         if (-not (Get-Command 'docker-compose' -ErrorAction SilentlyContinue)) {
