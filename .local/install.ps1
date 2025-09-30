@@ -321,6 +321,86 @@ function Process-StepPrompts {
     }
 }
 
+# Embedded template parser function
+function Parse-EnvTemplate {
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$TemplateFile
+    )
+
+    if (-not (Test-Path $TemplateFile)) {
+        throw "Template file not found: $TemplateFile"
+    }
+
+    $prompts = @()
+    $currentStep = ""
+    $currentDepends = ""
+    $lines = Get-Content $TemplateFile
+
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        $line = $lines[$i]
+
+        # Check for step headers
+        if ($line -match '^#\s*Step\s+(\d+):\s*(.+)$') {
+            $currentStep = $matches[1]
+            $currentDepends = ""
+            continue
+        }
+
+        # Check for @depends directive
+        if ($line -match '^#\s*@depends:(.+)$') {
+            $currentDepends = $matches[1]
+            continue
+        }
+
+        # Check for @prompt directive
+        if ($line -match '^#\s*@prompt:(.+)$') {
+            $directive = $matches[1]
+            $parts = $directive -split '\|'
+
+            if ($parts.Count -lt 5) {
+                Write-Warning "Invalid @prompt directive: $line"
+                continue
+            }
+
+            $step = $parts[0].Trim()
+            $required = $parts[1].Trim() -eq 'true'
+            $type = $parts[2].Trim()
+            $description = $parts[3].Trim()
+            $default = $parts[4].Trim()
+
+            # Find next variable name
+            for ($j = $i + 1; $j -lt $lines.Count; $j++) {
+                $nextLine = $lines[$j]
+                if ($nextLine -match '^([A-Z_]+)=') {
+                    $varName = $matches[1]
+
+                    # Use currentStep if step is "auto"
+                    if ($step -eq 'auto') {
+                        $step = $currentStep
+                    }
+
+                    $prompt = [PSCustomObject]@{
+                        Variable    = $varName
+                        Step        = [int]$step
+                        Required    = $required
+                        Type        = $type
+                        Description = $description
+                        Default     = $default
+                        Depends     = $currentDepends
+                    }
+
+                    $prompts += $prompt
+                    $currentDepends = ""
+                    break
+                }
+            }
+        }
+    }
+
+    return $prompts
+}
+
 # Interactive setup for all customer secrets
 function Prompt-ForSecrets {
     param([string]$SensitiveFile)
@@ -342,9 +422,6 @@ function Prompt-ForSecrets {
 # Do NOT commit this file. Generated on $(Get-Date)
 
 "@ | Out-File -FilePath $SensitiveFile -Encoding UTF8
-
-    # Source the template parser
-    . (Join-Path $PSScriptRoot "Parse-EnvTemplate.ps1")
 
     # Parse template and group by step
     $prompts = Parse-EnvTemplate -TemplateFile $templateFile
