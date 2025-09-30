@@ -15,12 +15,13 @@
    - The script will check Docker availability and test functionality before proceeding.
    - **What Gets Installed**: Chat UI, API server, databases (ClickHouse/Redis), and AI services (anonymization, embeddings).
 
-2. **Answer Simple Questions About Your Setup** (6 easy steps):
-   - The script walks you through each secret with clear prompts and progress indicators.
+2. **Answer Simple Questions About Your Setup** (8 easy steps):
+   - The script walks you through each secret with clear prompts and progress indicators (Step 1/8 through 8/8).
    - **For passwords** (databases, encryption): Just press Enter to auto-generate strong, secure ones.
-   - **For API keys**: Enter the keys provided to you securely (DOCKER_PAT, OPENAI_API_KEY, etc.).
-   - **For optional items**: Press Enter to skip (Azure, SSO, etc.).
+   - **For API keys**: Enter the keys provided to you securely (DOCKER_PAT, OPENAI_API_KEY, UNSTRUCTURED_API_KEY, etc.).
+   - **For optional items**: Press Enter to skip (Azure, SFTP, SSO, etc.).
    - Takes 2-3 minutes with helpful descriptions, auto-generation, and format validation.
+   - **New**: Configuration is now driven by `.env.example.sensitive` template with structured metadata for easier maintenance.
 
 3. **Access**:
    - **UI**: http://localhost (or https://localhost if TLS enabled) - MimIR chat interface
