@@ -270,6 +270,26 @@ function Process-StepPrompts {
         $type = $parts[2]
         $desc = $parts[3]
         $default = $parts[4]
+        $depends = if ($parts.Count -gt 5) { $parts[5] } else { "" }
+
+        # Check dependencies
+        if ($depends) {
+            $depParts = $depends -split '\|'
+            $depVar = $depParts[0]
+            $depCondition = $depParts[1]
+
+            switch ($depCondition) {
+                'not-empty' {
+                    # Skip if dependency variable is empty
+                    if (-not $stepValues[$depVar]) {
+                        continue
+                    }
+                }
+                'always' {
+                    # Always process (dependency just for documentation)
+                }
+            }
+        }
 
         # Convert type to default
         switch ($type) {
@@ -330,7 +350,7 @@ function Prompt-ForSecrets {
     foreach ($group in $promptsByStep) {
         $stepPrompts = @()
         foreach ($prompt in $group.Group) {
-            $stepPrompts += "$($prompt.Variable)|$($prompt.Required)|$($prompt.Type)|$($prompt.Description)|$($prompt.Default)"
+            $stepPrompts += "$($prompt.Variable)|$($prompt.Required)|$($prompt.Type)|$($prompt.Description)|$($prompt.Default)|$($prompt.Depends)"
         }
         Process-StepPrompts -StepNum ([int]$group.Name) -OutputFile $SensitiveFile -Prompts $stepPrompts
     }

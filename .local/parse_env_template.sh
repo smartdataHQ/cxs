@@ -14,11 +14,21 @@ parse_env_template() {
   local current_step=""
   local in_group=""
 
-  while IFS= read -r line; do
+  # Read entire file into array for lookahead
+  local -a lines
+  while IFS= read -r line_data; do
+    lines+=("$line_data")
+  done < "$template_file"
+
+  local i=0
+  while [ $i -lt ${#lines[@]} ]; do
+    local line="${lines[$i]}"
+
     # Check for step headers (# Step N: Description)
     if [[ "$line" =~ ^#[[:space:]]*Step[[:space:]]+([0-9]+):[[:space:]]*(.+)$ ]]; then
       current_step="${BASH_REMATCH[1]}"
       in_group="${BASH_REMATCH[2]}"
+      ((i++))
       continue
     fi
 
@@ -29,8 +39,20 @@ parse_env_template() {
       # Parse directive: step|required|type|description|default
       IFS='|' read -r step required type description default <<< "$directive"
 
-      # Read next non-comment line to get variable name
-      while IFS= read -r next_line; do
+      # Look ahead for @depends directive
+      local depends=""
+      local j=$((i + 1))
+      while [ $j -lt ${#lines[@]} ]; do
+        local next_line="${lines[$j]}"
+
+        # Check for @depends
+        if [[ "$next_line" =~ ^#[[:space:]]*@depends:(.+)$ ]]; then
+          depends="${BASH_REMATCH[1]}"
+          ((j++))
+          continue
+        fi
+
+        # Found variable name
         if [[ "$next_line" =~ ^([A-Z_]+)= ]]; then
           local var_name="${BASH_REMATCH[1]}"
 
@@ -41,16 +63,18 @@ parse_env_template() {
 
           # Output in requested format
           if [ "$output_format" = "json" ]; then
-            echo "{\"var\":\"$var_name\",\"step\":\"$step\",\"required\":$required,\"type\":\"$type\",\"desc\":\"$description\",\"default\":\"$default\"}"
+            echo "{\"var\":\"$var_name\",\"step\":\"$step\",\"required\":$required,\"type\":\"$type\",\"desc\":\"$description\",\"default\":\"$default\",\"depends\":\"$depends\"}"
           else
-            # Bash array format: var|step|required|type|description|default
-            echo "$var_name|$step|$required|$type|$description|$default"
+            # Bash array format: var|step|required|type|description|default|depends
+            echo "$var_name|$step|$required|$type|$description|$default|$depends"
           fi
           break
         fi
+        ((j++))
       done
     fi
-  done < "$template_file"
+    ((i++))
+  done
 }
 
 # Example usage:

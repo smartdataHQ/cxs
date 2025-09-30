@@ -14,6 +14,7 @@ function Parse-EnvTemplate {
 
     $prompts = @()
     $currentStep = ""
+    $currentDepends = ""
     $lines = Get-Content $TemplateFile
 
     for ($i = 0; $i -lt $lines.Count; $i++) {
@@ -22,6 +23,13 @@ function Parse-EnvTemplate {
         # Check for step headers
         if ($line -match '^#\s*Step\s+(\d+):\s*(.+)$') {
             $currentStep = $matches[1]
+            $currentDepends = ""
+            continue
+        }
+
+        # Check for @depends directive
+        if ($line -match '^#\s*@depends:(.+)$') {
+            $currentDepends = $matches[1]
             continue
         }
 
@@ -59,9 +67,11 @@ function Parse-EnvTemplate {
                         Type        = $type
                         Description = $description
                         Default     = $default
+                        Depends     = $currentDepends
                     }
 
                     $prompts += $prompt
+                    $currentDepends = ""
                     break
                 }
             }

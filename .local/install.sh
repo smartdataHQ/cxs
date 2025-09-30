@@ -203,7 +203,24 @@ process_step_prompts() {
   declare -A STEP_VALUES
 
   for prompt_data in "${prompts[@]}"; do
-    IFS='|' read -r var required type desc default <<< "$prompt_data"
+    IFS='|' read -r var required type desc default depends <<< "$prompt_data"
+
+    # Check dependencies
+    if [ -n "$depends" ]; then
+      IFS='|' read -r dep_var dep_condition <<< "$depends"
+
+      case "$dep_condition" in
+        not-empty)
+          # Skip if dependency variable is empty
+          if [ -z "${STEP_VALUES[$dep_var]}" ]; then
+            continue
+          fi
+          ;;
+        always)
+          # Always process (dependency just for documentation)
+          ;;
+      esac
+    fi
 
     # Convert type to default
     case "$type" in
@@ -261,7 +278,7 @@ EOF
   local step_prompts=()
 
   # Parse template and group by step
-  while IFS='|' read -r var step required type desc default; do
+  while IFS='|' read -r var step required type desc default depends; do
     if [ "$step" != "$current_step" ]; then
       # Process previous step if any
       if [ -n "$current_step" ] && [ ${#step_prompts[@]} -gt 0 ]; then
@@ -271,7 +288,7 @@ EOF
       current_step="$step"
     fi
 
-    step_prompts+=("$var|$required|$type|$desc|$default")
+    step_prompts+=("$var|$required|$type|$desc|$default|$depends")
   done < <(parse_env_template "$template_file")
 
   # Process final step
