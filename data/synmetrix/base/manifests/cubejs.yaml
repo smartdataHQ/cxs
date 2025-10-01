@@ -51,7 +51,8 @@ spec:
       containers:
         - name: cubejs
           image: "quicklookup/synmetrix-cube:latest"
-          imagePullPolicy: 
+          imagePullPolicy:
+          command: ["node", "--max-old-space-size=8096", "--max-http-header-size=32768", "index.js"] 
           ports:
             - name: http
               containerPort: 4000
