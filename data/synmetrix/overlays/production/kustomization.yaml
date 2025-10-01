@@ -6,12 +6,6 @@ namespace: synmetrix
 resources:
   - ../../base
 
-images:
-  - name: quicklookup/synmetrix-actions
-    newTag: 7270f8d
-  - name: quicklookup/synmetrix-cube
-    newTag: "1b8790e"
-
 # Production ingress hostname override
 patches:
   - target:
