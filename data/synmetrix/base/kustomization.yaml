@@ -3,6 +3,14 @@ kind: Kustomization
 
 namespace: synmetrix
 
+images:
+  - name: quicklookup/synmetrix-client
+    newTag: latest
+  - name: quicklookup/synmetrix-actions
+    newTag: 7270f8d
+  - name: quicklookup/synmetrix-cube
+    newTag: "1b8790e"
+
 patches:
   - target:
       kind: Deployment
@@ -47,14 +55,6 @@ resources:
   - manifests/hasura-plus.yaml
   - manifests/mailhog.yaml
   - manifests/minio.yaml
-  
-images:
-  - name: quicklookup/synmetrix-client
-    newTag: latest
-  - name: quicklookup/synmetrix-actions
-    newTag: latest
-  - name: quicklookup/synmetrix-cube
-    newTag: latest 
 
 configMapGenerator:
   - name: synmetrix-config

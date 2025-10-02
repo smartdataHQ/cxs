@@ -23,7 +23,7 @@ AUTO_OPEN_DIFF=false
 DIFF_VIEWER="delta -s"
 NAMESPACE_OVERRIDE=""
 KUBE_CONTEXT=""
-IGNORE_ANNOTATIONS="argocd.argoproj.io/tracking-id§,deployment.kubernetes.io/revision,field.cattle.io/publicEndpoints,autoscaling.alpha.kubernetes.io/conditions,meta.helm.sh/release-namespace,objectset.rio.cattle.io/id,app.kubernetes.io/managed-by,objectset.rio.cattle.io/hash,kubectl.kubernetes.io/last-applied-configuration"
+IGNORE_ANNOTATIONS="argocd.argoproj.io/tracking-id,deployment.kubernetes.io/revision,field.cattle.io/publicEndpoints,autoscaling.alpha.kubernetes.io/conditions,meta.helm.sh/release-namespace,objectset.rio.cattle.io/id,app.kubernetes.io/managed-by,objectset.rio.cattle.io/hash,kubectl.kubernetes.io/last-applied-configuration"
 
 # Colors for output
 RED='\033[0;31m'

@@ -19,7 +19,7 @@ grafana.ini:
     ssl_mode: require
 
 admin:
-  existingSecret: "csx-deployment-monitoring-grafana"
+  existingSecret: "cxs-staging-monitoring-grafana"
   userKey: admin-user
   passwordKey: admin-password
 
