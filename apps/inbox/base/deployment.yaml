@@ -8,10 +8,6 @@ spec:
       app: inbox
       tier: api
   replicas: 2
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0 # old pod stays until the new one is ready
   template:
     metadata:
       labels:
@@ -20,7 +16,7 @@ spec:
     spec:
       containers:
       - name: inbox
-        image: quicklookup/inbox:main-d7f13f9
+        image: quicklookup/inbox:main-59c6fe1
         resources:
           requests:
             cpu: 100m
@@ -30,27 +26,6 @@ spec:
           name: http
         - containerPort: 2222
           name: sftp
-        readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
-            port: 9090
-          initialDelaySeconds: 15
-          periodSeconds: 15
-          failureThreshold: 8       # gives ~2 minutes for GeoIP catch-up after ready once
-        livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
-            port: 9090
-          initialDelaySeconds: 30
-          periodSeconds: 30
-          failureThreshold: 3
-        startupProbe:               # protects slow GeoIP bootstrap
-          httpGet:
-            path: /actuator/health/readiness
-            port: 9090
-          initialDelaySeconds: 10
-          periodSeconds: 20
-          failureThreshold: 30      # ~10 minutes max for first GeoIP load
         env:
           - name: POSTGRES_PASSWORD
             valueFrom:
