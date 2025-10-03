@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: inbox
-        image: quicklookup/inbox:main-a7956e4
+        image: quicklookup/inbox:main-89fc876
         resources:
           requests:
             cpu: 100m
