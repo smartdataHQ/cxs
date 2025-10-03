@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: inbox
-        image: quicklookup/inbox:32ea1e8
+        image: quicklookup/inbox:main-32ea1e8
         resources:
           requests:
             cpu: 100m
