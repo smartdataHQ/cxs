@@ -7,7 +7,7 @@ spec:
     matchLabels:
       app: inbox
       tier: api
-  replicas: 6
+  replicas: 2
   template:
     metadata:
       labels:
