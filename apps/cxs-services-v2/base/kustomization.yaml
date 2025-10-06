@@ -16,7 +16,7 @@ configMapGenerator:
       - CLICKHOUSE_USER=default
       - ENVIRONMENT=prod
       - DEVELOPER=prod@snjallgogn.is
-      - REDIS_USER=
+      - REDIS_USER=''
       - REDIS_HOST=redis-master.data
       - REDIS_DB=0
       - REDIS_URL=redis-master.data
