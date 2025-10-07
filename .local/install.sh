@@ -298,43 +298,38 @@ EOF
   fi
   source "$parser_script"
 
-  # Group prompts by step
+  # First, collect all parsed data into an array to avoid read conflicts
+  local all_prompts=()
+  while IFS='|' read -r var step required type desc default depends; do
+    [ -z "$var" ] && continue
+    all_prompts+=("$var|$step|$required|$type|$desc|$default|$depends")
+  done < <(parse_env_template "$template_file")
+
+  echo "DEBUG: Collected ${#all_prompts[@]} total prompts" >&2
+
+  # Now group and process them
   local current_step=""
   local step_prompts=()
 
-  # Parse template and group by step
-  # parse_env_template output format: var|step|required|type|desc|default|depends
-  while IFS='|' read -r var step required type desc default depends; do
-    # Skip empty lines
-    [ -z "$var" ] && continue
+  for prompt_line in "${all_prompts[@]}"; do
+    IFS='|' read -r var step required type desc default depends <<< "$prompt_line"
 
-    echo "DEBUG-GROUP: Read var=$var step=$step current_step=$current_step array_size=${#step_prompts[@]}" >&2
+    echo "DEBUG-GROUP: Processing var=$var step=$step current_step=$current_step" >&2
 
-    # Save current line data before calling process_step_prompts
-    local save_var="$var"
-    local save_step="$step"
-    local save_required="$required"
-    local save_type="$type"
-    local save_desc="$desc"
-    local save_default="$default"
-    local save_depends="$depends"
-
-    if [ "$save_step" != "$current_step" ]; then
+    if [ "$step" != "$current_step" ]; then
       # Process previous step if any
       if [ -n "$current_step" ] && [ ${#step_prompts[@]} -gt 0 ]; then
-        echo "DEBUG-GROUP: Step changed from $current_step to $save_step, processing ${#step_prompts[@]} prompts" >&2
+        echo "DEBUG-GROUP: Step changed, processing step $current_step with ${#step_prompts[@]} prompts" >&2
         process_step_prompts "$current_step" "$sensitive_file" "${step_prompts[@]}"
         step_prompts=()
       fi
-      current_step="$save_step"
-      echo "DEBUG-GROUP: Set current_step=$current_step" >&2
+      current_step="$step"
     fi
 
-    # Re-pack without step for process_step_prompts (it only needs: var|required|type|desc|default|depends)
-    local packed="$save_var|$save_required|$save_type|$save_desc|$save_default|$save_depends"
-    echo "DEBUG-GROUP: Adding to array: $packed" >&2
-    step_prompts+=("$packed")
-  done < <(parse_env_template "$template_file")
+    # Re-pack without step for process_step_prompts
+    step_prompts+=("$var|$required|$type|$desc|$default|$depends")
+    echo "DEBUG-GROUP: Added $var to step $current_step" >&2
+  done
 
   # Process final step
   if [ ${#step_prompts[@]} -gt 0 ]; then
