@@ -115,7 +115,7 @@ systemctl start s3-documents.service
 export POSTGRES_PASSWORD=$(kubectl get secret --namespace data postgresql -o jsonpath="{.data.postgres-password}" | base64 -d)
 echo $POSTGRES_PASSWORD
 
-kubectl run postgresql-client --rm --tty -i --restart='Never' --namespace data --image docker.io/bitnami/postgresql:16.2.0-debian-12-r10 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
+kubectl run postgresql-client --rm --tty -i --restart='Never' --namespace data --image docker.io/bitnamilegacy/postgresql:16.2.0-debian-12-r10 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
 --command -- psql --host postgresql -U postgres -d postgres -p 5432
 
 kubectl port-forward --namespace data svc/postgresql 5432:5432 & PGPASSWORD="$POSTGRES_PASSWORD" psql --host 127.0.0.1 -U postgres -d postgres -p 5432
@@ -170,7 +170,7 @@ password="$(kubectl get secret kafka-user-passwords --namespace data -o jsonpath
 
 To create a pod that you can use as a Kafka client run the following commands:
 
-    kubectl run kafka-client --restart='Never' --image docker.io/bitnami/kafka:3.7.0-debian-12-r0 --namespace data --command -- sleep infinity
+    kubectl run kafka-client --restart='Never' --image docker.io/bitnamilegacy/kafka:3.7.0-debian-12-r0 --namespace data --command -- sleep infinity
     kubectl cp --namespace data /path/to/client.properties kafka-client:/tmp/client.properties
     kubectl exec --tty -i kafka-client --namespace data -- bash
 
