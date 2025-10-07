@@ -1,6 +1,8 @@
 loki:
   auth_enabled: false
   storage:
+    persistence:
+      size: 20Gi
     type: "s3"
     s3:
       s3: null
