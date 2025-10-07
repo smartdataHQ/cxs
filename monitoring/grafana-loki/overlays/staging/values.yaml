@@ -1,8 +1,6 @@
 loki:
   auth_enabled: false
   storage:
-    persistence:
-      size: 20Gi
     type: "s3"
     s3:
       s3: null
@@ -12,6 +10,8 @@ loki:
       secretAccessKey: ${S3_LOKI_SECRET_ACCESS_KEY}
       s3ForcePathStyle: true
       insecure: true
+
+      
     bucketNames:
       chunks: "loki-chunks"
       ruler: "loki-ruler"
@@ -48,6 +48,8 @@ backend:
           key: S3_LOKI_SECRET_ACCESS_KEY
 
 write:
+  persistence:
+    size: 20Gi
   extraArgs:
     - '-config.expand-env=true'
   extraEnv:
