@@ -252,7 +252,12 @@ process_step_prompts() {
 # Interactive setup for all customer secrets
 prompt_for_secrets() {
   local sensitive_file="$1"
-  local template_file="$SCRIPT_DIR/.env.example.sensitive"
+  local template_file="$2"
+
+  if [ -z "$template_file" ] || [ ! -f "$template_file" ]; then
+    echo "ERROR: Template file not found at: $template_file" >&2
+    exit 1
+  fi
 
   echo
   echo "🔐 MimIR Setup: Customer Secrets Configuration"
@@ -271,7 +276,16 @@ prompt_for_secrets() {
 EOF
 
   # Source the template parser
-  source "$SCRIPT_DIR/parse_env_template.sh"
+  local target_dir="$(dirname "$sensitive_file")"
+  local parser_script="$target_dir/parse_env_template.sh"
+  if [ ! -f "$parser_script" ]; then
+    curl -s -L "https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/${DEFAULT_GITHUB_REF}/${GITHUB_PATH}/parse_env_template.sh" -o "$parser_script"
+    if [ $? -ne 0 ]; then
+      echo "Failed to download parse_env_template.sh" >&2
+      exit 1
+    fi
+  fi
+  source "$parser_script"
 
   # Group prompts by step
   local current_step=""
@@ -342,17 +356,29 @@ setup_env_files() {
   local sensitive="$target_abs/.env.sensitive"
   local example_non="$target_abs/.env.example.non-sensitive"
   local example_sensitive="$target_abs/.env.example.sensitive"
-  
+
   # Download non-sensitive example and copy (ready with defaults)
   download_example ".env.example.non-sensitive" "$example_non"
   if [ ! -f "$non_sensitive" ]; then
     cp "$example_non" "$non_sensitive"
     echo "✅ SUCCESS: Created $non_sensitive with safe defaults."
   fi
-  
+
+  # Download sensitive example template for prompts
+  echo "Downloading template file to: $example_sensitive"
+  download_example ".env.example.sensitive" "$example_sensitive"
+
+  if [ ! -f "$example_sensitive" ]; then
+    echo "ERROR: Template file was not downloaded successfully to $example_sensitive. Check internet connection and GitHub access." >&2
+    exit 1
+  fi
+
+  echo "✅ SUCCESS: Template file downloaded to $example_sensitive"
+
   # For sensitive: Interactive prompts instead of editor
   if [ ! -f "$sensitive" ] && [ "$NON_INTERACTIVE" != "true" ]; then
-    prompt_for_secrets "$sensitive"
+    echo "Starting interactive prompts with template: $example_sensitive"
+    prompt_for_secrets "$sensitive" "$example_sensitive"
   elif [ ! -f "$sensitive" ]; then
     echo "ERROR: Run without --no-interactive for guided setup, or create $sensitive manually." >&2
     exit 1

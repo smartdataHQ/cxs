@@ -1,5 +1,9 @@
 # Mímir Agent On‑Prem (Docker Compose)
 
+**⚡ Quick Start:** See [README_FIRST.md](./README_FIRST.md) for the fastest 3-step installation process.
+
+---
+
 This directory provides a single docker‑compose stack to run the Mímir agent on‑prem with a small footprint. Only the web entrypoint is exposed; all other services are internal.
 
 ## Components
