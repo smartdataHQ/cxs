@@ -95,7 +95,7 @@ services:
 
   cxs-embeddings:
     # NOTE: First startup downloads ~4GB Qwen3 embedding model, can take 5-15 minutes depending on connection
-    image: quicklookup/cxs-embeddings:5b35fd2
+    image: quicklookup/cxs-embeddings:6c803ee
     platform: linux/amd64
     restart: unless-stopped
     ports:
