@@ -308,17 +308,23 @@ EOF
     # Skip empty lines
     [ -z "$var" ] && continue
 
+    echo "DEBUG-GROUP: Read var=$var step=$step current_step=$current_step array_size=${#step_prompts[@]}" >&2
+
     if [ "$step" != "$current_step" ]; then
       # Process previous step if any
       if [ -n "$current_step" ] && [ ${#step_prompts[@]} -gt 0 ]; then
+        echo "DEBUG-GROUP: Step changed from $current_step to $step, processing ${#step_prompts[@]} prompts" >&2
         process_step_prompts "$current_step" "$sensitive_file" "${step_prompts[@]}"
         step_prompts=()
       fi
       current_step="$step"
+      echo "DEBUG-GROUP: Set current_step=$current_step" >&2
     fi
 
     # Re-pack without step for process_step_prompts (it only needs: var|required|type|desc|default|depends)
-    step_prompts+=("$var|$required|$type|$desc|$default|$depends")
+    local packed="$var|$required|$type|$desc|$default|$depends"
+    echo "DEBUG-GROUP: Adding to array: $packed" >&2
+    step_prompts+=("$packed")
   done < <(parse_env_template "$template_file")
 
   # Process final step
