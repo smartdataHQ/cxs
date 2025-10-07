@@ -29,7 +29,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: backup
-            image: bitnami/kubectl:latest
+            image: bitnamilegacy/kubectl:latest
             command:
             - /bin/bash
             - /scripts/backup.sh
@@ -88,7 +88,7 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: backup
-            image: bitnami/kubectl:latest
+            image: bitnamilegacy/kubectl:latest
             command:
             - /bin/bash
             - /scripts/backup.sh
