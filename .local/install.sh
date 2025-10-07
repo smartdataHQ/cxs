@@ -311,24 +311,30 @@ EOF
   local current_step=""
   local step_prompts=()
 
-  for prompt_line in "${all_prompts[@]}"; do
-    IFS='|' read -r var step required type desc default depends <<< "$prompt_line"
+  local i
+  for ((i=0; i<${#all_prompts[@]}; i++)); do
+    local prompt_line="${all_prompts[$i]}"
+    echo "DEBUG-GROUP: About to parse line: $prompt_line" >&2
 
-    echo "DEBUG-GROUP: Processing var=$var step=$step current_step=$current_step" >&2
+    # Parse in a subshell to avoid variable corruption
+    local parsed_var parsed_step parsed_required parsed_type parsed_desc parsed_default parsed_depends
+    IFS='|' read -r parsed_var parsed_step parsed_required parsed_type parsed_desc parsed_default parsed_depends <<< "$prompt_line"
 
-    if [ "$step" != "$current_step" ]; then
+    echo "DEBUG-GROUP: Parsed var=$parsed_var step=$parsed_step" >&2
+
+    if [ "$parsed_step" != "$current_step" ]; then
       # Process previous step if any
       if [ -n "$current_step" ] && [ ${#step_prompts[@]} -gt 0 ]; then
         echo "DEBUG-GROUP: Step changed, processing step $current_step with ${#step_prompts[@]} prompts" >&2
         process_step_prompts "$current_step" "$sensitive_file" "${step_prompts[@]}"
         step_prompts=()
       fi
-      current_step="$step"
+      current_step="$parsed_step"
     fi
 
     # Re-pack without step for process_step_prompts
-    step_prompts+=("$var|$required|$type|$desc|$default|$depends")
-    echo "DEBUG-GROUP: Added $var to step $current_step" >&2
+    step_prompts+=("$parsed_var|$parsed_required|$parsed_type|$parsed_desc|$parsed_default|$parsed_depends")
+    echo "DEBUG-GROUP: Added $parsed_var to step $current_step" >&2
   done
 
   # Process final step
