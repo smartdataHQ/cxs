@@ -326,7 +326,10 @@ EOF
       # Process previous step if any
       if [ -n "$current_step" ] && [ ${#step_prompts[@]} -gt 0 ]; then
         echo "DEBUG-GROUP: Step changed, processing step $current_step with ${#step_prompts[@]} prompts" >&2
-        process_step_prompts "$current_step" "$sensitive_file" "${step_prompts[@]}"
+        # Run in subshell to prevent variable corruption
+        (
+          process_step_prompts "$current_step" "$sensitive_file" "${step_prompts[@]}"
+        )
         step_prompts=()
       fi
       current_step="$parsed_step"
@@ -339,7 +342,10 @@ EOF
 
   # Process final step
   if [ ${#step_prompts[@]} -gt 0 ]; then
-    process_step_prompts "$current_step" "$sensitive_file" "${step_prompts[@]}"
+    # Run in subshell to prevent variable corruption
+    (
+      process_step_prompts "$current_step" "$sensitive_file" "${step_prompts[@]}"
+    )
   fi
 
   # Add fixed values
