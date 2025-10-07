@@ -207,7 +207,7 @@ process_step_prompts() {
 
     # Check dependencies
     if [ -n "$depends" ]; then
-      IFS='|' read -r dep_var dep_condition <<< "$depends"
+      IFS=':' read -r dep_var dep_condition <<< "$depends"
 
       case "$dep_condition" in
         not-empty)
