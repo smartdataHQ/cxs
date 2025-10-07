@@ -212,7 +212,7 @@ services:
     <<: *default-limits
 
   mimir-server:
-    image: quicklookup/cxs-mimir-api:070032a
+    image: quicklookup/cxs-mimir-api:6373c99
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
@@ -250,7 +250,7 @@ services:
       AZURE_OPENAI_API_TYPE: ${AZURE_OPENAI_API_TYPE:-azure}
       ON_PREM_IDENTIFIER: ${BOT_IDENTIFIER:-varzity.ai}
       # Other secrets/integrations (optional)
-      CONTEXT_SUITE_JWT_SECRET_KEY: ${ON_PREM_SSP_TOKEN:-context-suite-f31a2a5f86f6cbc6a828110da9a4807d}
+      ON_PREM_SSP_TOKEN: ${ON_PREM_SSP_TOKEN:-context-suite-f31a2a5f86f6cbc6a828110da9a4807d}
       UNSTRUCTURED_API_KEY: ${UNSTRUCTURED_API_KEY}
       UNSTRUCTURED_API_URL: ${UNSTRUCTURED_API_URL:-https://api.unstructuredapp.io}
       TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
@@ -298,14 +298,14 @@ services:
       BROWSER_CHAT_WSS_API: ${BROWSER_NIMIR_SERVER:-ws://localhost:8000}
       MIMIR_SERVER_API: ${MIMIR_SERVER_INTERNAL_URL:-http://mimir-server:8000}
       CONTEXTSUITE_ADMIN_API: ${NEAREST_CXS_ADMIN_URL:-https://admin.contextsuite.com}
-      BOT_IDENTIFIER: ${BOT_IDENTIFIER}
+      BOT_IDENTIFIER: ${BOT_IDENTIFIER:-logreglan-a-hofudborgarsvaedinu-mimir-lhbs}
       AUTH_TRUST_HOST: true
       AUTH_SECRET: ${CUSTOMER_BASED_SECRET:-SomeSecretStringToReplace}
     networks:
       - app
     logging: *default-logging
     healthcheck:
-      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\" || exit 1"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/api/status/ready', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\" || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
