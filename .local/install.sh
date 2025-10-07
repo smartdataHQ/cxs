@@ -18,6 +18,7 @@ Options:
   -e, --env-file <file1,file2,...>  Comma-separated paths to environment files (non-sensitive first, sensitive last; overrides apply in order)
       --no-up            Download only; do not run docker compose up
       --no-interactive   Skip interactive secret prompts (use existing files)
+      --skip-docker-check Skip Docker daemon and functionality checks
       --ref <git-ref>    Git ref (branch/tag/SHA) to fetch (defaults to env GITHUB_REF or main)
   -h, --help             Show this help text
 USAGE
@@ -191,13 +192,12 @@ process_step_prompts() {
     2) step_name="Database Passwords" ;;
     3) step_name="AI/ML Service Keys" ;;
     4) step_name="Application Security Keys" ;;
-    5) step_name="Optional API Keys (press Enter to skip)" ;;
-    6) step_name="On-Prem Configuration (Required)" ;;
-    7) step_name="SFTP Integration (Optional - press Enter to skip)" ;;
-    8) step_name="Single Sign-On (Optional - press Enter to skip)" ;;
+    5) step_name="On-Prem Configuration (Required)" ;;
+    6) step_name="SFTP Integration (Optional - press Enter to skip)" ;;
+    7) step_name="Single Sign-On (Optional - press Enter to skip)" ;;
   esac
 
-  echo "Step $step_num/8: $step_name"
+  echo "Step $step_num/7: $step_name"
 
   # Track special values for dependency handling
   declare -A STEP_VALUES
@@ -258,9 +258,9 @@ prompt_for_secrets() {
   echo "🔐 MimIR Setup: Customer Secrets Configuration"
   echo "================================================"
   echo "We'll walk through each required secret. You can:"
-  echo "• Press Enter to use auto-generated values (for passwords)"
-  echo "• Enter your own values (for API keys provided to you)"
-  echo "• Press Enter to skip optional items"
+  echo "- Press Enter to use auto-generated values (for passwords)"
+  echo "- Enter your own values (for API keys provided to you)"
+  echo "- Press Enter to skip optional items"
   echo
 
   # Start building the env file
@@ -300,14 +300,11 @@ EOF
   cat >> "$sensitive_file" <<'EOF'
 
 # Fixed values (do not change)
-DOCKER_REGISTRY="docker.io"
-DOCKER_USERNAME="quicklookup"
-CLICKHOUSE_USER="default"
 REDIS_DB=0
 EOF
 
   echo
-  echo "✅ Secrets configuration complete! Saved to $sensitive_file"
+  echo "✅ SUCCESS: Secrets configuration complete! Saved to $sensitive_file"
   echo
 
   # TLS Configuration Guidance
@@ -350,17 +347,17 @@ setup_env_files() {
   download_example ".env.example.non-sensitive" "$example_non"
   if [ ! -f "$non_sensitive" ]; then
     cp "$example_non" "$non_sensitive"
-    echo "✅ Created $non_sensitive with safe defaults."
+    echo "✅ SUCCESS: Created $non_sensitive with safe defaults."
   fi
   
   # For sensitive: Interactive prompts instead of editor
   if [ ! -f "$sensitive" ] && [ "$NON_INTERACTIVE" != "true" ]; then
     prompt_for_secrets "$sensitive"
   elif [ ! -f "$sensitive" ]; then
-    echo "Run without --no-interactive for guided setup, or create $sensitive manually." >&2
+    echo "ERROR: Run without --no-interactive for guided setup, or create $sensitive manually." >&2
     exit 1
   else
-    echo "✅ Using existing $sensitive"
+    echo "✅ SUCCESS: Using existing $sensitive"
   fi
 
   # Set ENV_FILES_ABS to these target directory files (absolute for compose)
@@ -374,6 +371,7 @@ TARGET_DIR="$DEFAULT_TARGET_DIR"
 ENV_FILES_INPUT=""
 RUN_COMPOSE=true
 NON_INTERACTIVE=false
+SKIP_DOCKER_CHECK=false
 CLI_GITHUB_REF=""
 ENV_FILES_ABS=()
 ENV_FILES_FOR_AUTH=()
@@ -396,6 +394,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-interactive)
       NON_INTERACTIVE=true
+      shift
+      ;;
+    --skip-docker-check)
+      SKIP_DOCKER_CHECK=true
       shift
       ;;
     --ref)
@@ -433,11 +435,6 @@ else
   setup_env_files "$TARGET_DIR"
 fi
 
-if ! command -v python3 >/dev/null 2>&1; then
-  echo "python3 is required" >&2
-  exit 1
-fi
-
 if ! command -v curl >/dev/null 2>&1; then
   echo "curl is required" >&2
   exit 1
@@ -449,13 +446,8 @@ if ! command -v tar >/dev/null 2>&1; then
 fi
 
 # Read from env files in order, last overrides
-GITHUB_TOKEN_VALUE="${GITHUB_TOKEN:-}"
 GITHUB_REF="${CLI_GITHUB_REF:-${GITHUB_REF:-$DEFAULT_GITHUB_REF}}"
 for env_file in "${ENV_FILES_ABS[@]}"; do
-  token_val=$(read_env_value "$env_file" "GITHUB_TOKEN")
-  if [ -n "$token_val" ]; then
-    GITHUB_TOKEN_VALUE="$token_val"
-  fi
   ref_val=$(read_env_value "$env_file" "GITHUB_REF")
   if [ -n "$ref_val" ]; then
     GITHUB_REF="$ref_val"
@@ -468,81 +460,35 @@ cleanup() {
 }
 trap cleanup EXIT
 
-DOWNLOAD_DIR="$TMP_DIR/download"
-mkdir -p "$DOWNLOAD_DIR"
+# Download using tarball (avoids GitHub API rate limits)
+echo 'Downloading stack from GitHub...'
+TARBALL_URL="https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/archive/refs/heads/${GITHUB_REF}.tar.gz"
+TARBALL_PATH="$TMP_DIR/repo.tar.gz"
 
-export OWNER="$GITHUB_OWNER"
-export REPO="$GITHUB_REPO"
-export GH_PATH="$GITHUB_PATH"
-export DEST="$DOWNLOAD_DIR"
-export GH_REF="$GITHUB_REF"
-export GITHUB_TOKEN_DOWNLOAD="$GITHUB_TOKEN_VALUE"
+echo "   URL: $TARBALL_URL"
+if ! curl -fsSL -o "$TARBALL_PATH" "$TARBALL_URL"; then
+  echo "ERROR: Failed to download from GitHub: $TARBALL_URL" >&2
+  exit 1
+fi
 
-python3 - <<'PY'
-import json
-import os
-import sys
-from pathlib import Path
-from urllib import request, error
+# Extract tarball
+echo "   Extracting archive..."
+EXTRACT_ROOT="$TMP_DIR/extracted"
+mkdir -p "$EXTRACT_ROOT"
 
-owner = os.environ['OWNER']
-repo = os.environ['REPO']
-path = os.environ['GH_PATH']
-dest = Path(os.environ['DEST'])
-ref = os.environ.get('GH_REF', '')
-token = os.environ.get('GITHUB_TOKEN_DOWNLOAD', '')
+if ! tar -xzf "$TARBALL_PATH" -C "$EXTRACT_ROOT"; then
+  echo "ERROR: Failed to extract tarball" >&2
+  exit 1
+fi
 
-base_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{path.strip('/')}"
-if ref:
-    root_url = f"{base_url}?ref={ref}"
-else:
-    root_url = base_url
+# Find the extracted folder (it will be named like "cxs-main")
+EXTRACTED_REPO=$(find "$EXTRACT_ROOT" -mindepth 1 -maxdepth 1 -type d | head -n1)
+STACK_SOURCE="$EXTRACTED_REPO/$GITHUB_PATH"
 
-def github_request(url: str, accept: str | None = None) -> bytes:
-    headers = {'User-Agent': 'cxs-installer', 'Accept': accept or 'application/vnd.github.v3+json'}
-    if token:
-        headers['Authorization'] = f'token {token}'
-    req = request.Request(url, headers=headers)
-    try:
-        with request.urlopen(req) as resp:
-            return resp.read()
-    except error.HTTPError as exc:
-        message = exc.read().decode('utf-8', errors='ignore')
-        raise SystemExit(f"GitHub request failed ({exc.code}): {url} - {message}") from exc
-
-def ensure_list(data):
-    if isinstance(data, list):
-        return data
-    return [data]
-
-def save_file(item, target: Path) -> None:
-    data = github_request(item['url'], accept='application/vnd.github.v3.raw')
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_bytes(data)
-
-def process(url: str, target_dir: Path) -> None:
-    payload = github_request(url)
-    data = json.loads(payload.decode('utf-8'))
-    items = ensure_list(data)
-    target_dir.mkdir(parents=True, exist_ok=True)
-    for entry in items:
-        entry_type = entry.get('type')
-        name = entry.get('name')
-        if not name:
-            continue
-        target_path = target_dir / name
-        if entry_type == 'file' or entry_type == 'symlink':
-            save_file(entry, target_path)
-        elif entry_type == 'dir':
-            process(entry['url'], target_path)
-        else:
-            # Skip unsupported types (e.g., submodule)
-            continue
-
-process(root_url, dest)
-PY
-
-STACK_SOURCE="$DOWNLOAD_DIR"
+if [ ! -d "$STACK_SOURCE" ]; then
+  echo "ERROR: Could not find .local directory in extracted archive" >&2
+  exit 1
+fi
 mkdir -p "$TARGET_DIR"
 TARGET_DIR_ABS="$(cd "$TARGET_DIR" && pwd)"
 
@@ -565,80 +511,134 @@ if ! command -v docker >/dev/null 2>&1; then
   exit 1
 fi
 
-# Check if Docker daemon is running
-echo "🔍 Checking Docker daemon..."
-if ! docker info >/dev/null 2>&1; then
-  echo "❌ Docker daemon is not running. Please start Docker Desktop and try again." >&2
-  echo "   On macOS: Open Docker Desktop app from Applications" >&2
-  echo "   On Linux: Run 'sudo systemctl start docker'" >&2
-  echo "   Test with: docker run hello-world" >&2
-  exit 1
-fi
-echo "✅ Docker daemon is running"
-
-# Check available disk space
-echo "🔍 Checking disk space..."
-if command -v df >/dev/null 2>&1; then
-  if df -BG "$TARGET_DIR_ABS" >/dev/null 2>&1; then
-    available_gb=$(df -BG "$TARGET_DIR_ABS" | awk 'NR==2 {print $4}' | sed 's/G//')
-  elif df -k "$TARGET_DIR_ABS" >/dev/null 2>&1; then
-    # macOS doesn't support -BG, use -k and convert
-    available_kb=$(df -k "$TARGET_DIR_ABS" | awk 'NR==2 {print $4}')
-    available_gb=$((available_kb / 1024 / 1024))
-  fi
-
-  if [ -n "$available_gb" ] && [ "$available_gb" -lt 30 ]; then
-    echo "⚠️  Warning: Only ${available_gb}GB disk space available." >&2
-    echo "   Recommended: 50GB+ for AI models and data storage." >&2
-    echo "   Required space breakdown:" >&2
-    echo "     - Docker images: ~8GB" >&2
-    echo "     - AI models (HuggingFace): ~10GB" >&2
-    echo "     - Database storage: ~5-50GB (usage-dependent)" >&2
-    printf "   Continue anyway? (y/N): "
-    read -r response
-    if [[ ! "$response" =~ ^[Yy]$ ]]; then
-      echo "Installation cancelled. Please free up disk space and try again." >&2
-      exit 1
-    fi
-  else
-    echo "✅ Sufficient disk space available (${available_gb}GB+)"
-  fi
-fi
-
-# Test Docker functionality
-echo "🔍 Testing Docker functionality..."
-if ! docker run --rm hello-world >/dev/null 2>&1; then
-  echo "❌ Docker test failed. Please check Docker installation and permissions." >&2
-  echo "   Try running: docker run hello-world" >&2
-  echo "   If it fails, restart Docker Desktop or check permissions." >&2
-  exit 1
-fi
-echo "✅ Docker is working correctly"
-
-# Check Docker memory allocation
-echo "🔍 Checking Docker memory allocation..."
-if docker_mem=$(docker info --format '{{.MemTotal}}' 2>/dev/null); then
-  docker_mem_gb=$((docker_mem / 1073741824))
-  if [ "$docker_mem_gb" -lt 12 ]; then
-    echo "⚠️  Warning: Docker has only ${docker_mem_gb}GB RAM allocated." >&2
-    echo "   Recommended: 16GB+ for AI services (embeddings, anonymization)." >&2
-    echo "   Current requirements:" >&2
-    echo "     - cxs-embeddings: 6-12GB" >&2
-    echo "     - cxs-anonymization: 4-8GB" >&2
-    echo "     - Other services: ~4GB" >&2
-    echo "   Containers may crash with OOM (Out of Memory) errors." >&2
-    echo "   To increase: Docker Desktop > Settings > Resources > Memory" >&2
-    printf "   Continue anyway? (y/N): "
-    read -r response
-    if [[ ! "$response" =~ ^[Yy]$ ]]; then
-      echo "Installation cancelled. Please increase Docker memory and try again." >&2
-      exit 1
-    fi
-  else
-    echo "✅ Sufficient Docker memory allocated (${docker_mem_gb}GB+)"
-  fi
+if [ "$SKIP_DOCKER_CHECK" = "true" ]; then
+  echo "⚠️  WARNING: Skipping Docker checks (--skip-docker-check specified)" >&2
+  echo "   Make sure Docker is running before starting containers!" >&2
 else
-  echo "⚠️  Could not determine Docker memory allocation. Proceeding..." >&2
+  # Check if Docker daemon is running
+  echo "🔍 CHECK: Checking Docker daemon..."
+  DOCKER_INFO_OUTPUT=$(docker info 2>&1)
+  DOCKER_INFO_EXIT_CODE=$?
+
+  echo "   Docker info exit code: $DOCKER_INFO_EXIT_CODE"
+
+  # Show output preview for debugging
+  if [ $DOCKER_INFO_EXIT_CODE -ne 0 ]; then
+    STDERR_PREVIEW=$(echo "$DOCKER_INFO_OUTPUT" | grep -v "^$" | head -n 3)
+    if [ -n "$STDERR_PREVIEW" ]; then
+      echo "   Error output:"
+      echo "$STDERR_PREVIEW" | sed 's/^/      /'
+    fi
+  else
+    STDOUT_PREVIEW=$(echo "$DOCKER_INFO_OUTPUT" | grep -v "^$" | head -n 3)
+    if [ -n "$STDOUT_PREVIEW" ]; then
+      echo "   Output preview:"
+      echo "$STDOUT_PREVIEW" | sed 's/^/      /'
+    fi
+  fi
+
+  if [ $DOCKER_INFO_EXIT_CODE -ne 0 ]; then
+    echo "❌ ERROR: Docker daemon check failed (exit code: $DOCKER_INFO_EXIT_CODE)" >&2
+    echo "" >&2
+    echo "Docker may be installed but not running." >&2
+    echo "This usually means Docker is still initializing or has an issue." >&2
+    echo "" >&2
+    echo "Try:" >&2
+    echo "   - Wait 1-2 minutes and re-run this script" >&2
+    echo "   - Restart Docker Desktop completely" >&2
+    echo "   - Run 'docker info' manually to see the error" >&2
+    echo "   - Use: ./install.sh --skip-docker-check (to bypass)" >&2
+    exit 1
+  fi
+
+  echo "✅ SUCCESS: Docker daemon is running"
+fi
+
+if [ "$SKIP_DOCKER_CHECK" != "true" ]; then
+  # Check available disk space
+  echo "🔍 CHECK: Checking disk space..."
+  if command -v df >/dev/null 2>&1; then
+    if df -BG "$TARGET_DIR_ABS" >/dev/null 2>&1; then
+      available_gb=$(df -BG "$TARGET_DIR_ABS" | awk 'NR==2 {print $4}' | sed 's/G//')
+    elif df -k "$TARGET_DIR_ABS" >/dev/null 2>&1; then
+      # macOS doesn't support -BG, use -k and convert
+      available_kb=$(df -k "$TARGET_DIR_ABS" | awk 'NR==2 {print $4}')
+      available_gb=$((available_kb / 1024 / 1024))
+    fi
+
+    if [ -n "$available_gb" ] && [ "$available_gb" -lt 30 ]; then
+      echo "⚠️  WARNING: Only ${available_gb}GB disk space available." >&2
+      echo "   Recommended: 50GB+ for AI models and data storage." >&2
+      echo "   Required space breakdown:" >&2
+      echo "     - Docker images: ~8GB" >&2
+      echo "     - AI models (HuggingFace): ~10GB" >&2
+      echo "     - Database storage: ~5-50GB (usage-dependent)" >&2
+      printf "   Continue anyway? (y/N): "
+      read -r response
+      if [[ ! "$response" =~ ^[Yy]$ ]]; then
+        echo "Installation cancelled. Please free up disk space and try again." >&2
+        exit 1
+      fi
+    else
+      echo "✅ SUCCESS: Sufficient disk space available (${available_gb}GB+)"
+    fi
+  fi
+
+  # Test Docker functionality
+  echo "🔍 CHECK: Testing Docker functionality..."
+  DOCKER_TEST_OUTPUT=$(docker run --rm hello-world 2>&1)
+  DOCKER_TEST_EXIT_CODE=$?
+
+  echo "   Docker test exit code: $DOCKER_TEST_EXIT_CODE"
+
+  # Show error output if test failed
+  if [ $DOCKER_TEST_EXIT_CODE -ne 0 ]; then
+    TEST_ERR_LINES=$(echo "$DOCKER_TEST_OUTPUT" | grep -v "^$" | head -n 5)
+    if [ -n "$TEST_ERR_LINES" ]; then
+      echo "   Error output:"
+      echo "$TEST_ERR_LINES" | sed 's/^/      /'
+    fi
+
+    echo "❌ ERROR: Docker test failed (exit code: $DOCKER_TEST_EXIT_CODE)" >&2
+    echo "" >&2
+    echo "This usually means:" >&2
+    echo "   - Docker is still pulling the hello-world image" >&2
+    echo "   - Network connectivity issue" >&2
+    echo "   - Docker daemon needs restart" >&2
+    echo "" >&2
+    echo "You can:" >&2
+    echo "   - Run 'docker run hello-world' manually to see full error" >&2
+    echo "   - Use: ./install.sh --skip-docker-check (skip this test)" >&2
+    exit 1
+  fi
+
+  echo "✅ SUCCESS: Docker is working correctly"
+
+  # Check Docker memory allocation
+  echo "🔍 CHECK: Checking Docker memory allocation..."
+  if docker_mem=$(docker info --format '{{.MemTotal}}' 2>/dev/null); then
+    docker_mem_gb=$((docker_mem / 1073741824))
+    if [ "$docker_mem_gb" -lt 12 ]; then
+      echo "⚠️  WARNING: Docker has only ${docker_mem_gb}GB RAM allocated." >&2
+      echo "   Recommended: 16GB+ for AI services (embeddings, anonymization)." >&2
+      echo "   Current requirements:" >&2
+      echo "     - cxs-embeddings: 6-12GB" >&2
+      echo "     - cxs-anonymization: 4-8GB" >&2
+      echo "     - Other services: ~4GB" >&2
+      echo "   Containers may crash with OOM (Out of Memory) errors." >&2
+      echo "   To increase: Docker Desktop > Settings > Resources > Memory" >&2
+      printf "   Continue anyway? (y/N): "
+      read -r response
+      if [[ ! "$response" =~ ^[Yy]$ ]]; then
+        echo "Installation cancelled. Please increase Docker memory and try again." >&2
+        exit 1
+      fi
+    else
+      echo "✅ SUCCESS: Sufficient Docker memory allocated (${docker_mem_gb}GB+)"
+    fi
+  else
+    echo "⚠️  WARNING: Could not determine Docker memory allocation. Proceeding..." >&2
+  fi
 fi
 
 # Get last env file for auth/creds (bash 3.2 compatible)
@@ -649,16 +649,35 @@ fi
 last_env_index=$(( ${#ENV_FILES_FOR_AUTH[@]} - 1 ))
 last_env="${ENV_FILES_FOR_AUTH[$last_env_index]}"
 
-# Read Docker creds from last env file (sensitive)
-DOCKER_REGISTRY=$(read_env_value "$last_env" "DOCKER_REGISTRY")
-DOCKER_USERNAME=$(read_env_value "$last_env" "DOCKER_USERNAME")
-DOCKER_PAT=$(read_env_value "$last_env" "DOCKER_PAT")
-DOCKER_REGISTRY=${DOCKER_REGISTRY:-docker.io}
+echo "Reading Docker credentials from: $last_env"
 
-if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PAT" ]; then
-  echo "DOCKER_USERNAME and DOCKER_PAT must be set in the last env file ($last_env)" >&2
-  echo "Current file contents:" >&2
-  head -5 "$last_env" >&2 || echo "File not readable" >&2
+# Hardcoded Docker registry credentials
+DOCKER_REGISTRY="docker.io"
+DOCKER_USERNAME="quicklookup"
+
+# Read Docker PAT from last env file (sensitive)
+DOCKER_PAT=$(read_env_value "$last_env" "DOCKER_PAT")
+
+# Mask sensitive values for display
+if [ -n "$DOCKER_PAT" ]; then
+  DOCKER_PAT_LAST4="${DOCKER_PAT: -4}"
+  DOCKER_PAT_DISPLAY="***${DOCKER_PAT_LAST4}"
+else
+  DOCKER_PAT_DISPLAY="(not found)"
+fi
+
+echo "   DOCKER_REGISTRY: docker.io"
+echo "   DOCKER_USERNAME: quicklookup"
+echo "   DOCKER_PAT: $DOCKER_PAT_DISPLAY"
+
+if [ -z "$DOCKER_PAT" ]; then
+  echo "" >&2
+  echo "ERROR: Missing Docker PAT in $last_env" >&2
+  echo "" >&2
+  echo "Please check that your .env.sensitive file contains:" >&2
+  echo '   DOCKER_PAT="dckr_pat_..."' >&2
+  echo "" >&2
+  echo "File location: $last_env" >&2
   exit 1
 fi
 
@@ -700,7 +719,7 @@ COMPOSE_ARGS=()
 for env_file in "${ENV_FILES_ABS[@]}"; do
   COMPOSE_ARGS+=("--env-file" "$env_file")
 done
-COMPOSE_ARGS+=("-f" "docker-compose.mimir.onprem.yml" "up" "-d")
+COMPOSE_ARGS+=("-f" "docker-compose.yml" "up" "-d")
 
 pushd "$STACK_TARGET" >/dev/null
 
@@ -714,11 +733,11 @@ done
 popd >/dev/null
 
 echo
-echo "🎉 Installation complete!"
+echo "🎉 SUCCESS: Installation complete!"
 echo
 
 # Post-install health check
-echo "⏳ Waiting for services to start (this may take 5-10 minutes for AI model downloads)..."
+echo "⏳ WAIT: Waiting for services to start (this may take 5-10 minutes for AI model downloads)..."
 sleep 30
 
 pushd "$STACK_TARGET" >/dev/null
@@ -740,14 +759,14 @@ done < <("${COMPOSE_BIN[@]}" ps 2>/dev/null || true)
 
 echo
 if [ "$healthy" -gt 0 ]; then
-  echo "✅ $healthy services healthy"
+  echo "✅ SUCCESS: $healthy services healthy"
 fi
 if [ "$starting" -gt 0 ]; then
-  echo "⏳ $starting services still starting (check again in a few minutes)"
+  echo "⏳ WAIT: $starting services still starting (check again in a few minutes)"
 fi
 if [ "$unhealthy" -gt 0 ]; then
-  echo "⚠️  $unhealthy services unhealthy"
-  echo "   Check logs: docker compose logs -f"
+  echo "⚠️  WARNING: $unhealthy services unhealthy"
+  echo "   Check logs: cd $STACK_TARGET && docker compose logs -f"
 fi
 
 popd >/dev/null
@@ -758,4 +777,4 @@ echo "📊 Check status: docker compose ps"
 echo "📝 View logs: docker compose logs -f [service-name]"
 echo "📂 Working directory: $STACK_TARGET"
 echo
-echo "⚠️  Note: First startup may take 5-10 minutes as AI models download (~10GB)"
+echo "⚠️  Note: First startup may take 5-10 minutes as AI models download (approximately 10GB)"
