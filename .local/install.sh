@@ -142,6 +142,7 @@ prompt_secret() {
     elif [ "$is_required" = "true" ]; then
       echo "   ❌ This field is required. Please enter a value."
       prompt_secret "$var_name" "$description" "$default_value" "$is_required"
+      # PROMPT_VALUE is already set by the recursive call, just return
       return
     fi
   fi
