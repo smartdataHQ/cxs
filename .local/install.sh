@@ -199,8 +199,8 @@ process_step_prompts() {
 
   echo "Step $step_num/7: $step_name"
 
-  # Track special values for dependency handling
-  declare -A STEP_VALUES
+  # Track special values for dependency handling (Bash 3.2 compatible)
+  # Use eval with prefixed variable names instead of associative arrays
 
   for prompt_data in "${prompts[@]}"; do
     IFS='|' read -r var required type desc default depends <<< "$prompt_data"
@@ -211,8 +211,9 @@ process_step_prompts() {
 
       case "$dep_condition" in
         not-empty)
-          # Skip if dependency variable is empty
-          if [ -z "${STEP_VALUES[$dep_var]}" ]; then
+          # Skip if dependency variable is empty (Bash 3.2 compatible)
+          eval "local dep_value=\${STEPVAL_${dep_var}:-}"
+          if [ -z "$dep_value" ]; then
             continue
           fi
           ;;
@@ -230,17 +231,17 @@ process_step_prompts() {
       auto-generate-44) default="AUTO_GENERATE:32" ;;
     esac
 
-    # Handle variable substitution in defaults
+    # Handle variable substitution in defaults (Bash 3.2 compatible)
     if [[ "$default" =~ ^\$\{([A-Z_]+)\}$ ]]; then
       local ref_var="${BASH_REMATCH[1]}"
-      default="${STEP_VALUES[$ref_var]:-}"
+      eval "default=\${STEPVAL_${ref_var}:-}"
     fi
 
     # Prompt using existing function
     prompt_secret "$var" "$desc" "$default" "$required"
 
-    # Store value for potential reference by other vars
-    STEP_VALUES["$var"]="$PROMPT_VALUE"
+    # Store value for potential reference by other vars (Bash 3.2 compatible)
+    eval "STEPVAL_${var}=\"\$PROMPT_VALUE\""
 
     # Write to file if value provided
     if [ -n "$PROMPT_VALUE" ]; then
