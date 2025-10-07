@@ -134,7 +134,7 @@ prompt_secret() {
   fi
   
   printf "   Enter value: "
-  read -r value
+  read -r value </dev/tty
   
   if [ -z "$value" ]; then
     if [ -n "$default_value" ]; then
