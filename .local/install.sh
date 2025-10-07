@@ -293,7 +293,11 @@ EOF
   local step_prompts=()
 
   # Parse template and group by step
+  # parse_env_template output format: var|step|required|type|desc|default|depends
   while IFS='|' read -r var step required type desc default depends; do
+    # Skip empty lines
+    [ -z "$var" ] && continue
+
     if [ "$step" != "$current_step" ]; then
       # Process previous step if any
       if [ -n "$current_step" ] && [ ${#step_prompts[@]} -gt 0 ]; then
@@ -303,6 +307,7 @@ EOF
       current_step="$step"
     fi
 
+    # Re-pack without step for process_step_prompts (it only needs: var|required|type|desc|default|depends)
     step_prompts+=("$var|$required|$type|$desc|$default|$depends")
   done < <(parse_env_template "$template_file")
 
