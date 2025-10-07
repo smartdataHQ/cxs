@@ -206,8 +206,6 @@ process_step_prompts() {
   for prompt_data in "${prompts[@]}"; do
     IFS='|' read -r var required type desc default depends <<< "$prompt_data"
 
-    echo "DEBUG: Processing var=$var required=$required default='$default'" >&2
-
     # Check dependencies
     if [ -n "$depends" ]; then
       IFS=':' read -r dep_var dep_condition <<< "$depends"
@@ -243,19 +241,12 @@ process_step_prompts() {
     # Prompt using existing function
     prompt_secret "$var" "$desc" "$default" "$required"
 
-    echo "DEBUG: After prompt, PROMPT_VALUE='$PROMPT_VALUE'" >&2
-
     # Store value for potential reference by other vars (Bash 3.2 compatible)
     eval "STEPVAL_${var}=\"\$PROMPT_VALUE\""
 
-    # Write to file if value provided (required fields should always have a value from prompt_secret)
+    # Write to file if value provided
     if [ -n "$PROMPT_VALUE" ]; then
       echo "$var=\"$PROMPT_VALUE\"" >> "$output_file"
-      echo "DEBUG: Wrote $var to file" >&2
-    elif [ "$required" = "true" ]; then
-      echo "ERROR: Required field $var has no value after prompting!" >&2
-    else
-      echo "DEBUG: Skipped optional field $var (empty)" >&2
     fi
   done
 }
@@ -305,8 +296,6 @@ EOF
     all_prompts+=("$var|$step|$required|$type|$desc|$default|$depends")
   done < <(parse_env_template "$template_file")
 
-  echo "DEBUG: Collected ${#all_prompts[@]} total prompts" >&2
-
   # Now group and process them
   local current_step=""
   local step_prompts=()
@@ -314,18 +303,14 @@ EOF
   local i
   for ((i=0; i<${#all_prompts[@]}; i++)); do
     local prompt_line="${all_prompts[$i]}"
-    echo "DEBUG-GROUP: About to parse line: $prompt_line" >&2
 
-    # Parse in a subshell to avoid variable corruption
+    # Parse with unique variable names to avoid corruption
     local parsed_var parsed_step parsed_required parsed_type parsed_desc parsed_default parsed_depends
     IFS='|' read -r parsed_var parsed_step parsed_required parsed_type parsed_desc parsed_default parsed_depends <<< "$prompt_line"
-
-    echo "DEBUG-GROUP: Parsed var=$parsed_var step=$parsed_step" >&2
 
     if [ "$parsed_step" != "$current_step" ]; then
       # Process previous step if any
       if [ -n "$current_step" ] && [ ${#step_prompts[@]} -gt 0 ]; then
-        echo "DEBUG-GROUP: Step changed, processing step $current_step with ${#step_prompts[@]} prompts" >&2
         # Run in subshell to prevent variable corruption
         (
           process_step_prompts "$current_step" "$sensitive_file" "${step_prompts[@]}"
@@ -337,7 +322,6 @@ EOF
 
     # Re-pack without step for process_step_prompts
     step_prompts+=("$parsed_var|$parsed_required|$parsed_type|$parsed_desc|$parsed_default|$parsed_depends")
-    echo "DEBUG-GROUP: Added $parsed_var to step $current_step" >&2
   done
 
   # Process final step
