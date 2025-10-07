@@ -1,0 +1,134 @@
+# ZooKeeper configuration matching current production deployment
+# Bitnami ZooKeeper Helm Chart 13.0.1
+
+# Image configuration
+image:
+  registry: docker.io
+  repository: bitnami/zookeeper
+  tag: 3.9.2-debian-12-r0
+  pullPolicy: IfNotPresent
+
+# Cluster configuration
+replicaCount: 3
+
+# ZooKeeper configuration parameters
+tickTime: 2000
+initLimit: 10
+syncLimit: 5
+preAllocSize: 65536
+snapCount: 100000
+maxClientCnxns: 60
+maxSessionTimeout: 40000
+heapSize: 1024
+fourlwCommandsWhitelist: "srvr, mntr, ruok"
+minServerId: 1
+listenOnAllIPs: false
+
+# Autopurge configuration
+autopurge:
+  snapRetainCount: 10
+  purgeInterval: 1
+
+# Logging
+logLevel: ERROR
+
+# Authentication (disabled)
+auth:
+  client:
+    enabled: false
+  quorum:
+    enabled: false
+
+# Pod management
+podManagementPolicy: Parallel
+
+# Resource configuration
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+    ephemeral-storage: 50Mi
+  limits:
+    cpu: 375m
+    memory: 384Mi
+    ephemeral-storage: 1Gi
+
+# Security Context
+podSecurityContext:
+  enabled: true
+  fsGroupChangePolicy: Always
+  fsGroup: 1001
+
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  runAsNonRoot: true
+  privileged: false
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop: ["ALL"]
+  seccompProfile:
+    type: "RuntimeDefault"
+
+# Service Account
+serviceAccount:
+  create: true
+  automountServiceAccountToken: false
+
+# Persistence
+persistence:
+  enabled: true
+  size: 8Gi
+  accessModes:
+    - ReadWriteOnce
+
+# Anti-affinity for high availability
+podAntiAffinityPreset: soft
+
+# Network Policy
+networkPolicy:
+  enabled: true
+  allowExternal: true
+  allowExternalEgress: true
+
+# Service configuration
+service:
+  type: ClusterIP
+  ports:
+    client: 2181
+    follower: 2888
+    election: 3888
+  headless:
+    publishNotReadyAddresses: true
+
+# Probes configuration
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+  probeCommandTimeout: 2
+
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+  probeCommandTimeout: 2
+
+# Disable metrics (not currently enabled)
+metrics:
+  enabled: false
+
+# TLS disabled
+tls:
+  client:
+    enabled: false
+  quorum:
+    enabled: false
