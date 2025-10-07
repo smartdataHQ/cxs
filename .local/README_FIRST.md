@@ -22,6 +22,7 @@
    - **For optional items**: Press Enter to skip (Azure, SFTP, SSO, etc.).
    - Takes 2-3 minutes with helpful descriptions, auto-generation, and format validation.
    - **New**: Configuration is now driven by `.env.example.sensitive` template with structured metadata for easier maintenance.
+   - **Pro tip**: Create a `.env` file in your current directory with values you want to use as defaults, or use `--defaults my.env` to specify a custom file.
 
 3. **Access**:
    - **UI**: http://localhost (or https://localhost if TLS enabled) - MimIR chat interface

@@ -16,6 +16,7 @@ Fetch the .local stack from GitHub and run docker compose.
 Options:
   -t, --target <dir>     Target directory for the stack (default: mimir-onprem)
   -e, --env-file <file1,file2,...>  Comma-separated paths to environment files (non-sensitive first, sensitive last; overrides apply in order)
+  -d, --defaults <file>  Use values from this .env file as defaults during prompts
       --no-up            Download only; do not run docker compose up
       --no-interactive   Skip interactive secret prompts (use existing files)
       --skip-docker-check Skip Docker daemon and functionality checks
@@ -114,7 +115,21 @@ prompt_secret() {
   local default_value="$3"
   local is_required="$4"
   local value=""
-  
+
+  # Check if there's a user-provided default from .env file
+  local user_default=""
+  if [ -n "$USER_DEFAULTS_FILE" ] && [ -f "$USER_DEFAULTS_FILE" ]; then
+    user_default=$(read_env_value "$USER_DEFAULTS_FILE" "$var_name")
+  fi
+
+  # Use user default if available and no template default exists
+  if [ -n "$user_default" ] && [ -z "$default_value" ]; then
+    default_value="$user_default"
+  elif [ -n "$user_default" ] && [[ "$default_value" == "AUTO_GENERATE"* ]]; then
+    # Prefer user default over auto-generation
+    default_value="$user_default"
+  fi
+
   echo
   echo "📋 $var_name: $description"
   if [ -n "$default_value" ]; then
@@ -123,6 +138,8 @@ prompt_secret() {
       gen_length="${gen_length:-16}"
       default_value=$(generate_random "$gen_length")
       echo "   Auto-generated: $default_value"
+    elif [ -n "$user_default" ]; then
+      echo "   From .env file: $default_value"
     fi
     echo "   Default: $default_value"
   fi
@@ -424,6 +441,18 @@ CLI_GITHUB_REF=""
 ENV_FILES_ABS=()
 ENV_FILES_FOR_AUTH=()
 
+# Save original working directory before any cd operations
+ORIGINAL_PWD="$(pwd)"
+USER_DEFAULTS_FILE=""
+
+# Check for .env file in the original working directory
+if [ -f "$ORIGINAL_PWD/.env" ]; then
+  USER_DEFAULTS_FILE="$ORIGINAL_PWD/.env"
+  echo "📂 Found .env file in current directory: $USER_DEFAULTS_FILE"
+  echo "   Will use values from this file as defaults during setup."
+  echo
+fi
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -t|--target)
@@ -434,6 +463,17 @@ while [[ $# -gt 0 ]]; do
     -e|--env-file)
       [[ $# -lt 2 ]] && { echo "Missing value for $1" >&2; exit 1; }
       ENV_FILES_INPUT="$2"
+      shift 2
+      ;;
+    -d|--defaults)
+      [[ $# -lt 2 ]] && { echo "Missing value for $1" >&2; exit 1; }
+      USER_DEFAULTS_FILE="$(resolve_abs_path "$2")"
+      if [ ! -f "$USER_DEFAULTS_FILE" ]; then
+        echo "ERROR: Defaults file not found: $2" >&2
+        exit 1
+      fi
+      echo "📂 Using defaults from: $USER_DEFAULTS_FILE"
+      echo
       shift 2
       ;;
     --no-up)
