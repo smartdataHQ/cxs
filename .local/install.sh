@@ -816,6 +816,24 @@ echo "Using env files:"
 for env_file in "${ENV_FILES_ABS[@]}"; do
   echo "  - $env_file"
 done
+
+# Start embeddings service first
+echo "Starting embeddings service first..."
+"${COMPOSE_BIN[@]}" "${COMPOSE_ARGS[@]:0:${#COMPOSE_ARGS[@]}-1}" "up" "-d" "cxs-embeddings"
+
+echo "Waiting for embeddings service to be healthy..."
+while true; do
+    health_status=$("${COMPOSE_BIN[@]}" ps cxs-embeddings | grep -o "(healthy)" || true)
+    if [ "$health_status" = "(healthy)" ]; then
+        echo "Embeddings service is healthy!"
+        break
+    fi
+    echo "Waiting... (current status: $health_status)"
+    sleep 10
+done
+
+echo "Starting remaining services..."
+
 "${COMPOSE_BIN[@]}" "${COMPOSE_ARGS[@]}"
 
 popd >/dev/null

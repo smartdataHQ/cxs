@@ -97,7 +97,8 @@ services:
     # NOTE: First startup downloads ~4GB Qwen3 embedding model, can take 5-15 minutes depending on connection
     image: quicklookup/cxs-embeddings:6c803ee
     platform: linux/amd64
-    restart: unless-stopped
+    restart: unless-stopped  # Back to original to prevent rapid restarts
+    stop_grace_period: 300s  # Give it 5 minutes to shut down gracefully
     ports:
       - "8082:8082"
     environment:
@@ -121,18 +122,30 @@ services:
       PYTHONPATH: ${PYTHONPATH:-/app}
       PYTHONDONTWRITEBYTECODE: ${PYTHONDONTWRITEBYTECODE:-1}
       PYTHONUNBUFFERED: ${PYTHONUNBUFFERED:-1}
+      # Additional settings to help with model loading
+      TRANSFORMERS_OFFLINE: "0"
+      OMP_NUM_THREADS: "4"
     volumes:
       - hf-cache:/tmp/hf_cache  # IMPORTANT: Persists downloaded models between restarts
       - torch-cache:/tmp/torch_cache
     networks:
       - app
     logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          cpus: '8.0'   # Much higher CPU limit for embeddings (10 CPUs available)
+          memory: 24G   # Higher memory limit just for embeddings (4B parameter model)
+        reservations:
+          cpus: '4.0'   # Reserve more CPUs
+          memory: 12G
+    # Not using default limits (*default-limits) to avoid inheriting lower limits
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8082/health')\" || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 10  # Increased retries for model download
-      start_period: 600s  # 10 minutes for initial model download
+      interval: 300s   # Check every 5 minutes
+      timeout: 180s    # 3 minute timeout
+      retries: 3
+      start_period: 1800s  # 30 minute start period
 
   cxsservices:
     image: quicklookup/cxs-services:5b35fd2
