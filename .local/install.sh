@@ -206,6 +206,8 @@ process_step_prompts() {
   for prompt_data in "${prompts[@]}"; do
     IFS='|' read -r var required type desc default depends <<< "$prompt_data"
 
+    echo "DEBUG: Processing var=$var required=$required default='$default'" >&2
+
     # Check dependencies
     if [ -n "$depends" ]; then
       IFS=':' read -r dep_var dep_condition <<< "$depends"
@@ -241,12 +243,19 @@ process_step_prompts() {
     # Prompt using existing function
     prompt_secret "$var" "$desc" "$default" "$required"
 
+    echo "DEBUG: After prompt, PROMPT_VALUE='$PROMPT_VALUE'" >&2
+
     # Store value for potential reference by other vars (Bash 3.2 compatible)
     eval "STEPVAL_${var}=\"\$PROMPT_VALUE\""
 
-    # Write to file if value provided
+    # Write to file if value provided (required fields should always have a value from prompt_secret)
     if [ -n "$PROMPT_VALUE" ]; then
       echo "$var=\"$PROMPT_VALUE\"" >> "$output_file"
+      echo "DEBUG: Wrote $var to file" >&2
+    elif [ "$required" = "true" ]; then
+      echo "ERROR: Required field $var has no value after prompting!" >&2
+    else
+      echo "DEBUG: Skipped optional field $var (empty)" >&2
     fi
   done
 }
