@@ -2,7 +2,7 @@ namespace: solutions
 
 images:
   - name: quicklookup/mimir-chat
-    newTag: f829d85
+    newTag: 94821a7
 
 resources:
   - ../../base
