@@ -1,4 +1,4 @@
-namespace: pipelines
+namespace: ingestion
 helm:
   repo: "https://airflow.apache.org"
   releaseName: "apache-airflow"
