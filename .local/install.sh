@@ -910,7 +910,9 @@ for env_file in "${ENV_FILES_ABS[@]}"; do
   fi
 done
 
-echo "🌐 Access your MimIR setup at: $PUBLIC_URL"
+# Make URL clickable using OSC 8 hyperlink (works in modern terminals)
+# Format: ESC]8;;URL\aText\ESC]8;;\a
+echo -e "🌐 Access your MimIR setup at: \e]8;;${PUBLIC_URL}\a${PUBLIC_URL}\e]8;;\a"
 echo "📊 Check status: docker compose ps"
 echo "📝 View logs: docker compose logs -f [service-name]"
 echo "📂 Working directory: $STACK_TARGET"

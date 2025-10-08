@@ -1017,7 +1017,13 @@ try {
         }
     }
 
-    Write-Host "Access your MimIR setup at: $publicUrl" -ForegroundColor Cyan
+    # Make URL clickable using OSC 8 hyperlink (works in modern terminals like Windows Terminal)
+    # Format: ESC]8;;URL\aText\ESC]8;;\a
+    $esc = [char]27
+    $bell = [char]7
+    $clickableUrl = "${esc}]8;;${publicUrl}${bell}${publicUrl}${esc}]8;;${bell}"
+    Write-Host "Access your MimIR setup at: " -NoNewline -ForegroundColor Cyan
+    Write-Host $clickableUrl -ForegroundColor Cyan
     Write-Host "Check status: docker compose ps" -ForegroundColor Gray
     Write-Host "View logs: docker compose logs -f [service-name]" -ForegroundColor Gray
     Write-Host "Working directory: $stackTarget" -ForegroundColor Gray
