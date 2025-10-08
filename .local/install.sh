@@ -816,25 +816,47 @@ echo "Using env files:"
 for env_file in "${ENV_FILES_ABS[@]}"; do
   echo "  - $env_file"
 done
-
-# Start embeddings service first
+# Start embeddings service first (it needs time to download models)
 echo "Starting embeddings service first..."
-"${COMPOSE_BIN[@]}" "${COMPOSE_ARGS[@]:0:${#COMPOSE_ARGS[@]}-1}" "up" "-d" "cxs-embeddings"
+pushd "$STACK_TARGET" >/dev/null
 
-echo "Waiting for embeddings service to be healthy..."
-while true; do
-    health_status=$("${COMPOSE_BIN[@]}" ps cxs-embeddings | grep -o "(healthy)" || true)
-    if [ "$health_status" = "(healthy)" ]; then
-        echo "Embeddings service is healthy!"
-        break
+if [ ${#ENV_FILES_ABS[@]} -eq 2 ]; then
+  # Start embeddings first
+  docker compose \
+    --env-file "${ENV_FILES_ABS[0]}" \
+    --env-file "${ENV_FILES_ABS[1]}" \
+    up -d cxs-embeddings
+
+  echo "Waiting for embeddings service to initialize (downloading models if needed)..."
+
+  # Wait for embeddings to be healthy or at least running
+  max_wait=1800  # 30 minutes max wait
+  waited=0
+  while [ $waited -lt $max_wait ]; do
+    health_status=$(docker compose ps cxs-embeddings --format json 2>/dev/null | grep -o '"Status":"[^"]*"' | cut -d'"' -f4 || echo "unknown")
+
+    if [[ "$health_status" == *"healthy"* ]]; then
+      echo "✅ Embeddings service is healthy!"
+      break
+    elif [[ "$health_status" == *"running"* ]]; then
+      echo "⏳ Embeddings service is running, waiting for health check..."
+    else
+      echo "⏳ Embeddings service status: $health_status"
     fi
-    echo "Waiting... (current status: $health_status)"
-    sleep 10
-done
 
-echo "Starting remaining services..."
+    sleep 30
+    waited=$((waited + 30))
+  done
 
-"${COMPOSE_BIN[@]}" "${COMPOSE_ARGS[@]}"
+  echo "Starting all remaining services..."
+  docker compose \
+    --env-file "${ENV_FILES_ABS[0]}" \
+    --env-file "${ENV_FILES_ABS[1]}" \
+    up -d
+else
+  # Fallback to original method for non-standard setups
+  "${COMPOSE_BIN[@]}" "${COMPOSE_ARGS[@]}"
+fi
 
 popd >/dev/null
 
