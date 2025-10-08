@@ -900,7 +900,17 @@ fi
 popd >/dev/null
 
 echo
-echo "🌐 Access your MimIR setup at: http://localhost"
+
+# Get the actual PUBLIC_BASE_URL from env files
+PUBLIC_URL="http://localhost"  # Default fallback
+for env_file in "${ENV_FILES_ABS[@]}"; do
+  url_val=$(read_env_value "$env_file" "PUBLIC_BASE_URL")
+  if [ -n "$url_val" ]; then
+    PUBLIC_URL="$url_val"
+  fi
+done
+
+echo "🌐 Access your MimIR setup at: $PUBLIC_URL"
 echo "📊 Check status: docker compose ps"
 echo "📝 View logs: docker compose logs -f [service-name]"
 echo "📂 Working directory: $STACK_TARGET"
