@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: node
-          image: quicklookup/ctx-suite-light:c52d4f5
+          image: quicklookup/ctx-suite-light:fcd5673
           resources:
             requests:
               cpu: 200m
