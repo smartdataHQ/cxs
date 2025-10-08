@@ -895,7 +895,57 @@ try {
 
     Push-Location $stackTarget
     try {
-        Write-Host 'Running docker compose up...'
+        # Start embeddings service first (it needs time to download models)
+        Write-Host 'Starting embeddings service first...'
+
+        # Build args for embeddings only
+        $embeddingsArgs = @()
+        foreach ($env in $envFilesResolved) {
+            $embeddingsArgs += '--env-file', $env
+        }
+        $embeddingsArgs += '-f', 'docker-compose.yml', 'up', '-d', 'cxs-embeddings'
+
+        if ($useComposePlugin) {
+            docker compose @embeddingsArgs
+        } else {
+            docker-compose @embeddingsArgs
+        }
+
+        Write-Host 'Waiting for embeddings service to initialize (downloading models if needed)...'
+
+        # Wait for embeddings to be healthy or at least running
+        $maxWait = 1800  # 30 minutes max wait
+        $waited = 0
+        while ($waited -lt $maxWait) {
+            $statusArgs = @()
+            foreach ($env in $envFilesResolved) {
+                $statusArgs += '--env-file', $env
+            }
+            $statusArgs += 'ps', 'cxs-embeddings', '--format', 'json'
+
+            if ($useComposePlugin) {
+                $statusOutput = docker compose @statusArgs 2>$null | ConvertFrom-Json
+            } else {
+                $statusOutput = docker-compose @statusArgs 2>$null | ConvertFrom-Json
+            }
+
+            if ($statusOutput -and $statusOutput.State) {
+                $status = $statusOutput.State
+                if ($status -like '*healthy*') {
+                    Write-Host 'SUCCESS: Embeddings service is healthy!' -ForegroundColor Green
+                    break
+                } elseif ($status -like '*running*') {
+                    Write-Host 'WAIT: Embeddings service is running, waiting for health check...' -ForegroundColor Yellow
+                } else {
+                    Write-Host "WAIT: Embeddings service status: $status" -ForegroundColor Yellow
+                }
+            }
+
+            Start-Sleep -Seconds 30
+            $waited += 30
+        }
+
+        Write-Host 'Starting all remaining services...'
         if ($useComposePlugin) {
             docker compose @composeArgs
         } else {
@@ -957,7 +1007,17 @@ try {
     }
 
     Write-Host ''
-    Write-Host 'Access your MimIR setup at: http://localhost' -ForegroundColor Cyan
+
+    # Get the actual PUBLIC_BASE_URL from env files
+    $publicUrl = "http://localhost"  # Default fallback
+    foreach ($envFile in $envFilesResolved) {
+        $urlVal = Get-EnvValue -File $envFile -Key "PUBLIC_BASE_URL"
+        if ($urlVal) {
+            $publicUrl = $urlVal
+        }
+    }
+
+    Write-Host "Access your MimIR setup at: $publicUrl" -ForegroundColor Cyan
     Write-Host "Check status: docker compose ps" -ForegroundColor Gray
     Write-Host "View logs: docker compose logs -f [service-name]" -ForegroundColor Gray
     Write-Host "Working directory: $stackTarget" -ForegroundColor Gray
