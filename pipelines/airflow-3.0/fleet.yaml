@@ -1,0 +1,11 @@
+namespace: pipelines
+helm:
+  repo: "https://airflow.apache.org"
+  releaseName: "apache-airflow"
+  chart: "airflow"  
+  version: "1.18.0"
+  disablePreProcess: true
+  force: false
+  timeoutSeconds: 0
+  valuesFiles:
+    - values.yaml
