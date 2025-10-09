@@ -33,7 +33,7 @@ helmCharts:
         kafka:
           enabled: true
           image:
-            repository: bitnamilegacy/kafka-exporter
+            repository: bitnamilegacy/kafka-exporter-archived
         jmx:
           enabled: true
           image:
