@@ -4,7 +4,7 @@ Param(
     [switch]$NoUp,
     [switch]$NoInteractive,
     [switch]$SkipDockerCheck,
-    [string]$Defaults,
+    [string]$Defaults = $(if ($PSScriptRoot) { Join-Path -Path $PSScriptRoot -ChildPath '.env' } else { '.env' }),
     [string]$GitRef
 )
 
