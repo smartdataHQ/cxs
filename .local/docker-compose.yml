@@ -18,16 +18,14 @@ x-resource-limits: &default-limits
 
 services:
   clickhouse:
-    image: clickhouse/clickhouse-server:25.8.2.29-alpine
+    image: clickhouse/clickhouse-server:25.9.2.1-alpine
     platform: linux/amd64
     restart: unless-stopped
-    # Ports commented out - only accessible internally via Docker network
-    # Uncomment for external access: ports: ["8123:8123"]
     environment:
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-cst}
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-cst}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
     volumes:
       - clickhouse-data:/var/lib/clickhouse
     networks:
@@ -45,8 +43,6 @@ services:
     image: redis:8.2.1-alpine
     platform: linux/amd64
     restart: unless-stopped
-    # Ports commented out - only accessible internally via Docker network
-    # Uncomment for external access: ports: ["6379:6379"]
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     volumes:
@@ -64,34 +60,27 @@ services:
     <<: *default-limits
 
   cxs-anonymization:
-    image: quicklookup/cxs-anonymization:9174145
+    image: quicklookup/cxs-anonymization:c0ee50d
     platform: linux/amd64
     restart: unless-stopped
     ports:
       - "8081:8081"
     environment:
-      # Server Configuration
-      ANONYMIZATION_HOST: "0.0.0.0"
-      ANONYMIZATION_PORT: "8081"
-      # Service Configuration
-      WORKERS: ${ANONYMIZATION_WORKERS:-1}
-      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENV: ${ENVIRONMENT:-onprem}
       DEBUG: ${ANONYMIZATION_DEBUG:-false}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ANONYMIZATION_HOST: ${ANONYMIZATION_HOST:-0.0.0.0}
+      ANONYMIZATION_PORT: ${ANONYMIZATION_PORT:-8081}
+      WORKERS: ${ANONYMIZATION_WORKERS:-1}
       RELOAD: ${ANONYMIZATION_RELOAD:-false}
-      # Performance Settings
       PYTORCH_NUM_THREADS: ${PYTORCH_NUM_THREADS:-8}
       MAX_NER_TEXT_LENGTH: ${MAX_NER_TEXT_LENGTH:-512}
-      # Model Configuration
       GLINER_MODEL_PATH: ${GLINER_MODEL_PATH:-ai_models/ner_transformer}
-      # Health Check Configuration
       HEALTH_CHECK_TIMEOUT: ${HEALTH_CHECK_TIMEOUT:-30}
-      # Python Path and Environment
-      PYTHONPATH: "/app"
-      HF_HOME: "/tmp/hf_cache"
-      # Python security
-      PYTHONDONTWRITEBYTECODE: "1"
-      PYTHONUNBUFFERED: "1"
-      ENV: ${ENVIRONMENT:-onprem}
+      HF_HOME: ${HF_HOME:-/tmp/hf_cache}
+      PYTHONPATH: ${PYTHONPATH:-/app}
+      PYTHONDONTWRITEBYTECODE: ${PYTHONDONTWRITEBYTECODE:-1}
+      PYTHONUNBUFFERED: ${PYTHONUNBUFFERED:-1}
     volumes:
       - hf-cache:/tmp/hf_cache
     networks:
@@ -103,70 +92,66 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s  # Allow model loading
-    deploy:
-      resources:
-        limits:
-          cpus: '4.0'  # Higher for AI processing (from K8s: 16000m limit)
-          memory: 8G   # From K8s: 8000Mi limit
-        reservations:
-          cpus: '2.0'  # From K8s: 8000m requests
-          memory: 4G   # From K8s: 4000Mi requests
 
   cxs-embeddings:
-    image: quicklookup/cxs-embeddings:5b35fd2
+    # NOTE: First startup downloads ~4GB Qwen3 embedding model, can take 5-15 minutes depending on connection
+    image: quicklookup/cxs-embeddings:c0ee50d
     platform: linux/amd64
-    restart: unless-stopped
+    restart: unless-stopped  # Back to original to prevent rapid restarts
+    stop_grace_period: 300s  # Give it 5 minutes to shut down gracefully
     ports:
       - "8082:8082"
     environment:
       # Service Configuration
-      EMBEDDINGS_HOST: "0.0.0.0"
-      EMBEDDINGS_PORT: "8082"
+      ENV: ${ENVIRONMENT:-onprem}
+      EMBEDDINGS_HOST: ${EMBEDDINGS_HOST:-0.0.0.0}
+      EMBEDDINGS_PORT: ${EMBEDDINGS_PORT:-8082}
       WORKERS: ${EMBEDDINGS_WORKERS:-1}
       RELOAD: ${EMBEDDINGS_RELOAD:-false}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       DEBUG: ${EMBEDDINGS_DEBUG:-false}
-      # Logging Configuration
       LOG_INPUT_TEXT: ${EMBEDDINGS_LOG_INPUT_TEXT:-false}
-      # PyTorch Configuration
       PYTORCH_NUM_THREADS: ${PYTORCH_NUM_THREADS:-8}
-      # Model Configuration (Default: Qwen3-0.6B)
-      EMBEDDINGS_MODEL: ${EMBEDDINGS_MODEL:-Qwen/Qwen3-Embedding-0.6B}
+      EMBEDDINGS_MODEL: ${EMBEDDINGS_MODEL:-Qwen/Qwen3-Embedding-4B}
       EMBEDDINGS_MODEL_TYPE: ${EMBEDDINGS_MODEL_TYPE:-transformers}
       EMBEDDINGS_QUERY_PREFIX: ${EMBEDDINGS_QUERY_PREFIX:-Represent this query for retrieving relevant documents:}
-      # Cache Directories
-      HF_HOME: "/tmp/hf_cache"
-      TORCH_HOME: "/tmp/torch_cache"
+      # Cache Directories (models persist here)
+      HF_HOME: ${HF_HOME:-/tmp/hf_cache}
+      TORCH_HOME: ${TORCH_HOME:-/tmp/torch_cache}
       # Python Environment
-      PYTHONPATH: "/app"
-      PYTHONDONTWRITEBYTECODE: "1"
-      PYTHONUNBUFFERED: "1"
-      ENV: ${ENVIRONMENT:-onprem}
+      PYTHONPATH: ${PYTHONPATH:-/app}
+      PYTHONDONTWRITEBYTECODE: ${PYTHONDONTWRITEBYTECODE:-1}
+      PYTHONUNBUFFERED: ${PYTHONUNBUFFERED:-1}
+      # Additional settings to help with model loading
+      TRANSFORMERS_OFFLINE: "0"
+      OMP_NUM_THREADS: "4"
     volumes:
-      - hf-cache:/tmp/hf_cache
+      - hf-cache:/tmp/hf_cache  # IMPORTANT: Persists downloaded models between restarts
       - torch-cache:/tmp/torch_cache
     networks:
       - app
     logging: *default-logging
-    healthcheck:
-      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8082/health')\" || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s  # Allow model loading
     deploy:
       resources:
         limits:
-          cpus: '4.0'  # Higher for AI processing (from K8s: 16000m limit)
-          memory: 12G  # From K8s: 12000Mi limit
+          cpus: '8.0'   # Much higher CPU limit for embeddings (10 CPUs available)
+          memory: 24G   # Higher memory limit just for embeddings (4B parameter model)
         reservations:
-          cpus: '2.0'  # From K8s: 8000m requests
-          memory: 6G   # From K8s: 6000Mi requests
+          cpus: '4.0'   # Reserve more CPUs
+          memory: 12G
+    # Not using default limits (*default-limits) to avoid inheriting lower limits
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8082/health')\" || exit 1"]
+      interval: 300s   # Check every 5 minutes
+      timeout: 180s    # 3 minute timeout
+      retries: 3
+      start_period: 1800s  # 30 minute start period
 
   cxsservices:
-    image: quicklookup/cxs-services:5b35fd2
+    image: quicklookup/cxs-services:3a9bc08
     platform: linux/amd64
     restart: unless-stopped
+    command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088", "--workers", "2"]
     depends_on:
       clickhouse:
         condition: service_healthy
@@ -185,29 +170,30 @@ services:
       DEVELOPER: ${DEVELOPER:-onprem@localhost}
       SERVER_VERSION: "0.1.0"
       # Database Configuration
-      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST:-clickhouse}
       CLICKHOUSE_PORT: ${CLICKHOUSE_PORT:-8123}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD}
-      REDIS_HOST: redis
+      REDIS_HOST: ${REDIS_HOST:-redis}
       REDIS_PORT: ${REDIS_PORT:-6379}
       REDIS_DB: ${REDIS_DB:-0}
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-      REDIS_USER: ""
-      REDIS_URL: redis
       # AI Services
       ANONYMIZATION_SERVICE_URL: ${ANONYMIZATION_SERVICE_URL:-http://cxs-anonymization:8081}
       EMBEDDINGS_SERVICE_URL: ${EMBEDDINGS_SERVICE_URL:-http://cxs-embeddings:8082}
+      LOCAL_EMBEDDING_SERVICE_URL: ${LOCAL_EMBEDDING_SERVICE_URL:-http://cxs-embeddings:8082}
       # Vector/LLM Configuration
       DEFAULT_VECTOR_PROVIDER: ${DEFAULT_VECTOR_PROVIDER:-Voyage}
       DEFAULT_VECTOR_MODEL: ${DEFAULT_VECTOR_MODEL:-voyage-multilingual-2}
       DEFAULT_VECTOR_API_KEY: ${VOYAGE_API_KEY:-}
+      # OpenAI Setup
       OPENAI_LLM_COMBINED_EXTRACTION_PROMPT: "gpt-4o"
       OPENAI_LLM_MAKE_DREAM_TOUR: "gpt_3_5_turbo"
-      # API Keys
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # API Keys
       VOYAGE_API_KEY: ${VOYAGE_API_KEY:-}
       UNSTRUCTURED_API_KEY: ${UNSTRUCTURED_API_KEY}
+      UNSTRUCTURED_API_URL: ${UNSTRUCTURED_API_URL:-https://api.unstructuredapp.io}
       FIRECRAWL_API_KEY: ${FIRECRAWL_API_KEY:-}
       # Security
       SECRET_KEY: ${SECRET_KEY}
@@ -216,7 +202,6 @@ services:
       ALGORITHM: ${ALGORITHM:-HS256}
       ACCESS_TOKEN_EXPIRE_MINUTES: "525600"
       # File Processing
-      UNSTRUCTURED_API_URL: ${UNSTRUCTURED_API_URL:-https://api.unstructuredapp.io}
       LOCAL_FILE_INPUT_DIR: "/tmp/input"
       LOCAL_FILE_OUTPUT_DIR: "/tmp/output"
       SCRAPER_TEMP_DIR: "/tmp"
@@ -241,14 +226,12 @@ services:
     <<: *default-limits
 
   mimir-server:
-    image: quicklookup/cxs-mimir-api:5b35fd2
+    image: quicklookup/cxs-mimir-api:cf907a7
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
     depends_on:
-      redis:
-        condition: service_healthy
-      clickhouse:
+      cxsservices:
         condition: service_healthy
       cxs-anonymization:
         condition: service_healthy
@@ -257,7 +240,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      ENV: ${ENVIRONMENT:-prod}
+      ENV: ${ENVIRONMENT:-onprem}
       NO_SSO: ${NO_SSO:-false}
       NO_OBSERVABILITY: ${NO_OBSERVABILITY:-false}
       # Data services
@@ -272,23 +255,19 @@ services:
       EVENTS_ENDPOINT: ${INBOX_EVENTS_ENDPOINT:-https://inbox.contextsuite.com/api/s/s2s/track}
       # Public base URL (external hostname for UI/API)
       BACKEND_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      SKIP_IMAGE_ANONYMIZATION: ${SKIP_IMAGE_ANONYMIZATION:-true}
       # LLM providers (customer-configured)
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
       AZURE_OPENAI_API_BASE: ${AZURE_OPENAI_API_BASE:-}
       AZURE_OPENAI_API_VERSION: ${AZURE_OPENAI_API_VERSION:-}
       AZURE_OPENAI_API_TYPE: ${AZURE_OPENAI_API_TYPE:-azure}
+      ON_PREM_IDENTIFIER: ${BOT_IDENTIFIER:-varzity.ai}
       # Other secrets/integrations (optional)
-      CONTEXT_SUITE_JWT_SECRET_KEY: ${CONTEXT_SUITE_JWT_SECRET_KEY:-context-suite-f31a2a5f86f6cbc6a828110da9a4807d}
-      VOYAGE_API_KEY: ${VOYAGE_API_KEY:-}
+      ON_PREM_SSP_TOKEN: ${ON_PREM_SSP_TOKEN:-context-suite-f31a2a5f86f6cbc6a828110da9a4807d}
       UNSTRUCTURED_API_KEY: ${UNSTRUCTURED_API_KEY}
-      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
-      TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
-      SFTP_USERNAME: ${SFTP_USERNAME:-}
-      SFTP_PASSWORD: ${SFTP_PASSWORD:-}
-      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
-      HF_TOKEN: ${HF_TOKEN:-}
       UNSTRUCTURED_API_URL: ${UNSTRUCTURED_API_URL:-https://api.unstructuredapp.io}
+      TOKEN_SECRET_KEY: ${TOKEN_SECRET_KEY}
       # Internal services
       SERVICES_BACKEND_URL: ${SERVICES_BACKEND_URL:-http://cxsservices:8088}
       ANONYMIZATION_SERVICE_URL: ${ANONYMIZATION_SERVICE_URL:-http://cxs-anonymization:8081}
@@ -317,7 +296,7 @@ services:
           memory: 1G
 
   mimir-ui:
-    image: quicklookup/mimir-chat:5a6d071
+    image: quicklookup/mimir-chat:f7502da
     platform: linux/amd64
     restart: unless-stopped
     depends_on:
@@ -327,20 +306,22 @@ services:
       - "3000:3000"
     command: ["npm", "run", "start"]
     environment:
-      AUTH_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
-      BROWSER_APP_API: ${PUBLIC_BASE_URL:-http://localhost:3000}
-      BROWSER_CHAT_API: ${PUBLIC_BASE_URL:-http://localhost:8000}
-      BROWSER_CHAT_WSS_API: ${PUBLIC_BASE_URL:-ws://localhost:8000}
-      MIMIR_SERVER_API: http://mimir-server:8000
+      AUTH_URL: ${MIMIR_URL:-http://localhost:3000}
+      BROWSER_APP_API: ${MIMIR_APP_API_URL:-http://localhost:3000}
+      BROWSER_CHAT_API: ${MIMIR_CHAT_API_URL:-http://localhost:8000}
+      BROWSER_CHAT_WSS_API: ${MIMIR_CHAT_WS_URL:-ws://localhost:8000}
+      MIMIR_SERVER_API: ${MIMIR_SERVER_INTERNAL_URL:-http://mimir-server:8000}
       CONTEXTSUITE_ADMIN_API: ${NEAREST_CXS_ADMIN_URL:-https://admin.contextsuite.com}
-      BOT_IDENTIFIER: ${BOT_IDENTIFIER:-skattur_agent_dev}
+      BOT_IDENTIFIER: ${BOT_IDENTIFIER:-logreglan-a-hofudborgarsvaedinu-mimir-lhbs}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
       AUTH_TRUST_HOST: true
       AUTH_SECRET: ${CUSTOMER_BASED_SECRET:-SomeSecretStringToReplace}
     networks:
       - app
     logging: *default-logging
     healthcheck:
-      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\" || exit 1"]
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:3000/api/status/ready', (r) => process.exit(r.statusCode === 200 ? 0 : 1))\" || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

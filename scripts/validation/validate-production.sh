@@ -486,15 +486,195 @@ validate_app() {
                 fi
             fi
         else
-            # Other error (connection, permissions, etc.)
-            log_error "$app_name: VALIDATION ERROR (exit code: $exit_code)"
-            ((ERRORS++))
-            
-            if [[ "$VERBOSE" == "true" ]]; then
-                echo "--- Error for $app_name ---"
-                cat "$temp_file"
-                echo "--- End error for $app_name ---"
-                echo
+            # Check if this is an immutable fields error (any resource type)
+            if grep -qE "(is invalid.*spec: Forbidden|cannot be changed|field is immutable|immutable field)" "$temp_file"; then
+                # Extract resource type and name from error message
+                local resource_info=$(grep -oE "(StatefulSet|Deployment|Service|Job|DaemonSet|ReplicaSet|PersistentVolume|StorageClass|Ingress) \"[^\"]*\"" "$temp_file" | head -1)
+                local resource_type=$(echo "$resource_info" | cut -d' ' -f1)
+                local resource_name=$(echo "$resource_info" | cut -d'"' -f2)
+                
+                # Fallback if pattern doesn't match
+                if [[ -z "$resource_type" ]]; then
+                    resource_type="Resource"
+                    resource_name="$(basename "$app_path")"
+                fi
+                
+                log_warning "$app_name: IMMUTABLE FIELDS DETECTED ($resource_type)"
+                log_info "$app_name: This typically indicates Helm->GitOps migration with immutable field differences"
+                log_info "$app_name: Attempting to capture detailed diff of $resource_type differences..."
+                
+                # Count as out of sync rather than error for StatefulSet immutable field issues
+                ((OUT_OF_SYNC++))
+                
+                # Try to get a detailed diff of the specific resource causing issues
+                local resource_diff=""
+                local temp_diff_file=$(mktemp)
+                
+                # Function to extract and compare specific resource type
+                extract_resource_diff() {
+                    local res_type="$1"
+                    local res_name="${2:-$(basename "$app_path")}"
+                    local res_namespace="${3:-${target_namespace:-data}}"
+                    
+                    # Save current directory and ensure we're in app directory
+                    local current_dir=$(pwd)
+                    local app_overlay_path="$current_dir/overlays/$OVERLAY_NAME"
+                    
+                    # Create temporary files for this function
+                    local tmp_generated_manifests="/tmp/generated-manifests-$$-$res_type.yaml"
+                    local tmp_generated_clean="/tmp/generated-clean-$$-$res_type.yaml"
+                    local tmp_current_clean="/tmp/current-clean-$$-$res_type.yaml"
+                    local tmp_diff="/tmp/diff-$$-$res_type.txt"
+                    
+                    # Build kustomize command with full path to avoid directory issues
+                    local build_cmd="kubectl kustomize $app_overlay_path --enable-helm"
+                    
+                    
+                    # Build manifests and extract the specific resource
+                    if $build_cmd > "$tmp_generated_manifests" 2>"$tmp_generated_manifests.err"; then
+                        # Extract and clean the generated resource
+                        # First try with name matching, then fallback to just type matching
+                        if yq "select(.kind == \"$res_type\" and .metadata.name == \"$res_name\")" "$tmp_generated_manifests" 2>/dev/null | \
+                           yq 'del(.metadata.annotations, .metadata.resourceVersion, .metadata.generation, .metadata.uid, .metadata.creationTimestamp, .status)' \
+                           > "$tmp_generated_clean" 2>/dev/null && [[ -s "$tmp_generated_clean" ]]; then
+                            : # Found with name match
+                        elif yq "select(.kind == \"$res_type\")" "$tmp_generated_manifests" 2>/dev/null | head -1 | \
+                             yq 'del(.metadata.annotations, .metadata.resourceVersion, .metadata.generation, .metadata.uid, .metadata.creationTimestamp, .status)' \
+                             > "$tmp_generated_clean" 2>/dev/null && [[ -s "$tmp_generated_clean" ]]; then
+                            # Update res_name to the actual name found
+                            res_name=$(yq '.metadata.name' "$tmp_generated_clean" 2>/dev/null)
+                        fi
+                        
+                        if [[ -s "$tmp_generated_clean" ]]; then
+                            # Get and clean the current resource
+                            local resource_type_lower=$(echo "$res_type" | tr '[:upper:]' '[:lower:]')
+                            local kubectl_get_cmd="kubectl get $resource_type_lower $res_name -n $res_namespace -o yaml"
+                            if [[ -n "$KUBE_CONTEXT" ]]; then
+                                kubectl_get_cmd="kubectl --context=$KUBE_CONTEXT get $resource_type_lower $res_name -n $res_namespace -o yaml"
+                            fi
+                            
+                            
+                            if $kubectl_get_cmd 2>"$tmp_current_clean.err" | \
+                               yq 'del(.metadata.annotations, .metadata.resourceVersion, .metadata.generation, .metadata.uid, .metadata.creationTimestamp, .status)' \
+                               > "$tmp_current_clean" 2>/dev/null && [[ -s "$tmp_current_clean" ]]; then
+                                
+                                # Get diff showing the actual field differences
+                                if diff -u "$tmp_current_clean" "$tmp_generated_clean" > "$tmp_diff" 2>/dev/null; then
+                                    echo "No differences found in $res_type spec"
+                                else
+                                    cat "$tmp_diff"
+                                fi
+                            else
+                                echo "Could not retrieve current $res_type for comparison"
+                                if [[ -f "$tmp_current_clean.err" ]]; then
+                                    echo "Kubectl get error was:" >&2
+                                    cat "$tmp_current_clean.err" >&2
+                                fi
+                            fi
+                        else
+                            echo "Could not extract $res_type from generated manifests"
+                        fi
+                    else
+                        echo "Could not generate manifests for comparison"
+                        if [[ -f "$tmp_generated_manifests.err" ]]; then
+                            echo "Error was:" >&2
+                            cat "$tmp_generated_manifests.err" >&2
+                        fi
+                    fi
+                    
+                    # Clean up temporary files
+                    rm -f "$tmp_generated_manifests" "$tmp_generated_clean" "$tmp_current_clean" "$tmp_diff" 2>/dev/null
+                }
+                
+                # Extract diff for the specific resource type
+                resource_diff=$(extract_resource_diff "$resource_type" "$resource_name")
+                
+                # Save the error details if requested
+                if [[ "$SAVE_DIFFS" == "true" ]]; then
+                    local diff_dir="$SCRIPT_DIR/../../$DIFF_OUTPUT_DIR"
+                    local resource_type_lower=$(echo "$resource_type" | tr '[:upper:]' '[:lower:]')
+                    local error_file="$diff_dir/${app_name}.immutable-${resource_type_lower}.error"
+                    
+                    # Ensure diff directory exists
+                    mkdir -p "$diff_dir"
+                    
+                    echo "$resource_type Immutable Fields Error for $app_name" > "$error_file"
+                    echo "=============================================" >> "$error_file"
+                    echo "" >> "$error_file"
+                    echo "This error occurs when trying to update immutable $resource_type fields." >> "$error_file"
+                    echo "Common causes:" >> "$error_file"
+                    
+                    # Resource-specific common causes
+                    case "$resource_type" in
+                        StatefulSet)
+                            echo "  - Migrating from Helm to GitOps with different selectors" >> "$error_file"
+                            echo "  - Changes to serviceName or volumeClaimTemplates" >> "$error_file"
+                            echo "  - Different metadata labels affecting selectors" >> "$error_file"
+                            ;;
+                        Deployment)
+                            echo "  - Migrating from Helm to GitOps with different selectors" >> "$error_file"
+                            echo "  - Changes to selector labels after initial creation" >> "$error_file"
+                            ;;
+                        Service)
+                            echo "  - Changes to clusterIP or service type" >> "$error_file"
+                            echo "  - Modifications to ports or selectors in some cases" >> "$error_file"
+                            ;;
+                        Job)
+                            echo "  - Changes to selector or completions after creation" >> "$error_file"
+                            echo "  - Modifications to parallelism or activeDeadlineSeconds" >> "$error_file"
+                            ;;
+                        *)
+                            echo "  - Migrating from Helm to GitOps with incompatible field changes" >> "$error_file"
+                            echo "  - Attempting to modify fields that cannot be updated after creation" >> "$error_file"
+                            ;;
+                    esac
+                    
+                    echo "" >> "$error_file"
+                    echo "Resolution options:" >> "$error_file"
+                    echo "  1. Review differences below and update manifests to match current $resource_type" >> "$error_file"
+                    echo "  2. Consider recreating $resource_type if changes are necessary" >> "$error_file"
+                    echo "  3. Use server-side apply with --force-conflicts if appropriate" >> "$error_file"
+                    echo "  4. For StatefulSets: Check if ordinal updates or recreation is needed" >> "$error_file"
+                    echo "" >> "$error_file"
+                    echo "$(echo "$resource_type" | tr '[:lower:]' '[:upper:]') FIELD DIFFERENCES:" >> "$error_file"
+                    echo "==============================" >> "$error_file"
+                    echo "$resource_diff" >> "$error_file"
+                    echo "" >> "$error_file"
+                    echo "Original kubectl error output:" >> "$error_file"
+                    echo "==============================" >> "$error_file"
+                    cat "$temp_file" >> "$error_file"
+                    
+                    log_info "$resource_type error details with diff saved to: $error_file"
+                fi
+                
+                # Clean up temp files
+                rm -f "$temp_diff_file" /tmp/generated-manifests.yaml /tmp/generated-clean.yaml /tmp/current-clean.yaml 2>/dev/null
+                
+                if [[ "$VERBOSE" == "true" ]]; then
+                    echo "--- $resource_type field differences for $app_name ---"
+                    echo "$resource_diff"
+                    echo "--- Original kubectl error ---"
+                    cat "$temp_file"
+                    echo "--- End $resource_type error for $app_name ---"
+                    echo
+                fi
+                
+                if [[ "$EXIT_ON_DIFF" == "true" ]]; then
+                    rm -f "$temp_file"
+                    cd - > /dev/null
+                    return 1
+                fi
+            else
+                # Other error (connection, permissions, etc.)
+                log_error "$app_name: VALIDATION ERROR (exit code: $exit_code)"
+                ((ERRORS++))
+                
+                if [[ "$VERBOSE" == "true" ]]; then
+                    echo "--- Error for $app_name ---"
+                    cat "$temp_file"
+                    echo "--- End error for $app_name ---"
+                    echo
+                fi
             fi
         fi
     fi
@@ -599,15 +779,23 @@ main() {
     # Show diff files if any were saved
     if [[ "$SAVE_DIFFS" == "true" && $OUT_OF_SYNC -gt 0 ]]; then
         echo
-        echo "📁 Diff files saved to $DIFF_OUTPUT_DIR/:"
-        for diff_file in "$DIFF_OUTPUT_DIR"/*.diff; do
-            if [[ -f "$diff_file" ]]; then
-                local filename=$(basename "$diff_file")
-                echo "   - $filename"
+        echo "📁 Files saved to $DIFF_OUTPUT_DIR/:"
+        for output_file in "$DIFF_OUTPUT_DIR"/*; do
+            if [[ -f "$output_file" ]]; then
+                local filename=$(basename "$output_file")
+                if [[ "$filename" == *.diff ]]; then
+                    echo "   - $filename (configuration drift)"
+                elif [[ "$filename" == *.immutable-*.error ]]; then
+                    local resource_type=$(echo "$filename" | sed -E 's/.*\.immutable-([^.]+)\.error/\1/' | tr '[:lower:]' '[:upper:]')
+                    echo "   - $filename ($resource_type immutable fields)"
+                else
+                    echo "   - $filename"
+                fi
             fi
         done
         echo
-        echo "💡 Inspect with: delta < $DIFF_OUTPUT_DIR/<app>.diff"
+        echo "💡 Inspect diffs with: delta < $DIFF_OUTPUT_DIR/<app>.diff"
+        echo "💡 Review immutable field issues: cat $DIFF_OUTPUT_DIR/<app>.immutable-<type>.error"
         echo "💡 Or use your preferred diff tool"
     fi
     

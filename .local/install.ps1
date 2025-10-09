@@ -264,13 +264,12 @@ function Process-StepPrompts {
         2 { "Database Passwords" }
         3 { "AI/ML Service Keys" }
         4 { "Application Security Keys" }
-        5 { "Optional API Keys (press Enter to skip)" }
-        6 { "On-Prem Configuration (Required)" }
-        7 { "SFTP Integration (Optional - press Enter to skip)" }
-        8 { "Single Sign-On (Optional - press Enter to skip)" }
+        5 { "On-Prem Configuration (Required)" }
+        6 { "SFTP Integration (Optional - press Enter to skip)" }
+        7 { "Single Sign-On (Optional - press Enter to skip)" }
     }
 
-    Write-Host "Step $StepNum/8: $stepName" -ForegroundColor Blue
+    Write-Host "Step $StepNum/7: $stepName" -ForegroundColor Blue
 
     # Track special values for dependency handling
     $stepValues = @{}
@@ -462,9 +461,6 @@ function Prompt-ForSecrets {
     @"
 
 # Fixed values (do not change)
-DOCKER_REGISTRY="docker.io"
-DOCKER_USERNAME="quicklookup"
-CLICKHOUSE_USER="default"
 REDIS_DB=0
 "@ | Out-File -FilePath $SensitiveFile -Append -Encoding UTF8
 
@@ -839,25 +835,26 @@ try {
 
     Write-Host "Reading Docker credentials from: $envFileForAuth" -ForegroundColor Gray
 
-    $dockerRegistry = Get-EnvValue -File $envFileForAuth -Key 'DOCKER_REGISTRY'
-    if (-not $dockerRegistry) { $dockerRegistry = 'docker.io' }
-    $dockerUsername = Get-EnvValue -File $envFileForAuth -Key 'DOCKER_USERNAME'
+    # Hardcoded Docker registry credentials
+    $dockerRegistry = 'docker.io'
+    $dockerUsername = 'quicklookup'
+
+    # Read Docker PAT from env file
     $dockerPat = Get-EnvValue -File $envFileForAuth -Key 'DOCKER_PAT'
 
-    Write-Host "   DOCKER_REGISTRY: $($dockerRegistry -replace '.', '*')" -ForegroundColor Gray
-    Write-Host "   DOCKER_USERNAME: $(if ($dockerUsername) { $dockerUsername } else { '(not found)' })" -ForegroundColor Gray
+    Write-Host "   DOCKER_REGISTRY: docker.io" -ForegroundColor Gray
+    Write-Host "   DOCKER_USERNAME: quicklookup" -ForegroundColor Gray
     Write-Host "   DOCKER_PAT: $(if ($dockerPat) { '***' + $dockerPat.Substring([Math]::Max(0, $dockerPat.Length - 4)) } else { '(not found)' })" -ForegroundColor Gray
 
-    if (-not $dockerUsername -or -not $dockerPat) {
+    if (-not $dockerPat) {
         Write-Host ""
-        Write-Host "ERROR: Missing Docker credentials in $envFileForAuth" -ForegroundColor Red
+        Write-Host "ERROR: Missing Docker PAT in $envFileForAuth" -ForegroundColor Red
         Write-Host ""
         Write-Host "Please check that your .env.sensitive file contains:" -ForegroundColor Yellow
-        Write-Host '   DOCKER_USERNAME="quicklookup"' -ForegroundColor Gray
         Write-Host '   DOCKER_PAT="dckr_pat_..."' -ForegroundColor Gray
         Write-Host ""
         Write-Host "File location: $envFileForAuth" -ForegroundColor Gray
-        throw "DOCKER_USERNAME and DOCKER_PAT must be set in the last env file ($envFileForAuth)"
+        throw "DOCKER_PAT must be set in the last env file ($envFileForAuth)"
     }
 
     # Validate key sensitive vars before up (best practice)
@@ -898,7 +895,57 @@ try {
 
     Push-Location $stackTarget
     try {
-        Write-Host 'Running docker compose up...'
+        # Start embeddings service first (it needs time to download models)
+        Write-Host 'Starting embeddings service first...'
+
+        # Build args for embeddings only
+        $embeddingsArgs = @()
+        foreach ($env in $envFilesResolved) {
+            $embeddingsArgs += '--env-file', $env
+        }
+        $embeddingsArgs += '-f', 'docker-compose.yml', 'up', '-d', 'cxs-embeddings'
+
+        if ($useComposePlugin) {
+            docker compose @embeddingsArgs
+        } else {
+            docker-compose @embeddingsArgs
+        }
+
+        Write-Host 'Waiting for embeddings service to initialize (downloading models if needed)...'
+
+        # Wait for embeddings to be healthy or at least running
+        $maxWait = 1800  # 30 minutes max wait
+        $waited = 0
+        while ($waited -lt $maxWait) {
+            $statusArgs = @()
+            foreach ($env in $envFilesResolved) {
+                $statusArgs += '--env-file', $env
+            }
+            $statusArgs += 'ps', 'cxs-embeddings', '--format', 'json'
+
+            if ($useComposePlugin) {
+                $statusOutput = docker compose @statusArgs 2>$null | ConvertFrom-Json
+            } else {
+                $statusOutput = docker-compose @statusArgs 2>$null | ConvertFrom-Json
+            }
+
+            if ($statusOutput -and $statusOutput.State) {
+                $status = $statusOutput.State
+                if ($status -like '*healthy*') {
+                    Write-Host 'SUCCESS: Embeddings service is healthy!' -ForegroundColor Green
+                    break
+                } elseif ($status -like '*running*') {
+                    Write-Host 'WAIT: Embeddings service is running, waiting for health check...' -ForegroundColor Yellow
+                } else {
+                    Write-Host "WAIT: Embeddings service status: $status" -ForegroundColor Yellow
+                }
+            }
+
+            Start-Sleep -Seconds 30
+            $waited += 30
+        }
+
+        Write-Host 'Starting all remaining services...'
         if ($useComposePlugin) {
             docker compose @composeArgs
         } else {
@@ -960,7 +1007,23 @@ try {
     }
 
     Write-Host ''
-    Write-Host 'Access your MimIR setup at: http://localhost' -ForegroundColor Cyan
+
+    # Get the actual PUBLIC_BASE_URL from env files
+    $publicUrl = "http://localhost"  # Default fallback
+    foreach ($envFile in $envFilesResolved) {
+        $urlVal = Get-EnvValue -File $envFile -Key "PUBLIC_BASE_URL"
+        if ($urlVal) {
+            $publicUrl = $urlVal
+        }
+    }
+
+    # Make URL clickable using OSC 8 hyperlink (works in modern terminals like Windows Terminal)
+    # Format: ESC]8;;URL\aText\ESC]8;;\a
+    $esc = [char]27
+    $bell = [char]7
+    $clickableUrl = "${esc}]8;;${publicUrl}${bell}${publicUrl}${esc}]8;;${bell}"
+    Write-Host "Access your MimIR setup at: " -NoNewline -ForegroundColor Cyan
+    Write-Host $clickableUrl -ForegroundColor Cyan
     Write-Host "Check status: docker compose ps" -ForegroundColor Gray
     Write-Host "View logs: docker compose logs -f [service-name]" -ForegroundColor Gray
     Write-Host "Working directory: $stackTarget" -ForegroundColor Gray

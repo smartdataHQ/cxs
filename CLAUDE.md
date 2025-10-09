@@ -72,19 +72,19 @@ kubectl diff -k apps/contextsuite/overlays/production
 ```bash
 # Start on-prem stack from project root
 cp .local/mimir-onprem.env .local/.env
-docker compose --project-name mimir-on-pre -f .local/docker-compose.mimir.onprem.yml up -d
+docker compose --project-name mimir-on-pre -f .local/docker-compose.yml up -d
 
 # Stop stack
-docker compose -f .local/docker-compose.mimir.onprem.yml down
+docker compose -f .local/docker-compose.yml down
 
 # Stop and remove volumes
-docker compose -f .local/docker-compose.mimir.onprem.yml down -v
+docker compose -f .local/docker-compose.yml down -v
 
 # View logs
-docker compose -f .local/docker-compose.mimir.onprem.yml logs -f <service>
+docker compose -f .local/docker-compose.yml logs -f <service>
 
 # Inspect configuration
-docker compose -f .local/docker-compose.mimir.onprem.yml config
+docker compose -f .local/docker-compose.yml config
 ```
 
 ### Database Access

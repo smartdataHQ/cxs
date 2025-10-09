@@ -11,6 +11,10 @@ helmCharts:
     # SRC: https://github.com/bitnami/charts/blob/kafka/28.0.1/bitnami/kafka/values.yaml
 
     valuesInline:
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/kafka
+      
       broker:
         replicaCount: 3 # Increase the number of replicas to 3
         heapOpts:  -Xmx8192m -Xms4096m # Increase the max heap size to 8GB

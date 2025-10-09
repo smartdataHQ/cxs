@@ -50,7 +50,7 @@ password="$(kubectl get secret kafka-user-passwords --namespace data -o jsonpath
 
 Example client pod and commands:
 ```bash
-kubectl run kafka-client --restart='Never' --image docker.io/bitnami/kafka:3.7.0-debian-12-r0 --namespace data --command -- sleep infinity
+kubectl run kafka-client --restart='Never' --image docker.io/bitnamilegacy/kafka:3.7.0-debian-12-r0 --namespace data --command -- sleep infinity
 kubectl cp --namespace data /path/to/client.properties kafka-client:/tmp/client.properties
 kubectl exec --tty -i kafka-client --namespace data -- bash
 

@@ -7,6 +7,10 @@ helmCharts:
     version: 19.0.1
     namespace: data
     valuesInline:
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/redis
+      
       auth:
         enabled: true
         existingSecret: "redis"

@@ -46,12 +46,12 @@ service:
     tailscale.com/hostname: grafana-dev
     tailscale.com/expose: "true"
 
-# extraConfigmapMounts:
-#   - name: grafana-longhorn-alerts
-#     mountPath: /etc/grafana/provisioning/alerting/longhorn-rules.yaml
-#     subPath: longhorn-rules.yaml
-#     configMap: grafana-longhorn-alerts
-#     readOnly: true
+  extraConfigmapMounts:
+    - name: grafana-longhorn-alerts
+      mountPath: /etc/grafana/provisioning/alerting/longhorn-rules.yaml
+      subPath: longhorn-rules.yaml
+      configMap: grafana-longhorn-alerts
+      readOnly: true
 
 testFramework:
   enabled: false

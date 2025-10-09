@@ -13,6 +13,10 @@ helmCharts:
     version: 13.7.3
     releaseName: zookeeper
     namespace: data
+    valuesInline:
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/zookeeper
 
   - name: solr-operator
     repo: https://solr.apache.org/charts

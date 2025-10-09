@@ -48,6 +48,8 @@ backend:
           key: S3_LOKI_SECRET_ACCESS_KEY
 
 write:
+  persistence:
+    size: 20Gi
   extraArgs:
     - '-config.expand-env=true'
   extraEnv:

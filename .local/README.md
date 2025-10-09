@@ -1,5 +1,9 @@
 # Mímir Agent On‑Prem (Docker Compose)
 
+**⚡ Quick Start:** See [README_FIRST.md](./README_FIRST.md) for the fastest 3-step installation process.
+
+---
+
 This directory provides a single docker‑compose stack to run the Mímir agent on‑prem with a small footprint. Only the web entrypoint is exposed; all other services are internal.
 
 ## Components
@@ -66,7 +70,7 @@ docker compose -f .local/docker-compose.mimir.onprem.yml \
 - TLS_CERTS_DIR (directory containing `fullchain.pem` and `privkey.pem`)
 - CLICKHOUSE_PASSWORD
 - REDIS_PASSWORD
-- CONTEXT_SUITE_JWT_SECRET_KEY
+- ON_PREM_SSP_TOKEN
 - TOKEN_SECRET_KEY
 - LLM provider credentials (choose at least one):
   - OpenAI: `OPENAI_API_KEY`
@@ -116,7 +120,7 @@ The env files (`.env.non-sensitive` and `.env.sensitive`) are automatically disc
 For manual setup without the install script:
 ```bash
 # From the deployment directory
-docker compose -f docker-compose.mimir.onprem.yml \
+docker compose -f docker-compose.yml \
   --env-file .env.non-sensitive \
   --env-file .env.sensitive \
   up -d

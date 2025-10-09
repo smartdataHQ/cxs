@@ -47,7 +47,9 @@ parse_env_template() {
 
         # Check for @depends
         if [[ "$next_line" =~ ^#[[:space:]]*@depends:(.+)$ ]]; then
+          # Replace pipe with colon to avoid field splitting issues
           depends="${BASH_REMATCH[1]}"
+          depends="${depends//|/:}"
           ((j++))
           continue
         fi

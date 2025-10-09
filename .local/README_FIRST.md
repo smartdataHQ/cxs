@@ -5,11 +5,11 @@
      - **System Requirements**: 8GB+ RAM recommended (AI services use ~20GB total for models)
    - **macOS/Linux**:
      ```
-     curl -L -o install.sh https://raw.githubusercontent.com/smartdataHQ/cxs/main/.local/install.sh && chmod +x install.sh && ./install.sh --target mimir-onprem
+     curl -L -H 'Cache-Control: no-cache, no-store' -o install.sh "https://raw.githubusercontent.com/smartdataHQ/cxs/main/.local/install.sh?$(date +%s)" && chmod +x install.sh && ./install.sh --target mimir-onprem
      ```
    - **Windows (PowerShell)**: Copy and paste this one-liner into PowerShell (select all and right-click to paste):
      ```
-     Invoke-WebRequest -Uri https://raw.githubusercontent.com/smartdataHQ/cxs/main/.local/install.ps1 -OutFile install.ps1; .\install.ps1 -TargetDirectory mimir-onprem
+     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/smartdataHQ/cxs/main/.local/install.ps1?$([DateTimeOffset]::UtcNow.ToUnixTimeSeconds())" -OutFile install.ps1 -Headers @{'Cache-Control'='no-cache, no-store'}; .\install.ps1 -TargetDirectory mimir-onprem
      ```
      - **Copy Tip**: Highlight the command above, copy (Ctrl+C), open PowerShell, paste (right-click or Ctrl+V), and press Enter. The script handles the rest.
    - The script will check Docker availability and test functionality before proceeding.
@@ -22,6 +22,7 @@
    - **For optional items**: Press Enter to skip (Azure, SFTP, SSO, etc.).
    - Takes 2-3 minutes with helpful descriptions, auto-generation, and format validation.
    - **New**: Configuration is now driven by `.env.example.sensitive` template with structured metadata for easier maintenance.
+   - **Pro tip**: Create a `.env` file in your current directory with values you want to use as defaults, or use `--defaults my.env` to specify a custom file.
 
 3. **Access**:
    - **UI**: http://localhost (or https://localhost if TLS enabled) - MimIR chat interface
