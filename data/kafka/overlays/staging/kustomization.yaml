@@ -36,6 +36,8 @@ helmCharts:
             repository: bitnamilegacy/kafka-exporter
         jmx:
           enabled: true
+          image:
+            repository: bitnamilegacy/jmx-exporter
           kafkaJmxPort: 5555
         serviceMonitor:
           enabled: true
