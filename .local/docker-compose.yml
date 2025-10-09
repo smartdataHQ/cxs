@@ -148,10 +148,10 @@ services:
       start_period: 1800s  # 30 minute start period
 
   cxsservices:
-    image: quicklookup/cxs-services:c0ee50d
+    image: quicklookup/cxs-services:f4975b4
     platform: linux/amd64
     restart: unless-stopped
-    command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088", "--workers", "2"]
+    command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088", "--workers", "6"]
     depends_on:
       clickhouse:
         condition: service_healthy
