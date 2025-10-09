@@ -306,10 +306,10 @@ services:
       - "3000:3000"
     command: ["npm", "run", "start"]
     environment:
-      AUTH_URL: ${PUBLIC_BASE_URL:-http://localhost:3000}
-      BROWSER_APP_API: ${PUBLIC_BASE_URL:-http://localhost:3000}
-      BROWSER_CHAT_API: ${BROWSER_NIMIR_SERVER:-http://localhost:8000}
-      BROWSER_CHAT_WSS_API: ${BROWSER_NIMIR_SERVER:-ws://localhost:8000}
+      AUTH_URL: ${MIMIR_URL:-http://localhost:3000}
+      BROWSER_APP_API: ${MIMIR_APP_API_URL:-http://localhost:3000}
+      BROWSER_CHAT_API: ${MIMIR_CHAT_API_URL:-http://localhost:8000}
+      BROWSER_CHAT_WSS_API: ${MIMIR_CHAT_WS_URL:-ws://localhost:8000}
       MIMIR_SERVER_API: ${MIMIR_SERVER_INTERNAL_URL:-http://mimir-server:8000}
       CONTEXTSUITE_ADMIN_API: ${NEAREST_CXS_ADMIN_URL:-https://admin.contextsuite.com}
       BOT_IDENTIFIER: ${BOT_IDENTIFIER:-logreglan-a-hofudborgarsvaedinu-mimir-lhbs}
