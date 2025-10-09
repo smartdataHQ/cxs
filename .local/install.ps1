@@ -1033,7 +1033,8 @@ try {
 
     Write-Host "DOCKER_REGISTRY: docker.io" -ForegroundColor Gray
     Write-Host "DOCKER_USERNAME: quicklookup" -ForegroundColor Gray
-    Write-Host ("DOCKER_PAT: {0}" -f (if ($dockerPat) { '***' + $dockerPat.Substring([Math]::Max(0, $dockerPat.Length - 4)) } else { '(not found)' })) -ForegroundColor Gray
+    $dockerPatDisplay = $(if ($dockerPat) { '***' + $dockerPat.Substring([Math]::Max(0, $dockerPat.Length - 4)) } else { '(not found)' })
+    Write-Host ("DOCKER_PAT: {0}" -f $dockerPatDisplay) -ForegroundColor Gray
 
     if (-not $dockerPat) {
         Write-Host ""
