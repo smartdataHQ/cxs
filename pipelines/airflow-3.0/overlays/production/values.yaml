@@ -79,7 +79,7 @@ airflowVersion: "3.0.2"
 # Images
 images:
   airflow:
-    repository: airflow-pipelines-v3
+    repository: quicklookup/airflow-pipelines-v3
     tag: 00be7de
     # Specifying digest takes precedence over tag.
     digest: ~
