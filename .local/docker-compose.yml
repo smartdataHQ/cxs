@@ -151,7 +151,7 @@ services:
     image: quicklookup/cxs-services:3a9bc08
     platform: linux/amd64
     restart: unless-stopped
-    command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088", "--workers", "6"]
+    command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088", "--workers", "2"]
     depends_on:
       clickhouse:
         condition: service_healthy
@@ -226,7 +226,7 @@ services:
     <<: *default-limits
 
   mimir-server:
-    image: quicklookup/cxs-mimir-api:c0ee50d
+    image: quicklookup/cxs-mimir-api:cf907a7
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
