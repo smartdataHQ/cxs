@@ -181,7 +181,7 @@ services:
       # AI Services
       ANONYMIZATION_SERVICE_URL: ${ANONYMIZATION_SERVICE_URL:-http://cxs-anonymization:8081}
       EMBEDDINGS_SERVICE_URL: ${EMBEDDINGS_SERVICE_URL:-http://cxs-embeddings:8082}
-      LOCAL_EMBEDDING_SERVICE_URL: ${LOCAL_EMBEDDING_SERVICE_URL:-http://cxs-embeddings:8082}
+      LOCAL_EMBEDDING_SERVICE_URL: ${LOCAL_EMBEDDING_SERVICE_URL:-http://cxs-embeddings:8082/api/embeddings/embed-single}
       # Vector/LLM Configuration
       DEFAULT_VECTOR_PROVIDER: ${DEFAULT_VECTOR_PROVIDER:-Voyage}
       DEFAULT_VECTOR_MODEL: ${DEFAULT_VECTOR_MODEL:-voyage-multilingual-2}
