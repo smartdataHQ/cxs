@@ -58,16 +58,19 @@ function Resolve-DefaultsFile {
         $candidates += $env:USER_DEFAULTS_FILE
     }
 
+    if ($PSScriptRoot) {
+        $parentDir = Split-Path -Path $PSScriptRoot -Parent
+        if ($parentDir) {
+            $parentCandidate = Join-Path -Path $parentDir -ChildPath '.env'
+            $candidates += $parentCandidate
+        }
+    }
+
     try {
         $cwdEnv = Join-Path -Path (Get-Location).Path -ChildPath '.env'
         $candidates += $cwdEnv
     } catch {
         # Ignore failures to resolve current location
-    }
-
-    if ($PSScriptRoot) {
-        $parentCandidate = Join-Path -Path $PSScriptRoot -ChildPath '..\.env'
-        $candidates += $parentCandidate
     }
 
     foreach ($candidate in $candidates) {
