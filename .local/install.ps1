@@ -230,6 +230,35 @@ function Invoke-DockerLogin {
     if ($stdout) { Write-Verbose $stdout }
 }
 
+function Invoke-DockerCompose {
+    param(
+        [bool]$UsePlugin,
+        [string[]]$Arguments,
+        [switch]$CaptureOutput
+    )
+
+    $arguments = $Arguments
+
+    if ($UsePlugin) {
+        $cmdArgs = @('compose') + $arguments
+        if ($CaptureOutput.IsPresent) {
+            $output = & docker @cmdArgs 2>$null
+            return $output
+        } else {
+            & docker @cmdArgs
+            return
+        }
+    } else {
+        if ($CaptureOutput.IsPresent) {
+            $output = & docker-compose @arguments 2>$null
+            return $output
+        } else {
+            & docker-compose @arguments
+            return
+        }
+    }
+}
+
 function New-GitHubHeaders {
     param(
         [string]$Token,
@@ -1095,11 +1124,7 @@ try {
         }
         $embeddingsArgs += '-f', 'docker-compose.yml', 'up', '-d', 'cxs-embeddings'
 
-        if ($useComposePlugin) {
-            docker compose @embeddingsArgs
-        } else {
-            docker-compose @embeddingsArgs
-        }
+        Invoke-DockerCompose -UsePlugin $useComposePlugin -Arguments $embeddingsArgs
 
         Write-Host 'Waiting for embeddings service to initialize (downloading models if needed)...'
 
@@ -1113,11 +1138,7 @@ try {
             }
             $statusArgs += 'ps', 'cxs-embeddings', '--format', 'json'
 
-            if ($useComposePlugin) {
-                $statusOutput = docker compose @statusArgs 2>$null | ConvertFrom-Json
-            } else {
-                $statusOutput = docker-compose @statusArgs 2>$null | ConvertFrom-Json
-            }
+            $statusOutput = Invoke-DockerCompose -UsePlugin $useComposePlugin -Arguments $statusArgs -CaptureOutput | ConvertFrom-Json
 
             if ($statusOutput -and $statusOutput.State) {
                 $status = $statusOutput.State
@@ -1136,11 +1157,7 @@ try {
         }
 
         Write-Host 'Starting all remaining services...'
-        if ($useComposePlugin) {
-            docker compose @composeArgs
-        } else {
-            docker-compose @composeArgs
-        }
+        Invoke-DockerCompose -UsePlugin $useComposePlugin -Arguments $composeArgs
     } finally {
         Pop-Location
     }
@@ -1167,11 +1184,7 @@ try {
         }
         $psArgs += '-f', 'docker-compose.mimir.onprem.yml', 'ps'
 
-        if ($useComposePlugin) {
-            $psOutput = docker compose @psArgs 2>$null
-        } else {
-            $psOutput = docker-compose @psArgs 2>$null
-        }
+            $psOutput = Invoke-DockerCompose -UsePlugin $useComposePlugin -Arguments $psArgs -CaptureOutput
 
         if ($psOutput) {
             foreach ($line in $psOutput) {
