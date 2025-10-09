@@ -189,10 +189,12 @@ ingress:
   # Configs for the Ingress of the web Service
   web:
     # Enable web ingress resource
-    enabled: false
+    enabled: true
 
     # Annotations for the web Ingress
-    annotations: {}
+    annotations:
+      kubernetes.io/ingress.class: nginx
+      cert-manager.io/cluster-issuer: letsencrypt-prod
 
     # The path for the web Ingress
     path: "/"
@@ -204,15 +206,15 @@ ingress:
     host: ""
 
     # The hostnames or hosts configuration for the web Ingress
-    hosts: []
+    hosts:
     #   # The hostname for the web Ingress (templated)
-    # - name: ""
+      - name: "airflow-v3.contextsuite.com"
     #   # configs for web Ingress TLS
-    #   tls:
+        tls:
     #     # Enable TLS termination for the web Ingress
-    #     enabled: false
+          enabled: true
     #     # the name of a pre-created Secret containing a TLS private key and certificate
-    #     secretName: ""
+          secretName: "airflow-v3-tls"
 
     # The Ingress Class for the web Ingress (used only with Kubernetes v1.19 and above)
     ingressClassName: ""
