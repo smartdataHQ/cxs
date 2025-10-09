@@ -30,11 +30,13 @@ helmCharts:
         existingSecret: "kafka-user-passwords"
 
       metrics:
+        kafka:
+          enabled: true
+          image:
+            repository: bitnamilegacy/kafka-exporter
         jmx:
           enabled: true
           kafkaJmxPort: 5555
-        kafka:
-          enabled: true
         serviceMonitor:
           enabled: true
           namespace: cattle-monitoring-system
