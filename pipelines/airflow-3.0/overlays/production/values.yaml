@@ -193,8 +193,7 @@ ingress:
 
     # Annotations for the web Ingress
     annotations:
-      kubernetes.io/ingress.class: nginx
-      cert-manager.io/cluster-issuer: letsencrypt-prod
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
 
     # The path for the web Ingress
     path: "/"
@@ -214,10 +213,10 @@ ingress:
     #     # Enable TLS termination for the web Ingress
           enabled: true
     #     # the name of a pre-created Secret containing a TLS private key and certificate
-          secretName: "airflow-v3-tls"
+          secretName: "airflow-v3-contextsuite-com-tls"
 
     # The Ingress Class for the web Ingress (used only with Kubernetes v1.19 and above)
-    ingressClassName: ""
+    ingressClassName: "nginx"
 
     # configs for web Ingress TLS (Deprecated - renamed to `ingress.web.hosts[*].tls`)
     tls:
