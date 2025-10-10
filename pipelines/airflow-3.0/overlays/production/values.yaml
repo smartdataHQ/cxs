@@ -385,6 +385,21 @@ allowPodLaunching: true
 env:
  - name: AIRFLOW__CORE__LOAD_EXAMPLES
    value: "true"
+ - name: AZURE_CLIENT_ID
+   valueFrom:
+     secretKeyRef:
+       name: airflow-3.0
+       key: azure-client-id
+ - name: AZURE_CLIENT_SECRET
+   valueFrom:
+     secretKeyRef:
+       name: airflow-3.0
+       key: azure-client-secret
+ - name: AZURE_TENANT_ID
+   valueFrom:
+     secretKeyRef:
+       name: airflow-3.0
+       key: azure-tenant-id
 
 # Volumes for all airflow containers
 volumes: []
@@ -1695,7 +1710,39 @@ webserver:
   # as a custom webserver_config.py. You can bake a webserver_config.py in to
   # your image instead or specify a configmap containing the
   # webserver_config.py.
-  webserverConfig: ~
+  webserverConfig: |
+    import os
+    from airflow import configuration as conf
+    from flask_appbuilder.security.manager import AUTH_OAUTH  
+    
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = None   
+    
+    AUTH_USER_REGISTRATION_ROLE = "Admin"
+    AUTH_USER_REGISTRATION = True
+    
+    AUTH_TYPE = AUTH_OAUTH
+    
+    OAUTH_PROVIDERS = [
+      {
+      "name": "azure",
+      "icon": "fa-windows",
+      "token_key": "access_token",
+      "remote_app": {
+          "client_id": os.environ.get("AZURE_CLIENT_ID"),
+          "client_secret": os.environ.get("AZURE_CLIENT_SECRET"),
+          "api_base_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2",
+          "client_kwargs": {
+              "scope": "User.read name preferred_username email profile upn",
+              "resource": os.environ.get("AZURE_CLIENT_ID"),                
+              "verify_signature": False
+          },
+          "request_token_url": None,
+          "access_token_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2/token",
+          "authorize_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2/authorize",
+          },
+      }
+    ]
   # webserverConfig: |
   #   from airflow import configuration as conf
 
@@ -3075,7 +3122,7 @@ logs:
 
   persistence:
     # Enable persistent volume for storing logs
-    enabled: false
+    enabled: true
     # Volume size for logs
     size: 100Gi
     # Annotations for the logs PVC
