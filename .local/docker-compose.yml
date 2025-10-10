@@ -41,7 +41,7 @@ services:
       resources:
         limits:
           cpus: '2.0'
-          memory: 4G  # Higher limit for database operations with embeddings
+          memory: 8G  # Higher limit for database operations with embeddings
         reservations:
           cpus: '0.5'
           memory: 2G
