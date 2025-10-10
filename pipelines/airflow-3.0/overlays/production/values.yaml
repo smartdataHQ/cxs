@@ -385,21 +385,6 @@ allowPodLaunching: true
 env:
  - name: AIRFLOW__CORE__LOAD_EXAMPLES
    value: "true"
- - name: AZURE_CLIENT_ID
-   valueFrom:
-     secretKeyRef:
-       name: airflow-3.0
-       key: azure-client-id
- - name: AZURE_CLIENT_SECRET
-   valueFrom:
-     secretKeyRef:
-       name: airflow-3.0
-       key: azure-client-secret
- - name: AZURE_TENANT_ID
-   valueFrom:
-     secretKeyRef:
-       name: airflow-3.0
-       key: azure-tenant-id
 
 # Volumes for all airflow containers
 volumes: []
@@ -408,10 +393,16 @@ volumes: []
 volumeMounts: []
 
 # Secrets for all airflow containers
-secret: []
-# - envName: ""
-#   secretName: ""
-#   secretKey: ""
+secret:
+ - envName: "AZURE_CLIENT_ID"
+   secretName: "airflow-3.0"
+   secretKey: "azure-client-id"
+ - envName: "AZURE_CLIENT_SECRET"
+   secretName: "airflow-3.0"
+   secretKey: "azure-client-secret"
+ - envName: "AZURE_TENANT_ID"
+   secretName: "airflow-3.0"
+   secretKey: "azure-tenant-id"
 
 # Enables selected built-in secrets that are set via environment variables by default.
 # Those secrets are provided by the Helm Chart secrets by default but in some cases you
