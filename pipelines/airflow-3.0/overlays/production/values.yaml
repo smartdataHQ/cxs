@@ -196,7 +196,7 @@ ingress:
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
 
     # The path for the web Ingress
-    path: "/"
+    path: "/v3"
 
     # The pathType for the above path (used only with Kubernetes v1.19 and above)
     pathType: "ImplementationSpecific"
@@ -207,13 +207,13 @@ ingress:
     # The hostnames or hosts configuration for the web Ingress
     hosts:
     #   # The hostname for the web Ingress (templated)
-      - name: "airflow-v3.contextsuite.com"
+      - name: "airflow.contextsuite.com"
     #   # configs for web Ingress TLS
         tls:
     #     # Enable TLS termination for the web Ingress
           enabled: true
     #     # the name of a pre-created Secret containing a TLS private key and certificate
-          secretName: "airflow-v3-contextsuite-com-tls"
+          secretName: "airflow-contextsuite-com-tls"
 
     # The Ingress Class for the web Ingress (used only with Kubernetes v1.19 and above)
     ingressClassName: "nginx"
