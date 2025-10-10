@@ -37,7 +37,14 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-    <<: *default-limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G  # Higher limit for database operations with embeddings
+        reservations:
+          cpus: '0.5'
+          memory: 2G
 
   redis:
     image: redis:8.2.1-alpine
@@ -148,7 +155,7 @@ services:
       start_period: 1800s  # 30 minute start period
 
   cxsservices:
-    image: quicklookup/cxs-services:2410038
+    image: quicklookup/cxs-services:933b759
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088", "--workers", "2"]
