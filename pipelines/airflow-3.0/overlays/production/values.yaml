@@ -140,15 +140,16 @@ labels: {}
 ingress:
   # Enable all ingress resources
   # (deprecated - use ingress.web.enabled, ingress.apiServer.enabled and ingress.flower.enabled)
-  enabled: ~
+  enabled: true
 
   # Configs for the Ingress of the API Server
   apiServer:
     # Enable API Server ingress resource
-    enabled: false
+    enabled: true
 
     # Annotations for the API Server Ingress
-    annotations: {}
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
 
     # The path for the API Server Ingress
     path: "/"
@@ -157,7 +158,7 @@ ingress:
     pathType: "ImplementationSpecific"
 
     # The hostname for the API Server Ingress (Deprecated - renamed to `ingress.apiServer.hosts`)
-    host: ""
+    host: "airflow-v3.contextsuite.com"
 
     # The hostnames or hosts configuration for the API Server Ingress
     hosts: []
@@ -176,9 +177,9 @@ ingress:
     # configs for API Server Ingress TLS (Deprecated - renamed to `ingress.apiServer.hosts[*].tls`)
     tls:
       # Enable TLS termination for the API Server Ingress
-      enabled: false
+      enabled: true
       # the name of a pre-created Secret containing a TLS private key and certificate
-      secretName: ""
+      secretName: "airflow-v3-contextsuite-com-tls"
 
     # HTTP paths to add to the API Server Ingress before the default path
     precedingPaths: []
@@ -189,14 +190,13 @@ ingress:
   # Configs for the Ingress of the web Service
   web:
     # Enable web ingress resource
-    enabled: true
+    enabled: false
 
     # Annotations for the web Ingress
-    annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    annotations: {}
 
     # The path for the web Ingress
-    path: "/v3"
+    path: "/"
 
     # The pathType for the above path (used only with Kubernetes v1.19 and above)
     pathType: "ImplementationSpecific"
@@ -205,18 +205,18 @@ ingress:
     host: ""
 
     # The hostnames or hosts configuration for the web Ingress
-    hosts:
+    hosts: []
     #   # The hostname for the web Ingress (templated)
-      - name: "airflow.contextsuite.com"
+    # - name: ""
     #   # configs for web Ingress TLS
-        tls:
+    #   tls:
     #     # Enable TLS termination for the web Ingress
-          enabled: true
+    #     enabled: false
     #     # the name of a pre-created Secret containing a TLS private key and certificate
-          secretName: "airflow-contextsuite-com-tls"
+    #     secretName: ""
 
     # The Ingress Class for the web Ingress (used only with Kubernetes v1.19 and above)
-    ingressClassName: "nginx"
+    ingressClassName: ""
 
     # configs for web Ingress TLS (Deprecated - renamed to `ingress.web.hosts[*].tls`)
     tls:
