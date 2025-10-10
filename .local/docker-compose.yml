@@ -155,7 +155,7 @@ services:
       start_period: 1800s  # 30 minute start period
 
   cxsservices:
-    image: quicklookup/cxs-services:933b759
+    image: quicklookup/cxs-services:8f9902f
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088", "--workers", "2"]
