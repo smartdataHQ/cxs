@@ -1678,7 +1678,7 @@ webserver:
 
   # Create initial user.
   defaultUser:
-    enabled: true
+    enabled: false
     role: Admin
     username: admin
     email: admin@example.com
