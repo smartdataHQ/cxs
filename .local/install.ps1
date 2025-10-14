@@ -10,6 +10,15 @@ Param(
 
 $ErrorActionPreference = 'Stop'
 
+# Installer version
+$INSTALLER_VERSION = "1.1.0"
+
+Write-Host ""
+Write-Host "===============================================" -ForegroundColor Cyan
+Write-Host "  Mímir On-Prem Installer v$INSTALLER_VERSION" -ForegroundColor Cyan
+Write-Host "===============================================" -ForegroundColor Cyan
+Write-Host ""
+
 $owner = if ($env:GITHUB_OWNER) { $env:GITHUB_OWNER } else { 'smartdataHQ' }
 $repo = if ($env:GITHUB_REPO) { $env:GITHUB_REPO } else { 'cxs' }
 $githubPath = '.local'

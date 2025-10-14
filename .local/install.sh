@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Installer version
+INSTALLER_VERSION="1.1.0"
+
 GITHUB_OWNER="${GITHUB_OWNER:-smartdataHQ}"
 GITHUB_REPO="${GITHUB_REPO:-cxs}"
 GITHUB_PATH=".local"
@@ -504,6 +507,12 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+echo ""
+echo "==============================================="
+echo "  Mímir On-Prem Installer v${INSTALLER_VERSION}"
+echo "==============================================="
+echo ""
 
 if [[ -n "$ENV_FILES_INPUT" ]]; then
   IFS=',' read -ra temp_files <<< "$ENV_FILES_INPUT"
