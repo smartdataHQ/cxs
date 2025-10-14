@@ -7,6 +7,6 @@ spec:
     apiVersion: apps/v1
     kind: StatefulSet
     name: inbox
-  maxReplicas: 2
+  maxReplicas: 1
   minReplicas: 1
   targetCPUUtilizationPercentage: 60
