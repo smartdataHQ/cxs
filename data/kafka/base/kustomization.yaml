@@ -16,7 +16,7 @@ helmCharts:
         repository: bitnamilegacy/kafka
       
       broker:
-        replicaCount: 3 # Increase the number of replicas to 3
+        replicaCount: 1 # Increase the number of replicas to X
         heapOpts:  -Xmx8192m -Xms4096m # Increase the max heap size to 8GB
       controller:
         replicaCount: 0
