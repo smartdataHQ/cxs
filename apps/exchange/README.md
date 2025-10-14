@@ -14,9 +14,9 @@ This application is deployed automatically by Fleet when changes are pushed to t
 
 ## Kubernetes Resources
 Kubernetes resource definitions for the Inbox application are managed within its environment-specific overlay directories. For example, for the production environment, these can be found in `overlays/production/`:
-- `inbox-deployment.yaml`: Manages the deployment of the Inbox pods.
-- `inbox-service.yaml`: Exposes the Inbox service.
-- `inbox-ingress.yaml`: Configures ingress rules for accessing the Inbox.
-- `inbox-config.yaml`: Contains specific configuration for the Inbox application.
-- `inbox-autoscaler.yaml`: Defines autoscaling rules for the Inbox deployment.
+- `exchange-deployment.yaml`: Manages the deployment of the Inbox pods.
+- `exchange-service.yaml`: Exposes the Inbox service.
+- `exchange-ingress.yaml`: Configures ingress rules for accessing the Inbox.
+- `exchange-config.yaml`: Contains specific configuration for the Inbox application.
+- `exchange-autoscaler.yaml`: Defines autoscaling rules for the Inbox deployment.
 - `kustomization.yaml`: Defines the Kustomize configuration for the production overlay.
