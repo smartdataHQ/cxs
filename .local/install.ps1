@@ -4,7 +4,7 @@ Param(
     [switch]$NoUp,
     [switch]$NoInteractive,
     [switch]$SkipDockerCheck,
-    [string]$Defaults = $(if ($PSScriptRoot) { Join-Path -Path $PSScriptRoot -ChildPath '.env' } else { '.env' }),
+    [string]$Defaults,  # Explicit only - no default to prevent picking up repo's .env
     [string]$GitRef
 )
 
@@ -79,12 +79,8 @@ function Resolve-DefaultsFile {
         $candidates += $env:USER_DEFAULTS_FILE
     }
 
-    if ($PSScriptRoot) {
-        $parentDir = Split-Path -Path $PSScriptRoot -Parent
-        if ($parentDir) {
-            $candidates += (Join-Path -Path $parentDir -ChildPath '.env')
-        }
-    }
+    # REMOVED: Script directory and parent directory lookups to prevent
+    # accidentally using the repository's development .env file
 
     if ($script:OriginalWorkingDirectory) {
         $candidates += (Join-Path -Path $script:OriginalWorkingDirectory -ChildPath '.env')

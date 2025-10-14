@@ -449,11 +449,20 @@ ORIGINAL_PWD="$(pwd)"
 USER_DEFAULTS_FILE=""
 
 # Check for .env file in the original working directory
+# BUT: Skip if we're running from within the repository (to avoid using dev .env)
 if [ -f "$ORIGINAL_PWD/.env" ]; then
-  USER_DEFAULTS_FILE="$ORIGINAL_PWD/.env"
-  echo "📂 Found .env file in current directory: $USER_DEFAULTS_FILE"
-  echo "   Will use values from this file as defaults during setup."
-  echo
+  # Safety check: Don't use .env if we're in a directory with docker-compose.yml
+  # (indicates we're in the repository's .local directory)
+  if [ ! -f "$ORIGINAL_PWD/docker-compose.yml" ] && [ ! -f "$ORIGINAL_PWD/install.sh" ]; then
+    USER_DEFAULTS_FILE="$ORIGINAL_PWD/.env"
+    echo "📂 Found .env file in current directory: $USER_DEFAULTS_FILE"
+    echo "   Will use values from this file as defaults during setup."
+    echo
+  else
+    echo "ℹ️  Note: Skipping .env in current directory (appears to be repository directory)"
+    echo "   Use -d /path/to/.env to explicitly specify a defaults file"
+    echo
+  fi
 fi
 
 while [[ $# -gt 0 ]]; do
