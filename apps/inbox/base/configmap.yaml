@@ -10,8 +10,8 @@ data:
   ## Kafka
   KAFKA_URI:  'kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092'
   KAFKA_HOST: 'kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092'
-  KAFKA_URI_NEW:  'kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092'
-  KAFKA_HOST_NEW: 'kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092'
+  KAFKA_URI_NEW:  'kafka.data.svc.cluster.local:9092'
+  KAFKA_HOST_NEW: 'kafka.data.svc.cluster.local:9092'
   KAFKA_PORT: '9092'
   KAFKA_USER: 'user1'
   AVRO_SCHEMA_DIRECTORY: 'avro'
