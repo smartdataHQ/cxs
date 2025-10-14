@@ -5,7 +5,7 @@ resources:
   - ../../base
 
 images:
-  - name: quicklookup/inbox
+  - name: quicklookup/inboxk
     newTag: main-1005197
 
 patches:
