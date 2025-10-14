@@ -7,3 +7,9 @@ resources:
 images:
   - name: quicklookup/inbox
     newTag: main-1005197
+
+patches:
+  - path: ingress-patch.yaml
+  - path: data-credentials.yaml
+  - path: configmap-patch.yaml
+  - path: autoscaler-patch.yaml

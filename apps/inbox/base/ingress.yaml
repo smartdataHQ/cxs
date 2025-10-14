@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: exchange
+  name: inbox
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
@@ -11,7 +11,7 @@ spec:
         paths:
           - backend:
               service:
-                name: exchange
+                name: inbox
                 port:
                   number: 9090
             path: /

@@ -259,7 +259,7 @@ services:
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD_LLM: ${CLICKHOUSE_PASSWORD_LLM:-${CLICKHOUSE_PASSWORD}}
       # External endpoints
-      EVENTS_ENDPOINT: ${INBOX_EVENTS_ENDPOINT:-https://exchange.contextsuite.com/api/s/s2s/track}
+      EVENTS_ENDPOINT: ${INBOX_EVENTS_ENDPOINT:-https://inbox.contextsuite.com/api/s/s2s/track}
       # Public base URL (external hostname for UI/API)
       BACKEND_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
       SKIP_IMAGE_ANONYMIZATION: ${SKIP_IMAGE_ANONYMIZATION:-true}
