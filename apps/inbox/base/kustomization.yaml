@@ -22,6 +22,8 @@ configMapGenerator:
       - KAFKA_HOST_NEW=kafka.data.svc.cluster.local:9092
       - KAFKA_PORT="9092"
       - KAFKA_USER=user1
+      - KAFKA_SASL_MECHANISM=PLAIN
+      - KAFKA_SECURITY_PROTOCOL=SASL_PLAINTEXT
       - AVRO_SCHEMA_DIRECTORY=avro
       - SCHEMA_REGISTRY_ENABLED="false"
       - SCHEMA_REGISTRY_URL=http://data-kafka-schema-registry:8081
