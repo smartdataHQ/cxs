@@ -1127,10 +1127,12 @@ try {
         Invoke-DockerCompose -UsePlugin $useComposePlugin -Arguments $embeddingsArgs
 
         Write-Host 'Waiting for embeddings service to initialize (downloading models if needed)...'
+        Write-Host "Press 'S' to skip this wait and continue with the remaining services." -ForegroundColor Gray
 
         # Wait for embeddings to be healthy or at least running
         $maxWait = 1800  # 30 minutes max wait
         $waited = 0
+        $userSkippedEmbeddingsWait = $false
         while ($waited -lt $maxWait) {
             $statusArgs = @()
             foreach ($env in $envFilesResolved) {
@@ -1152,8 +1154,24 @@ try {
                 }
             }
 
+            try {
+                if ([Console]::KeyAvailable) {
+                    $key = [Console]::ReadKey($true)
+                    if ($key.Key -eq 'S') {
+                        Write-Host 'Skipping embeddings health wait (user request).' -ForegroundColor Yellow
+                        $userSkippedEmbeddingsWait = $true
+                        break
+                    }
+                }
+            } catch {
+                # Ignore key detection issues (e.g., non-interactive shells)
+            }
+
             Start-Sleep -Seconds 30
             $waited += 30
+        }
+        if ($waited -ge $maxWait -and -not $userSkippedEmbeddingsWait) {
+            Write-Host 'WARNING: Embeddings health check timed out. Continuing with stack startup.' -ForegroundColor Yellow
         }
 
         Write-Host 'Starting all remaining services...'
