@@ -16,13 +16,20 @@ helmCharts:
         repository: bitnamilegacy/kafka
       
       broker:
-        replicaCount: 1 # Increase the number of replicas to X
-        heapOpts:  -Xmx8192m -Xms4096m # Increase the max heap size to 8GB
+        replicaCount: 1 # Single broker deployment
+        heapOpts: -Xmx4096m -Xms2048m # 4GB heap for single broker
+        resources:
+          limits:
+            memory: 6Gi # 4GB heap + 2GB non-heap
+            cpu: 2000m
+          requests:
+            memory: 4Gi
+            cpu: 1000m
       controller:
         replicaCount: 0
       kraft:
         enabled: false
-      resourcesPreset: xlarge # Set a preset profile or define resources
+      # resourcesPreset: xlarge # Using custom resources instead
 
       externalZookeeper:
         servers: [zookeeper.data.svc.cluster.local]
