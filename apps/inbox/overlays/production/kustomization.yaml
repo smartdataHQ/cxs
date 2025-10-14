@@ -6,6 +6,6 @@ resources:
 
 images:
   - name: quicklookup/inbox
-    newTag: main-e785f06
+    newTag: main-913fed9
 
 # Production uses defaults from base - no patches needed
