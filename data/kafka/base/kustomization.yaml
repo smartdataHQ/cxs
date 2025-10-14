@@ -22,7 +22,7 @@ helmCharts:
         replicaCount: 0
       kraft:
         enabled: false
-      resourcesPreset: large # Set a preset profile or define resources
+      resourcesPreset: xlarge # Set a preset profile or define resources
 
       externalZookeeper:
         servers: [zookeeper.data.svc.cluster.local]
