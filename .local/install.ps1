@@ -493,7 +493,7 @@ function Process-StepPrompts {
             'auto-generate-16' { $default = 'AUTO_GENERATE:16' }
             'auto-generate-24' { $default = 'AUTO_GENERATE:24' }
             'auto-generate-32' { $default = 'AUTO_GENERATE:32' }
-            'auto-generate-44' { $default = 'AUTO_GENERATE:32' }
+            'auto-generate-44' { $default = 'AUTO_GENERATE:44' }
         }
 
         # Handle variable substitution in defaults (e.g., ${CLICKHOUSE_PASSWORD})
@@ -857,7 +857,7 @@ try {
         foreach ($env in $envFilesResolved) {
             $composeArgs += '--env-file', $env  # Absolute paths ensure compose finds them
         }
-        $composeArgs += '-f', 'docker-compose.mimir.onprem.yml', 'up', '-d'
+        $composeArgs += '-f', 'docker-compose.yml', 'up', '-d'
         $envFileForAuth = $envFilesResolved[-1]  # Last for auth
     } else {
         $localEnv = Join-Path $stackTarget '.env'
@@ -1053,15 +1053,18 @@ try {
 
     Write-Host "Reading Docker credentials from: $envFileForAuth" -ForegroundColor Gray
 
-    # Hardcoded Docker registry credentials
-    $dockerRegistry = 'docker.io'
-    $dockerUsername = 'quicklookup'
+    # Docker registry credentials (with defaults)
+    $dockerRegistry = Get-EnvValue -File $envFileForAuth -Key 'DOCKER_REGISTRY'
+    if (-not $dockerRegistry) { $dockerRegistry = 'docker.io' }
+
+    $dockerUsername = Get-EnvValue -File $envFileForAuth -Key 'DOCKER_USERNAME'
+    if (-not $dockerUsername) { $dockerUsername = 'quicklookup' }
 
     # Read Docker PAT from env file
     $dockerPat = Get-EnvValue -File $envFileForAuth -Key 'DOCKER_PAT'
 
-    Write-Host "DOCKER_REGISTRY: docker.io" -ForegroundColor Gray
-    Write-Host "DOCKER_USERNAME: quicklookup" -ForegroundColor Gray
+    Write-Host "DOCKER_REGISTRY: $dockerRegistry" -ForegroundColor Gray
+    Write-Host "DOCKER_USERNAME: $dockerUsername" -ForegroundColor Gray
     $dockerPatDisplay = $(if ($dockerPat) { '***' + $dockerPat.Substring([Math]::Max(0, $dockerPat.Length - 4)) } else { '(not found)' })
     Write-Host ("DOCKER_PAT: {0}" -f $dockerPatDisplay) -ForegroundColor Gray
 
@@ -1140,18 +1143,24 @@ try {
             }
             $statusArgs += 'ps', 'cxs-embeddings', '--format', 'json'
 
-            $statusOutput = Invoke-DockerCompose -UsePlugin $useComposePlugin -Arguments $statusArgs -CaptureOutput | ConvertFrom-Json
-
-            if ($statusOutput -and $statusOutput.State) {
-                $status = $statusOutput.State
-                if ($status -like '*healthy*') {
-                    Write-Host 'SUCCESS: Embeddings service is healthy!' -ForegroundColor Green
-                    break
-                } elseif ($status -like '*running*') {
-                    Write-Host 'WAIT: Embeddings service is running, waiting for health check...' -ForegroundColor Yellow
-                } else {
-                    Write-Host "WAIT: Embeddings service status: $status" -ForegroundColor Yellow
+            try {
+                $statusOutput = Invoke-DockerCompose -UsePlugin $useComposePlugin -Arguments $statusArgs -CaptureOutput
+                if ($statusOutput) {
+                    $jsonObj = $statusOutput | ConvertFrom-Json -ErrorAction Stop
+                    if ($jsonObj -and $jsonObj.PSObject.Properties['State']) {
+                        $status = $jsonObj.State
+                        if ($status -like '*healthy*') {
+                            Write-Host 'SUCCESS: Embeddings service is healthy!' -ForegroundColor Green
+                            break
+                        } elseif ($status -like '*running*') {
+                            Write-Host 'WAIT: Embeddings service is running, waiting for health check...' -ForegroundColor Yellow
+                        } else {
+                            Write-Host "WAIT: Embeddings service status: $status" -ForegroundColor Yellow
+                        }
+                    }
                 }
+            } catch {
+                Write-Verbose "Status check failed: $_"
             }
 
             try {
@@ -1200,7 +1209,7 @@ try {
         foreach ($env in $envFilesResolved) {
             $psArgs += '--env-file', $env
         }
-        $psArgs += '-f', 'docker-compose.mimir.onprem.yml', 'ps'
+        $psArgs += '-f', 'docker-compose.yml', 'ps'
 
             $psOutput = Invoke-DockerCompose -UsePlugin $useComposePlugin -Arguments $psArgs -CaptureOutput
 
