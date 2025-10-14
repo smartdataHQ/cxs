@@ -303,7 +303,7 @@ services:
           memory: 1G
 
   mimir-ui:
-    image: quicklookup/mimir-chat:f7502da
+    image: quicklookup/mimir-chat:dd2023d
     platform: linux/amd64
     restart: unless-stopped
     depends_on:
