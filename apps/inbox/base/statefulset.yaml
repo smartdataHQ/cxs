@@ -1,8 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: inbox
 spec:
+  serviceName: inbox
   selector:
     matchLabels:
       app: inbox
@@ -16,7 +17,7 @@ spec:
     spec:
       containers:
       - name: inbox
-        image: quicklookup/inbox:main-59c6fe1
+        image: quicklookup/inbox
         resources:
           requests:
             cpu: 100m
@@ -78,9 +79,20 @@ spec:
         volumeMounts:
           - mountPath: /tmp
             name: sftp
+          - mountPath: /data/dlq
+            name: dlq-data
       imagePullSecrets:
         - name: dockerlock
       volumes:
         - name: sftp
           hostPath:
             path: /data/local/sftp
+  volumeClaimTemplates:
+  - metadata:
+      name: dlq-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: longhorn
+      resources:
+        requests:
+          storage: 10Gi

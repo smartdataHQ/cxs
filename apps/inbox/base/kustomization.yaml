@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: ingress
 
 resources:
-  - deployment.yaml
+  - statefulset.yaml
   - service.yaml
   - configmap.yaml
   - autoscaler.yaml
