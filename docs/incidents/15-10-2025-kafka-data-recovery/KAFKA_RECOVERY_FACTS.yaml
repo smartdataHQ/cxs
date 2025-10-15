@@ -1,0 +1,209 @@
+# Kafka Data Recovery Facts
+# Generated: 2025-10-15
+# Context: External Kafka cluster migration and K8s volume data recovery
+
+recovery_metadata:
+  discovery_date: "2025-10-15"
+  data_age: "385 days"
+  total_volumes: 3
+  total_storage: "240Gi"
+  recovery_method: "direct_node_access"
+  reason: "K8s cluster non-functional, Longhorn volumes won't mount to pods"
+
+# Kubernetes Kafka Cluster (Source - K8s)
+source_cluster:
+  status: "non_functional"
+  namespace: "data"
+  persistent_volumes:
+    kafka-broker-0:
+      pvc_name: "data-kafka-broker-0" 
+      pv_name: "pvc-5a06f2f5-9468-4270-92c3-179ee37ce272"
+      size: "80Gi"
+      storage_class: "longhorn"
+      current_node: "famous-stork"
+      age: "385d"
+    kafka-broker-1:
+      pvc_name: "data-kafka-broker-1"
+      pv_name: "pvc-506850a8-e124-46f8-bfea-2ce2a5deaaf3" 
+      size: "80Gi"
+      storage_class: "longhorn"
+      current_node: "unknown" # requires investigation
+      age: "385d"
+    kafka-broker-2:
+      pvc_name: "data-kafka-broker-2"
+      pv_name: "pvc-b7693b29-bb92-4867-b375-8b54e48b8f18"
+      size: "80Gi" 
+      storage_class: "longhorn"
+      current_node: "unknown" # requires investigation
+      age: "385d"
+
+# External Kafka Cluster (Target)
+target_cluster:
+  status: "functional"
+  protocol: "PLAINTEXT" # no authentication
+  brokers:
+    - "c001db1:9092"
+    - "c001db2:9092" 
+    - "c001db3:9092"
+  data_directories:
+    - "/data/local/kafka"
+  cluster_id: "zb5DS8shSHeyWIYI4m246A"
+  kraft_mode: true
+  backup_available: "ansible/backups/kafka-working-config-20251015-0001/"
+
+# Data Inventory (from kafka-broker-0 inspection)
+discovered_topics:
+  critical_business_data:
+    - name: "audit.events-1"
+      type: "compliance"
+      priority: "highest"
+      description: "Audit logs for compliance"
+    - name: "content_processing_jobs-*"  
+      type: "business_workflow"
+      priority: "high"
+      description: "Content processing workflows"
+      partitions: [0, 3, 6, 9, 12, 15, 18]
+    - name: "content_refresh_jobs-*"
+      type: "business_workflow" 
+      priority: "high"
+      description: "Content refresh workflows"
+      partitions: [0, 3, 6, 9, 12, 15, 18]
+  domain_specific:
+    - name: "se2-contextsuite-com-0"
+      type: "domain_data"
+      priority: "medium"
+      description: "contextsuite.com domain data"
+    - name: "se2-islandshotel-is-0"
+      type: "domain_data"
+      priority: "medium" 
+      description: "islandshotel.is domain data"
+    - name: "se2-adventures-is-0"
+      type: "domain_data"
+      priority: "medium"
+    - name: "se2-blue-is-0"
+      type: "domain_data" 
+      priority: "medium"
+    - name: "se2-bonus-is-0"
+      type: "domain_data"
+      priority: "medium"
+    - name: "se2-elko-is-0"
+      type: "domain_data"
+      priority: "medium"
+    - name: "se2-hallo-is-0" 
+      type: "domain_data"
+      priority: "medium"
+    - name: "se2-skattur-is-0"
+      type: "domain_data"
+      priority: "medium"
+    - name: "se2-syn-is-0"
+      type: "domain_data"
+      priority: "medium"
+  system_topics:
+    - name: "_schemas-0"
+      type: "schema_registry"
+      priority: "low"
+      description: "Schema registry data - can recreate"
+    - name: "__consumer_offsets-*"
+      type: "internal"
+      priority: "skip"
+      description: "Consumer offsets - will rebuild automatically"
+      partitions: 50 # 0-49
+
+# Infrastructure Details
+longhorn_storage:
+  base_directories:
+    - "/var/lib/longhorn/volumes"
+    - "/var/lib/rancher/longhorn/volumes" 
+  volume_structure: "volumes/{volume-id}/replica-{id}/"
+  access_method: "direct_node_filesystem"
+  mount_issues: "Longhorn volumes fail to mount to recovery pods"
+
+# Recovery Strategy
+recovery_approach:
+  method: "node_based_extraction"
+  tools:
+    - "kafka-dump-log.sh" # for proper log parsing
+    - "strings" # fallback for binary extraction
+    - "kubectl cp" # for data transfer
+  phases:
+    1: "volume_location_mapping"
+    2: "data_assessment_per_node" 
+    3: "critical_topic_extraction"
+    4: "data_transfer_to_external_cluster"
+    5: "verification_and_replay"
+
+# Recovery Scripts
+automation_files:
+  node_recovery: "scripts/kafka-node-recovery.sh"
+  data_assessment: "scripts/assess-kafka-data.sh" 
+  topic_extraction: "scripts/extract-topic-data.sh"
+  recovery_pod_manifest: "kafka-data-recovery-pod.yaml"
+
+# Migration Status
+application_updates:
+  inbox_service:
+    status: "configured"
+    kafka_uri: "c001db1:9092,c001db2:9092,c001db3:9092"
+    security_protocol: "PLAINTEXT"
+    config_file: "apps/inbox/base/kustomization.yaml"
+    deployment_pending: true
+  kafkaui:
+    status: "configured"
+    external_cluster_connected: true
+
+# Next Steps
+immediate_actions:
+  1: "Map remaining volume locations (kafka-broker-1, kafka-broker-2)"
+  2: "Copy recovery script to nodes with volume data"
+  3: "Run data assessment on each node"
+  4: "Extract critical topics (audit.events, content_*_jobs)"
+  5: "Replay to external cluster"
+  6: "Deploy inbox service updates"
+  7: "Verify end-to-end functionality"
+
+# Rollback Plan
+rollback_options:
+  external_cluster: "ansible/backups/kafka-working-config-20251015-0001/restore.sh"
+  k8s_kafka: "Not recommended - unstable cluster"
+  inbox_service: "Git revert apps/inbox/base/kustomization.yaml changes"
+
+# Command Reference
+useful_commands:
+  find_volume_nodes: |
+    for vol in pvc-5a06f2f5-9468-4270-92c3-179ee37ce272 pvc-506850a8-e124-46f8-bfea-2ce2a5deaaf3 pvc-b7693b29-bb92-4867-b375-8b54e48b8f18; do
+      echo -n "$vol -> "
+      kubectl get -n longhorn-system volume.longhorn.io $vol -o jsonpath='{.status.currentNodeID}'
+      echo
+    done
+  
+  copy_recovery_script: |
+    kubectl cp scripts/kafka-node-recovery.sh {node-name}:/tmp/kafka-node-recovery.sh
+  
+  run_assessment: |
+    kubectl exec -it {node-name} -- /tmp/kafka-node-recovery.sh assess
+  
+  extract_topic: |  
+    kubectl exec -it {node-name} -- /tmp/kafka-node-recovery.sh extract {topic-name}
+  
+  copy_data_back: |
+    kubectl cp {node-name}:/tmp/kafka-recovery ./kafka-recovery-data
+  
+  test_external_cluster: |
+    ansible c001db1 -i ansible/inventories/data-layer.ini -m shell -a "/home/kafka/kafka/bin/kafka-topics.sh --bootstrap-server c001db1:9092,c001db2:9092,c001db3:9092 --list"
+
+# Monitoring and Validation
+success_criteria:
+  - "Critical topics successfully extracted from K8s volumes"
+  - "Data replayed to external cluster without corruption"
+  - "Inbox service connects to external cluster"
+  - "End-to-end message flow verified"
+  - "No data loss for business-critical topics"
+
+estimated_timeline:
+  volume_mapping: "30 minutes"
+  data_assessment: "1 hour"
+  critical_extraction: "2-4 hours" 
+  data_replay: "1-2 hours"
+  application_deployment: "30 minutes"
+  verification: "1 hour"
+  total: "6-9 hours"
