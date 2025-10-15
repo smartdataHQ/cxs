@@ -4,6 +4,9 @@ kind: Kustomization
 resources:
   - ../../base
 
+patches:
+  - path: replicas-patch.yaml
+
 images:
   - name: quicklookup/inbox
     newTag: main-9cfb7ef
