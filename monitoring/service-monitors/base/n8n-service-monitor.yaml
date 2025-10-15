@@ -1,0 +1,77 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: n8n
+  namespace: monitoring
+  labels:
+    app: n8n
+spec:
+  selector:
+    matchLabels:
+      service: n8n
+  endpoints:
+  - port: http
+    interval: 30s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+    - data
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-metrics
+  namespace: data
+  labels:
+    service: n8n
+    app: n8n
+spec:
+  type: ClusterIP
+  selector:
+    service: n8n
+  ports:
+    - name: http
+      port: 5678
+      targetPort: 5678
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: n8n-redis-queue
+  namespace: monitoring
+  labels:
+    app: n8n-redis
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis
+  endpoints:
+  - port: redis-metrics
+    interval: 30s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+    - data
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: n8n-postgres-queue
+  namespace: monitoring
+  labels:
+    app: n8n-postgres
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+  endpoints:
+  - port: http-metrics
+    interval: 30s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+    - data

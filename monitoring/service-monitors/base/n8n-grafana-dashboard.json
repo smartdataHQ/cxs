@@ -1,0 +1,239 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "N8N Production Monitoring",
+    "tags": ["n8n", "production", "queue", "workflows"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "N8N Queue Length - CRITICAL ALERT",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "redis_db_keys{db=\"db3\"}",
+            "legendFormat": "Redis Queue (DB3)",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(postgresql_stat_user_tables_n_tup_ins{schemaname=\"public\", relname=\"execution_entity\"}[5m]) - rate(postgresql_stat_user_tables_n_tup_del{schemaname=\"public\", relname=\"execution_entity\"}[5m]))",
+            "legendFormat": "DB Queue Growth Rate",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "yellow", 
+                  "value": 100
+                },
+                {
+                  "color": "red",
+                  "value": 1000
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 0
+        }
+      },
+      {
+        "id": 2,
+        "title": "N8N Workflow Execution Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(n8n_executions_total[5m])",
+            "legendFormat": "Total Executions/sec"
+          },
+          {
+            "expr": "rate(n8n_executions_total{status=\"success\"}[5m])",
+            "legendFormat": "Successful Executions/sec"
+          },
+          {
+            "expr": "rate(n8n_executions_total{status=\"error\"}[5m])",
+            "legendFormat": "Failed Executions/sec"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 0
+        }
+      },
+      {
+        "id": 3,
+        "title": "N8N Queue Health Status",
+        "type": "table",
+        "targets": [
+          {
+            "expr": "redis_db_keys{db=\"db3\"}",
+            "legendFormat": "Redis Queue Length",
+            "format": "table"
+          },
+          {
+            "expr": "redis_memory_used_bytes / redis_memory_max_bytes * 100",
+            "legendFormat": "Redis Memory Usage %",
+            "format": "table"
+          },
+          {
+            "expr": "rate(redis_commands_processed_total[5m])",
+            "legendFormat": "Redis Commands/sec",
+            "format": "table"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 8
+        }
+      },
+      {
+        "id": 4,
+        "title": "N8N Database Activity",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "postgresql_database_size_bytes{datname=\"n8n\"} / 1024 / 1024",
+            "legendFormat": "N8N DB Size (MB)"
+          },
+          {
+            "expr": "rate(postgresql_stat_database_tup_inserted{datname=\"n8n\"}[5m])",
+            "legendFormat": "Inserts/sec"
+          },
+          {
+            "expr": "rate(postgresql_stat_database_tup_updated{datname=\"n8n\"}[5m])",
+            "legendFormat": "Updates/sec"
+          },
+          {
+            "expr": "rate(postgresql_stat_database_tup_deleted{datname=\"n8n\"}[5m])",
+            "legendFormat": "Deletes/sec"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 16
+        }
+      },
+      {
+        "id": 5,
+        "title": "N8N Application Health",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "up{job=\"n8n\"}",
+            "legendFormat": "N8N Main"
+          },
+          {
+            "expr": "up{job=\"n8n-worker\"}",
+            "legendFormat": "N8N Worker"
+          },
+          {
+            "expr": "up{job=\"n8n-webhook\"}", 
+            "legendFormat": "N8N Webhook"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "thresholds": {
+              "steps": [
+                {
+                  "color": "red",
+                  "value": null
+                },
+                {
+                  "color": "green",
+                  "value": 1
+                }
+              ]
+            }
+          }
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 12,
+          "y": 16
+        }
+      },
+      {
+        "id": 6,
+        "title": "N8N Resource Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "container_memory_working_set_bytes{container=\"main\", pod=~\"n8n-.*\"} / 1024 / 1024",
+            "legendFormat": "Memory Usage (MB) - {{pod}}"
+          },
+          {
+            "expr": "rate(container_cpu_usage_seconds_total{container=\"main\", pod=~\"n8n-.*\"}[5m]) * 100",
+            "legendFormat": "CPU Usage % - {{pod}}"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        }
+      },
+      {
+        "id": 7,
+        "title": "N8N Workflow Error Tracking",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{namespace=\"data\", pod=~\"n8n-.*\"} |= \"ERROR\" or |= \"error\" or |= \"Error\"",
+            "legendFormat": "N8N Error Logs"
+          }
+        ],
+        "gridPos": {
+          "h": 8,
+          "w": 24,
+          "x": 0,
+          "y": 32
+        }
+      }
+    ],
+    "templating": {
+      "list": []
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Queue Alerts",
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "ALERTS{alertname=~\"N8N.*Queue.*\"}",
+          "iconColor": "red"
+        }
+      ]
+    }
+  }
+}

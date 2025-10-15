@@ -1,0 +1,147 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: n8n-alerts
+  namespace: monitoring
+  labels:
+    app: n8n
+spec:
+  groups:
+  - name: n8n.rules
+    rules:
+    
+    # N8N Redis Queue Length Alert
+    - alert: N8NRedisQueueLengthHigh
+      expr: redis_db_keys{db="db3"} > 100
+      for: 5m
+      labels:
+        severity: warning
+        service: n8n
+      annotations:
+        summary: "N8N Redis Queue Length is High"
+        description: "N8N Redis queue (db3) has {{ $value }} items queued for more than 5 minutes. This may indicate workflow processing issues."
+        runbook_url: "https://docs.n8n.io/hosting/scaling/queue-mode/"
+
+    # N8N Redis Queue Length Critical
+    - alert: N8NRedisQueueLengthCritical  
+      expr: redis_db_keys{db="db3"} > 1000
+      for: 2m
+      labels:
+        severity: critical
+        service: n8n
+      annotations:
+        summary: "N8N Redis Queue Length is Critical"
+        description: "N8N Redis queue (db3) has {{ $value }} items queued for more than 2 minutes. The system may be overwhelmed and affecting all customers."
+        runbook_url: "https://docs.n8n.io/hosting/scaling/queue-mode/"
+
+    # N8N Database Execution Queue Length
+    - alert: N8NPostgresQueueLengthHigh
+      expr: |
+        postgresql_database_size_bytes{datname="n8n"} / 1024 / 1024 > 500 or
+        rate(postgresql_stat_database_tup_inserted{datname="n8n"}[5m]) > 50
+      for: 5m
+      labels:
+        severity: warning
+        service: n8n
+      annotations:
+        summary: "N8N Database Activity High"
+        description: "N8N database showing high activity: size {{ $value }}MB or high insert rate. This may indicate execution queue buildup."
+
+    # N8N Application Down
+    - alert: N8NDown
+      expr: up{job="n8n"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        service: n8n
+      annotations:
+        summary: "N8N Application is Down"
+        description: "N8N application has been down for more than 1 minute."
+
+    # N8N Worker Down
+    - alert: N8NWorkerDown
+      expr: up{job="n8n-worker"} == 0
+      for: 2m
+      labels:
+        severity: warning
+        service: n8n
+      annotations:
+        summary: "N8N Worker is Down"
+        description: "N8N worker has been down for more than 2 minutes. Workflow execution may be impacted."
+
+    # N8N High Memory Usage
+    - alert: N8NHighMemoryUsage
+      expr: |
+        (
+          container_memory_working_set_bytes{container="main", pod=~"n8n-.*"} 
+          / container_spec_memory_limit_bytes{container="main", pod=~"n8n-.*"}
+        ) * 100 > 80
+      for: 10m
+      labels:
+        severity: warning
+        service: n8n
+      annotations:
+        summary: "N8N High Memory Usage"
+        description: "N8N pod {{ $labels.pod }} is using {{ $value }}% of its memory limit for more than 10 minutes."
+
+    # N8N High CPU Usage
+    - alert: N8NHighCPUUsage
+      expr: |
+        (
+          rate(container_cpu_usage_seconds_total{container="main", pod=~"n8n-.*"}[5m])
+          / container_spec_cpu_quota{container="main", pod=~"n8n-.*"} 
+          * container_spec_cpu_period{container="main", pod=~"n8n-.*"}
+        ) * 100 > 80
+      for: 10m
+      labels:
+        severity: warning
+        service: n8n
+      annotations:
+        summary: "N8N High CPU Usage"
+        description: "N8N pod {{ $labels.pod }} is using {{ $value }}% of its CPU limit for more than 10 minutes."
+
+    # N8N Execution Errors Rate
+    - alert: N8NExecutionErrorRate
+      expr: |
+        (
+          rate(http_requests_total{job="n8n", code=~"5.."}[5m]) 
+          / rate(http_requests_total{job="n8n"}[5m])
+        ) * 100 > 10
+      for: 5m
+      labels:
+        severity: warning
+        service: n8n
+      annotations:
+        summary: "N8N High Error Rate"
+        description: "N8N is experiencing {{ $value }}% error rate for more than 5 minutes."
+
+  - name: n8n.database.rules
+    rules:
+    
+    # N8N Execution Table Growth Rate
+    - alert: N8NExecutionTableGrowthHigh
+      expr: |
+        increase(postgresql_stat_user_tables_n_tup_ins{schemaname="public", relname="execution_entity"}[1h]) > 1000
+      for: 0m
+      labels:
+        severity: warning
+        service: n8n
+      annotations:
+        summary: "N8N Execution Table Growing Rapidly"
+        description: "N8N execution table has grown by {{ $value }} rows in the last hour. This may indicate runaway workflows."
+
+    # N8N Failed Executions
+    - alert: N8NFailedExecutionsHigh
+      expr: |
+        (
+          postgresql_stat_user_tables_n_tup_ins{schemaname="public", relname="execution_entity"}
+          - postgresql_stat_user_tables_n_tup_del{schemaname="public", relname="execution_entity"}
+        ) > 10000
+      for: 5m
+      labels:
+        severity: critical
+        service: n8n
+      annotations:
+        summary: "N8N Failed Executions Accumulating"
+        description: "N8N has {{ $value }} accumulated execution records. This suggests failed cleanup or runaway workflows affecting all customers."
