@@ -6,7 +6,7 @@ resources:
   - isl-hotel-streaming-client-configmap.yaml
 
 configMapGenerator:
-  - name: isl-hotel-streaming-client-config
+  - name: isl-hotel-streaming-client-config-v2
     literals:
       - APIGW_URL=https://mtce4pr.hospitality-api.eu-frankfurt-1.ocs.oraclecloud.com
       - WS_URL=wss://mtce4pr.hospitality-api.eu-frankfurt-1.ocs.oraclecloud.com
