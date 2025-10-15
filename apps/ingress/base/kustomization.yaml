@@ -12,7 +12,7 @@ resources:
 configMapGenerator:
   - name: ingress-config
     literals:
-      # Kafka - External Cluster (migrated from K8s cluster)
+      # Kafka - External Cluster (migrated from K8s cluster)  
       - KAFKA_URI_OLD=kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092
       - KAFKA_HOST_OLD=kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092
       - KAFKA_URI=c001db1:9092,c001db2:9092,c001db3:9092
@@ -20,7 +20,6 @@ configMapGenerator:
       - KAFKA_PORT=9092
       - KAFKA_USER=""
       - KAFKA_USER_PASSWORD=""
-      - KAFKA_SASL_MECHANISM=PLAIN
       - KAFKA_SECURITY_PROTOCOL=PLAINTEXT
       # Redis
       - REDIS_HOST=redis-master.data
