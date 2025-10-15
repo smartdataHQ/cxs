@@ -72,6 +72,13 @@ services:
     restart: unless-stopped
     ports:
       - "8081:8081"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     environment:
       ENV: ${ENVIRONMENT:-onprem}
       DEBUG: ${ANONYMIZATION_DEBUG:-false}
@@ -88,6 +95,9 @@ services:
       PYTHONPATH: ${PYTHONPATH:-/app}
       PYTHONDONTWRITEBYTECODE: ${PYTHONDONTWRITEBYTECODE:-1}
       PYTHONUNBUFFERED: ${PYTHONUNBUFFERED:-1}
+      # GPU Configuration
+      DEVICE: ${DEVICE:-cuda}
+      CUDA_VISIBLE_DEVICES: "0"
     volumes:
       - hf-cache:/tmp/hf_cache
     networks:
@@ -132,6 +142,9 @@ services:
       # Additional settings to help with model loading
       TRANSFORMERS_OFFLINE: "0"
       OMP_NUM_THREADS: "4"
+      # GPU Configuration
+      DEVICE: ${DEVICE:-cuda}
+      CUDA_VISIBLE_DEVICES: "0"
     volumes:
       - hf-cache:/tmp/hf_cache  # IMPORTANT: Persists downloaded models between restarts
       - torch-cache:/tmp/torch_cache
@@ -146,6 +159,10 @@ services:
         reservations:
           cpus: '4.0'   # Reserve more CPUs
           memory: 12G
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     # Not using default limits (*default-limits) to avoid inheriting lower limits
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8082/health')\" || exit 1"]
@@ -284,6 +301,7 @@ services:
       ONPREM_ORGANIZATION: ${ONPREM_ORGANIZATION}
       ONPREM_ORGANIZATION_GID: ${ONPREM_ORGANIZATION_GID}
       ONPREM_PARTITION: ${ONPREM_PARTITION}
+      TAVILY_API_KEY: ${TAVILY_API_KEY}
     networks:
       - app
     logging: *default-logging
