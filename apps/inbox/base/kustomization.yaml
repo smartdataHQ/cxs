@@ -27,11 +27,11 @@ configMapGenerator:
       - SCHEMA_REGISTRY_ENABLED="false"
       - SCHEMA_REGISTRY_URL=http://data-kafka-schema-registry:8081
       # Redis
+      - REDIS_CLUSTER_NODES=c001db1,c001db2,c001db3
       - REDIS_HOST=redis-master.data
       - REDIS_PORT="6379"
       - REDIS_DB="0"
       - REDIS_USER=admin
-      - REDIS_LOCAL="true"
       - REDIS_TTL="120"
       # Postgres
       - POSTGRES_HOST=cxs-pg-ha.data
