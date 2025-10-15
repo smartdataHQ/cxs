@@ -8,7 +8,11 @@ spec:
     matchLabels:
       app: inbox
       tier: api
-  replicas: 1
+  replicas: 2
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
   template:
     metadata:
       labels:
