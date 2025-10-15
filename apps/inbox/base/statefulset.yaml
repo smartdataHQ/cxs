@@ -79,12 +79,7 @@ spec:
         - name: sftp
           hostPath:
             path: /data/local/sftp
-  volumeClaimTemplates:
-  - metadata:
-      name: dlq-data
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      storageClassName: longhorn
-      resources:
-        requests:
-          storage: 10Gi
+        - name: dlq-data
+          hostPath:
+            path: /data/local/dlq
+            type: DirectoryOrCreate
