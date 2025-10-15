@@ -27,6 +27,11 @@ spec:
                 secretKeyRef:
                   name: kafka-ui-secret
                   key: KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG
+            - name: KAFKA_CLUSTERS_2_PROPERTIES_SASL_JAAS_CONFIG
+              valueFrom:
+                secretKeyRef:
+                  name: kafka-ui-secret
+                  key: KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG
 
 ---
 apiVersion: autoscaling/v1
