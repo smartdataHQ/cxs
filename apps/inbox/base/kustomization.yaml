@@ -16,12 +16,11 @@ configMapGenerator:
       - SERVER_PORT="9090"
       - SPRING_PROFILES_ACTIVE=prod
       # Kafka
-      - KAFKA_URI=kafka.data.svc.cluster.local:9092
-      - KAFKA_HOST=kafka.data.svc.cluster.local:9092
-      - KAFKA_URI_NEW=kafka.data.svc.cluster.local:9092
-      - KAFKA_HOST_NEW=kafka.data.svc.cluster.local:9092
+      - KAFKA_URI=c001db1:9092,c001db2:9092,c001db3:9092
+      - KAFKA_HOST=c001db1:9092,c001db2:9092,c001db3:9092
+      - KAFKA_URI_NEW=c001db1:9092,c001db2:9092,c001db3:9092
+      - KAFKA_HOST_NEW=c001db1:9092,c001db2:9092,c001db3:9092
       - KAFKA_PORT="9092"
-      - KAFKA_USER=user1
       - KAFKA_SASL_MECHANISM=PLAIN
       - KAFKA_SECURITY_PROTOCOL=SASL_PLAINTEXT
       - AVRO_SCHEMA_DIRECTORY=avro
@@ -31,6 +30,7 @@ configMapGenerator:
       - REDIS_HOST=redis-master.data
       - REDIS_PORT="6379"
       - REDIS_DB="0"
+      - REDIS_USER=admin
       - REDIS_LOCAL="true"
       - REDIS_TTL="120"
       # Postgres
