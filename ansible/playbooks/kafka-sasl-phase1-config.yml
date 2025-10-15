@@ -1,0 +1,125 @@
+---
+- name: Configure SASL/PLAIN Authentication for Kafka Cluster - Phase 1 (Config Deployment)
+  hosts: data_nodes
+  become: yes
+  vars_files:
+    - ../group_vars/data_nodes.yml
+  vars:
+    kafka_home: /home/kafka/kafka
+    kafka_config_dir: "{{ kafka_home }}/config"
+    kafka_user: kafka
+    kafka_group: kafka
+    
+  tasks:
+    - name: Validate required SASL authentication variables are defined
+      assert:
+        that:
+          - vault_kafka_admin_password is defined
+          - vault_kafka_admin_password | length > 0
+          - vault_kafka_service_password is defined
+          - vault_kafka_service_password | length > 0
+          - vault_kafka_client_password is defined
+          - vault_kafka_client_password | length > 0
+          - vault_kafka_inter_broker_password is defined
+          - vault_kafka_inter_broker_password | length > 0
+          - kafka_admin_user is defined
+          - kafka_admin_user | length > 0
+          - kafka_service_user is defined
+          - kafka_service_user | length > 0
+          - kafka_client_user is defined
+          - kafka_client_user | length > 0
+          - kafka_inter_broker_user is defined
+          - kafka_inter_broker_user | length > 0
+        fail_msg: |
+          Required SASL authentication variables are missing or empty.
+          Please ensure all required variables are defined in group_vars/data_nodes.yml:
+          - vault_kafka_admin_password
+          - vault_kafka_service_password  
+          - vault_kafka_client_password
+          - vault_kafka_inter_broker_password
+          - kafka_admin_user
+          - kafka_service_user
+          - kafka_client_user
+          - kafka_inter_broker_user
+        success_msg: "All required SASL authentication variables are defined"
+
+    - name: Backup current server.properties
+      copy:
+        src: "{{ kafka_config_dir }}/kraft/server.properties"
+        dest: "{{ kafka_config_dir }}/kraft/server.properties.backup-{{ ansible_date_time.epoch }}"
+        remote_src: yes
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_group }}"
+        mode: '0644'
+    
+    - name: Create JAAS configuration file
+      template:
+        src: kafka_server_jaas.conf.j2
+        dest: "{{ kafka_config_dir }}/kafka_server_jaas.conf"
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_group }}"
+        mode: '0600'
+      
+    - name: Replace PLAINTEXT listeners with SASL_PLAINTEXT
+      lineinfile:
+        path: "{{ kafka_config_dir }}/kraft/server.properties"
+        regexp: '^listeners=PLAINTEXT'
+        line: 'listeners=SASL_PLAINTEXT://:9092,CONTROLLER://:9093'
+        
+    - name: Replace PLAINTEXT advertised.listeners with SASL_PLAINTEXT
+      lineinfile:
+        path: "{{ kafka_config_dir }}/kraft/server.properties"
+        regexp: '^advertised.listeners=PLAINTEXT'
+        line: 'advertised.listeners=SASL_PLAINTEXT://{{ ansible_hostname }}:9092'
+        
+    - name: Remove conflicting inter.broker.listener.name setting
+      lineinfile:
+        path: "{{ kafka_config_dir }}/kraft/server.properties"
+        regexp: '^inter\.broker\.listener\.name='
+        state: absent
+        
+    - name: Add SASL authentication configuration
+      blockinfile:
+        path: "{{ kafka_config_dir }}/kraft/server.properties"
+        marker: "# {mark} SASL Authentication Configuration"
+        block: |
+          # SASL Authentication Configuration
+          listener.security.protocol.map=CONTROLLER:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
+          sasl.enabled.mechanisms=PLAIN
+          sasl.mechanism.inter.broker.protocol=PLAIN
+          security.inter.broker.protocol=SASL_PLAINTEXT
+          
+          # Authorization
+          authorizer.class.name=org.apache.kafka.metadata.authorizer.StandardAuthorizer
+          super.users=User:{{ kafka_admin_user }}
+          allow.everyone.if.no.acl.found=true
+      
+    - name: Backup current kafka.service
+      copy:
+        src: /etc/systemd/system/kafka.service
+        dest: /etc/systemd/system/kafka.service.backup-{{ ansible_date_time.epoch }}
+        remote_src: yes
+        mode: '0644'
+    
+    - name: Update systemd service with KAFKA_OPTS
+      lineinfile:
+        path: /etc/systemd/system/kafka.service
+        regexp: '^Environment='
+        line: 'Environment="JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64" "KAFKA_OPTS=-Djava.security.auth.login.config={{ kafka_config_dir }}/kafka_server_jaas.conf"'
+        insertafter: '^\[Service\]'
+      
+    - name: Reload systemd daemon on all nodes
+      systemd:
+        daemon_reload: yes
+      
+    - name: Deploy client configuration files
+      template:
+        src: "{{ item }}.j2"
+        dest: "{{ kafka_config_dir }}/{{ item }}"
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_group }}"
+        mode: '0644'
+      loop:
+        - client.properties
+        - producer.properties
+        - consumer.properties

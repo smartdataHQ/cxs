@@ -1,0 +1,23 @@
+---
+# Kafka authentication configuration
+# Variables loaded from environment or .env file
+
+# SECURITY NOTE: Create a .env file from .env.example and add actual passwords
+# The .env file is in .gitignore to prevent password exposure
+
+# Kafka SASL passwords (loaded from environment)
+vault_kafka_admin_password: "{{ lookup('env', 'KAFKA_ADMIN_PASSWORD') }}"
+vault_kafka_service_password: "{{ lookup('env', 'KAFKA_SERVICE_PASSWORD') }}"  
+vault_kafka_client_password: "{{ lookup('env', 'KAFKA_CLIENT_PASSWORD') }}"
+vault_kafka_inter_broker_password: "{{ lookup('env', 'KAFKA_INTER_BROKER_PASSWORD') }}"
+
+# Kafka users (loaded from environment with defaults)
+kafka_admin_user: "{{ lookup('env', 'KAFKA_ADMIN_USER') | default('user1') }}"
+kafka_service_user: "{{ lookup('env', 'KAFKA_SERVICE_USER') | default('user1') }}"  
+kafka_client_user: "{{ lookup('env', 'KAFKA_CLIENT_USER') | default('user1') }}"
+kafka_inter_broker_user: "{{ lookup('env', 'KAFKA_INTER_BROKER_USER') | default('inter_broker_user') }}"
+
+# Usage:
+# 1. Copy .env.example to .env
+# 2. Fill in actual passwords in .env
+# 3. Run: source .env && ansible-playbook playbook.yml

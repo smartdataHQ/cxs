@@ -1,0 +1,11 @@
+# Kafka admin client configuration with SASL authentication
+bootstrap.servers={{ groups['data_nodes'] | join(':9092,') }}:9092
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required \
+    username="{{ kafka_admin_user }}" \
+    password="{{ vault_kafka_admin_password }}";
+
+# Additional admin settings
+request.timeout.ms=60000
+retries=5

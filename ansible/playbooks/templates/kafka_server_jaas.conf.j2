@@ -1,0 +1,13 @@
+KafkaServer {
+    org.apache.kafka.common.security.plain.PlainLoginModule required
+    username="{{ kafka_inter_broker_user | default('inter_broker_user') }}"
+    password="{{ vault_kafka_inter_broker_password }}"
+    user_{{ kafka_inter_broker_user | default('inter_broker_user') }}="{{ vault_kafka_inter_broker_password }}"
+    user_{{ kafka_admin_user }}="{{ vault_kafka_admin_password }}";
+};
+
+KafkaClient {
+    org.apache.kafka.common.security.plain.PlainLoginModule required
+    username="{{ kafka_admin_user }}"
+    password="{{ vault_kafka_admin_password }}";
+};

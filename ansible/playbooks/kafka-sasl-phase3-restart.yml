@@ -1,0 +1,61 @@
+---
+- name: Restart Kafka Cluster with SASL Authentication - Phase 3
+  hosts: data_nodes
+  become: yes
+  vars_files:
+    - ../group_vars/data_nodes.yml
+  vars:
+    kafka_home: /home/kafka/kafka
+    
+  tasks:
+    - name: Validate required SASL authentication variables are defined
+      assert:
+        that:
+          - vault_kafka_admin_password is defined
+          - vault_kafka_admin_password | length > 0
+          - kafka_admin_user is defined
+          - kafka_admin_user | length > 0
+        fail_msg: |
+          Required SASL authentication variables are missing or empty.
+          Cannot test SASL authentication without these variables defined in group_vars/data_nodes.yml.
+        success_msg: "Required SASL authentication variables are defined for testing"
+        
+    - name: Start Kafka services on all nodes simultaneously
+      systemd:
+        name: kafka
+        state: started
+        enabled: yes
+        
+    - name: Wait for Kafka services to start
+      wait_for:
+        port: 9092
+        host: "{{ ansible_hostname }}"
+        delay: 15
+        timeout: 120
+      
+    - name: Verify all Kafka services are active
+      shell: systemctl is-active kafka
+      register: kafka_status
+      failed_when: kafka_status.stdout != "active"
+      
+    - name: Test SASL authentication (first node only)
+      shell: "{{ kafka_home }}/bin/kafka-broker-api-versions.sh --bootstrap-server {{ ansible_hostname }}:9092 --command-config {{ kafka_home }}/config/client.properties"
+      register: sasl_test
+      when: inventory_hostname == groups['data_nodes'][0]
+      failed_when: false
+      
+    - name: Display SASL authentication test results
+      debug:
+        var: sasl_test.stdout_lines
+      when: inventory_hostname == groups['data_nodes'][0] and sasl_test is defined
+      
+    - name: Test cluster connectivity from first node
+      shell: "{{ kafka_home }}/bin/kafka-topics.sh --bootstrap-server c001db1:9092,c001db2:9092,c001db3:9092 --command-config {{ kafka_home }}/config/client.properties --list"
+      register: cluster_test
+      when: inventory_hostname == groups['data_nodes'][0]
+      failed_when: false
+      
+    - name: Display cluster connectivity results
+      debug:
+        var: cluster_test
+      when: inventory_hostname == groups['data_nodes'][0] and cluster_test is defined

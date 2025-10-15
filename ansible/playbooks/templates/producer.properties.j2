@@ -1,0 +1,11 @@
+# Producer configuration for SASL/PLAIN authentication
+bootstrap.servers={{ groups['data_nodes'] | map('extract', hostvars, 'ansible_hostname') | join(':9092,') }}:9092
+security.protocol=SASL_PLAINTEXT
+sasl.mechanism=PLAIN
+sasl.jaas.config=org.apache.kafka.common.security.plain.PlainLoginModule required username="{{ kafka_admin_user }}" password="{{ vault_kafka_admin_password }}";
+
+# Producer settings
+acks=all
+retries=2147483647
+max.in.flight.requests.per.connection=5
+enable.idempotence=true
