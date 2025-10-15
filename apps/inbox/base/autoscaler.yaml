@@ -8,5 +8,5 @@ spec:
     kind: StatefulSet
     name: inbox
   maxReplicas: 1
-  minReplicas: 1
+  minReplicas: 0
   targetCPUUtilizationPercentage: 60
