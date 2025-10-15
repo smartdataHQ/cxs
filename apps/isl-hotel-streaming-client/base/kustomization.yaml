@@ -1,3 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
   - isl-hotel-streaming-client-deployment.yaml
-  - isl-hotel-streaming-client-configmap.yaml
+
+configMapGenerator:
+  - name: isl-hotel-streaming-client-config
+    literals:
+      - APIGW_URL=https://mtce4pr.hospitality-api.eu-frankfurt-1.ocs.oraclecloud.com
+      - WS_URL=wss://mtce4pr.hospitality-api.eu-frankfurt-1.ocs.oraclecloud.com
+      - OAUTH_ENDPOINT=/oauth/v1/tokens
+      - SUBS_ENDPOINT=/subscriptions
+      - CHAIN=ISLHTL
+      - PING=20000
+      - DELTA=false
+      - STATS=false
+      - TIME_BUCKET=HOUR
+      - RUN_FOR=-1
+      - STACK_VALUES=true
+      - DELAY_BEFORE_RECONNECT=10000
+      - SEGMENT_CONVERSION=true
+      - CLIENT_ID=ISLHTL_Client
+      - INTEGRATION_USER=ISLHTL_SNJALLGOGN
+      - GRAPHQL_CLIENT_ID=bea04c89-586c-4f18-a9a3-6850818950dc
+      - KAFKA_ENABLED=true
+      - KAFKA_HOST=c001db1.data.svc.cluster.local:9094,c001db2.data.svc.cluster.local:9094,c001db3.data.svc.cluster.local:9094
+      - KAFKA_USER=user1
+      - KAFKA_SECURITY_PROTOCOL=SASL_PLAINTEXT
+      - KAFKA_SASL_MECHANISM=PLAIN
+      - KAFKA_CLIENT_ID=ohip-shovel
+      - KAFKA_TOPIC=se2-islandshotel-is
+      - LOGLEVEL=debug
+      - 'EXTRA_PAYLOAD_VALS={"partition": "islandshotel.is"}'
