@@ -1,0 +1,153 @@
+---
+- name: Configure Kafka dual-port authentication (safe rollout)
+  hosts: data_nodes
+  become: yes
+  serial: 1  # Deploy one node at a time for safety
+  vars:
+    kafka_home: /home/kafka/kafka
+    kafka_config_dir: "{{ kafka_home }}/config"
+    kafka_jaas_path: "{{ kafka_config_dir }}/kafka_server_jaas.conf"
+    
+  pre_tasks:
+    - name: Verify this is a Kafka node
+      stat:
+        path: "{{ kafka_home }}"
+      register: kafka_check
+      failed_when: not kafka_check.stat.exists
+      
+    - name: Create backup of current configuration
+      copy:
+        src: "{{ kafka_config_dir }}/server.properties"
+        dest: "{{ kafka_config_dir }}/server.properties.backup.{{ ansible_date_time.epoch }}"
+        remote_src: yes
+        
+  tasks:
+    - name: Stop Kafka service for configuration update
+      systemd:
+        name: kafka
+        state: stopped
+      register: kafka_stop
+      
+    - name: Wait for Kafka to fully stop
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 9092
+        state: stopped
+        timeout: 30
+        
+    - name: Deploy JAAS authentication file (matching K8s cluster credentials)
+      copy:
+        content: |
+          KafkaServer {
+            org.apache.kafka.common.security.plain.PlainLoginModule required
+            username="inter_broker_user"
+            password="b2Rey8bXMd"
+            user_inter_broker_user="b2Rey8bXMd"
+            user_user1="qCD9zc70ie";
+          };
+        dest: "{{ kafka_jaas_path }}"
+        owner: kafka
+        group: kafka
+        mode: '0600'
+        
+    - name: Read current server.properties
+      slurp:
+        src: "{{ kafka_config_dir }}/server.properties"
+      register: current_config
+      
+    - name: Check if dual-port config already exists
+      set_fact:
+        dual_port_exists: "{{ 'SASL_PLAINTEXT://0.0.0.0:9093' in (current_config.content | b64decode) }}"
+        
+    - name: Add dual-port configuration to server.properties
+      blockinfile:
+        path: "{{ kafka_config_dir }}/server.properties"
+        marker: "# {mark} DUAL PORT AUTHENTICATION CONFIG"
+        block: |
+          
+          # Dual-port configuration - PLAINTEXT:9092 + SASL_PLAINTEXT:9093
+          listeners=PLAINTEXT://0.0.0.0:9092,SASL_PLAINTEXT://0.0.0.0:9093
+          listener.security.protocol.map=PLAINTEXT:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
+          advertised.listeners=PLAINTEXT://{{ inventory_hostname }}:9092,SASL_PLAINTEXT://{{ inventory_hostname }}:9093
+          
+          # Keep inter-broker communication on PLAINTEXT (no impact on existing cluster)
+          inter.broker.listener.name=PLAINTEXT
+          sasl.mechanism.inter.broker.protocol=PLAINTEXT
+          
+          # Enable PLAIN SASL mechanism for port 9093
+          sasl.enabled.mechanisms=PLAIN
+        backup: yes
+      when: not dual_port_exists
+      
+    - name: Update Kafka systemd service with JAAS config
+      lineinfile:
+        path: /etc/systemd/system/kafka.service
+        regexp: '^Environment="KAFKA_OPTS='
+        line: 'Environment="KAFKA_OPTS=-Djava.security.auth.login.config={{ kafka_jaas_path }}"'
+        insertafter: '^\[Service\]'
+        backup: yes
+        
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+        
+    - name: Start Kafka with dual-port configuration
+      systemd:
+        name: kafka
+        state: started
+        
+    - name: Wait for PLAINTEXT port (9092) to be ready
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 9092
+        timeout: 60
+        
+    - name: Wait for SASL port (9093) to be ready  
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 9093
+        timeout: 60
+        
+    - name: Verify both ports are listening
+      shell: |
+        echo "=== Kafka Port Status on {{ inventory_hostname }} ==="
+        ss -tlnp | grep -E ':(9092|9093)' || netstat -tlnp | grep -E ':(9092|9093)'
+        echo ""
+        echo "=== Kafka Process ==="
+        ps aux | grep kafka | grep -v grep
+      register: port_verification
+      
+    - name: Display verification results
+      debug:
+        msg: "{{ port_verification.stdout_lines }}"
+        
+    - name: Test PLAINTEXT connection (should work)
+      shell: |
+        timeout 10 {{ kafka_home }}/bin/kafka-topics.sh \
+          --bootstrap-server {{ inventory_hostname }}:9092 \
+          --list
+      register: plaintext_test
+      ignore_errors: yes
+      
+    - name: Display PLAINTEXT test result
+      debug:
+        msg: |
+          PLAINTEXT port 9092 test: {{ 'SUCCESS' if plaintext_test.rc == 0 else 'FAILED' }}
+          {% if plaintext_test.rc != 0 %}
+          Error: {{ plaintext_test.stderr }}
+          {% endif %}
+          
+  post_tasks:
+    - name: Summary of dual-port deployment
+      debug:
+        msg: |
+          === DUAL-PORT KAFKA DEPLOYMENT SUMMARY ===
+          Node: {{ inventory_hostname }}
+          
+          Port 9092: PLAINTEXT (no authentication) - {{ 'READY' if plaintext_test.rc == 0 else 'ERROR' }}
+          Port 9093: SASL_PLAINTEXT (requires authentication) - DEPLOYED
+          
+          Next steps:
+          1. Test SASL authentication on port 9093
+          2. Update client applications to use port 9093
+          3. Eventually deprecate port 9092 when all clients migrated
