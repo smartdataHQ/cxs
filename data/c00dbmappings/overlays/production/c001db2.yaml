@@ -21,6 +21,10 @@ spec:
       protocol: TCP
       port: 9092
       targetPort: 9092
+    - name: port-9094
+      protocol: TCP
+      port: 9094
+      targetPort: 9094
 ---
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
@@ -47,6 +51,10 @@ ports:
     appProtocol: port-9092
     protocol: TCP
     port: 9092
+  - name: port-9094
+    appProtocol: port-9094
+    protocol: TCP
+    port: 9094
 endpoints:
   - addresses:
       - "10.180.122.46"
@@ -74,6 +82,10 @@ spec:
       protocol: TCP
       port: 9092
       targetPort: 9092
+    - name: port-9094
+      protocol: TCP
+      port: 9094
+      targetPort: 9094
 ---
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
@@ -100,6 +112,10 @@ ports:
     appProtocol: port-9092
     protocol: TCP
     port: 9092
+  - name: port-9094
+    appProtocol: port-9094
+    protocol: TCP
+    port: 9094
 endpoints:
   - addresses:
       - "10.180.122.46"
@@ -127,6 +143,10 @@ spec:
       protocol: TCP
       port: 9092
       targetPort: 9092
+    - name: port-9094
+      protocol: TCP
+      port: 9094
+      targetPort: 9094
 ---
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
@@ -153,6 +173,10 @@ ports:
     appProtocol: port-9092
     protocol: TCP
     port: 9092
+  - name: port-9094
+    appProtocol: port-9094
+    protocol: TCP
+    port: 9094
 endpoints:
   - addresses:
       - "10.180.122.46"
@@ -180,6 +204,10 @@ spec:
       protocol: TCP
       port: 9092
       targetPort: 9092
+    - name: port-9094
+      protocol: TCP
+      port: 9094
+      targetPort: 9094
 ---
 apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
@@ -206,6 +234,10 @@ ports:
     appProtocol: port-9092
     protocol: TCP
     port: 9092
+  - name: port-9094
+    appProtocol: port-9094
+    protocol: TCP
+    port: 9094
 endpoints:
   - addresses:
       - "10.180.122.46"
