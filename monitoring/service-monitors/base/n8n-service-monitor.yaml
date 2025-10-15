@@ -16,7 +16,7 @@ spec:
     path: /metrics
   namespaceSelector:
     matchNames:
-    - data
+    - pipelines
 
 ---
 apiVersion: v1
@@ -54,7 +54,7 @@ spec:
     path: /metrics
   namespaceSelector:
     matchNames:
-    - data
+    - pipelines
 
 ---
 apiVersion: monitoring.coreos.com/v1
@@ -74,4 +74,4 @@ spec:
     path: /metrics
   namespaceSelector:
     matchNames:
-    - data
+    - pipelines
