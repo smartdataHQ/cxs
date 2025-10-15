@@ -6,7 +6,7 @@ resources:
 
 images:
   - name: quicklookup/inbox
-    newTag: main-d55f245
+    newTag: main-9cfb7ef
 
 patches:
   - path: ingress-patch.yaml
