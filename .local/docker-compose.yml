@@ -67,7 +67,7 @@ services:
     <<: *default-limits
 
   cxs-anonymization:
-    image: quicklookup/cxs-anonymization:c0ee50d
+    image: quicklookup/cxs-anonymization:1d2334b
     platform: linux/amd64
     restart: unless-stopped
     ports:
@@ -112,7 +112,7 @@ services:
 
   cxs-embeddings:
     # NOTE: First startup downloads ~4GB Qwen3 embedding model, can take 5-15 minutes depending on connection
-    image: quicklookup/cxs-embeddings:c0ee50d
+    image: quicklookup/cxs-embeddings:1d2334b
     platform: linux/amd64
     restart: unless-stopped  # Back to original to prevent rapid restarts
     stop_grace_period: 300s  # Give it 5 minutes to shut down gracefully
