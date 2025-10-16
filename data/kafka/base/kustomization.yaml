@@ -16,7 +16,7 @@ helmCharts:
         repository: bitnamilegacy/kafka
       
       broker:
-        replicaCount: 2 # Single broker deployment
+        replicaCount: 3
         heapOpts: -Xmx4096m -Xms2048m # 4GB heap for single broker
         resources:
           limits:
