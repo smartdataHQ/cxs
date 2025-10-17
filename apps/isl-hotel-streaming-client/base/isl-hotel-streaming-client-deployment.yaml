@@ -48,7 +48,7 @@ spec:
                   key: KAFKA_PASSWORD
           envFrom:
             - configMapRef:
-                name: isl-hotel-streaming-client-config
+                name: isl-hotel-streaming-client-config-v2
           volumeMounts:
             - name: offset-volume
               mountPath: /mnt/pvc

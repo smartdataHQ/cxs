@@ -99,14 +99,11 @@ airflow:
           name: airflow
           key: airflow-webserver-secret-key       
     - name: KAFKA_HOST
-      value: "kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092"
+      value: "c001db1:9092,c001db2:9092,c001db3:9092"
     - name: KAFKA_USER
-      value: "user1"
+      value: ""
     - name: KAFKA_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: airflow
-          key: kafka-password
+      value: ""
     - name: REDIS_HOST
       value: "redis-master.data"
     - name: REDIS_PORT

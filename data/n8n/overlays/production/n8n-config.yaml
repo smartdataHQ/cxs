@@ -42,3 +42,16 @@ data:
   EXECUTIONS_DATA_MAX_AGE: "2160"  # 90 days = 2160 hours (maximum age)
   EXECUTIONS_DATA_PRUNE_MAX_COUNT: "50000"  # Maximum number of executions to keep  
   EXECUTIONS_DATA_HARD_DELETE_BUFFER: "168" # Hard guard against deleting data younger than 7 days
+
+  # Prometheus Metrics Configuration
+  N8N_METRICS: "true"
+  N8N_METRICS_INCLUDE_DEFAULT_METRICS: "true"
+  N8N_METRICS_INCLUDE_CACHE_METRICS: "true"
+  N8N_METRICS_INCLUDE_MESSAGE_EVENT_BUS_METRICS: "true"
+  N8N_METRICS_INCLUDE_WORKFLOW_ID_LABEL: "true"
+  N8N_METRICS_INCLUDE_NODE_TYPE_LABEL: "true"
+  N8N_METRICS_INCLUDE_CREDENTIAL_TYPE_LABEL: "false"  # Security: avoid exposing credential types
+  N8N_METRICS_INCLUDE_API_ENDPOINTS: "true"
+  N8N_METRICS_INCLUDE_API_PATH_LABEL: "true"
+  N8N_METRICS_INCLUDE_API_METHOD_LABEL: "true"
+  N8N_METRICS_INCLUDE_API_STATUS_CODE_LABEL: "true"

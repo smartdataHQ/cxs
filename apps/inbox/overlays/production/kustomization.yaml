@@ -4,4 +4,8 @@ kind: Kustomization
 resources:
   - ../../base
 
+images:
+  - name: quicklookup/inbox
+    newTag: main-55f4059
+
 # Production uses defaults from base - no patches needed

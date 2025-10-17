@@ -1,0 +1,12 @@
+[Unit]
+Description=Apache Kafka Server
+Documentation=http://kafka.apache.org/documentation.html
+
+[Service]
+Type=simple
+Environment="JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64"
+ExecStart=/home/kafka/kafka/bin/kafka-server-start.sh /home/kafka/kafka/config/kraft/server.properties
+ExecStop=/home/kafka/kafka/bin/kafka-server-stop.sh
+
+[Install]
+WantedBy=multi-user.target

@@ -4,8 +4,80 @@ kind: Kustomization
 namespace: ingress
 
 resources:
-  - deployment.yaml
+  - statefulset.yaml
   - service.yaml
-  - configmap.yaml
   - autoscaler.yaml
   - ingress.yaml
+
+configMapGenerator:
+  - name: inbox-config
+    literals:
+      - WRITEKEY_HEADER_NAME=writekey
+      - SERVER_PORT="9090"
+      - SPRING_PROFILES_ACTIVE=prod
+      # Kafka
+      - KAFKA_URI=c001db1:9092,c001db2:9092,c001db3:9092
+      - KAFKA_HOST=c001db1:9092,c001db2:9092,c001db3:9092
+      - KAFKA_URI_NEW=c001db1:9092,c001db2:9092,c001db3:9092
+      - KAFKA_HOST_NEW=c001db1:9092,c001db2:9092,c001db3:9092
+      - KAFKA_PORT="9092"
+      - KAFKA_USER=""
+      - KAFKA_USER_PASSWORD=""
+      - KAFKA_SASL_MECHANISM=PLAIN
+      - KAFKA_SECURITY_PROTOCOL=SASL_PLAINTEXT
+      - AVRO_SCHEMA_DIRECTORY=avro
+      - SCHEMA_REGISTRY_ENABLED="false"
+      - SCHEMA_REGISTRY_URL=http://data-kafka-schema-registry:8081
+      # Redis
+      - REDIS_CLUSTER_NODES=c001db1:6379,c001db2:6379,c001db3:6379
+      - REDIS_HOST=redis-master.data
+      - REDIS_PORT="6379"
+      - REDIS_DB="0"
+      - REDIS_USER=admin
+      - REDIS_TTL="120"
+      # Postgres
+      - POSTGRES_HOST=cxs-pg-ha.data
+      - POSTGRES_PORT="5432"
+      - POSTGRES_USER=cxs-pg
+      - POSTGRES_DB=ssp
+      # Neo4j
+      - NEO4J_URI=neo4j://neo4j.data:7687
+      - NEO4J_HOST=neo4j.data
+      - NEO4J_USER=admin
+      - NEO4J_DATABASE=contextsuite
+      # S3 and GeoIP
+      - S3_ENDPOINT=https://s-darz.cloud.gcore.lu
+      - S3_REGION=s-darz
+      - GEOIP_BUCKET_NAME=geoip-bucket
+      - GEOIP_FILE_NAME=GeoIP2-City.mmdb
+      - GEOIP_ENABLED="true"
+      # Airflow
+      - AIRFLOW_TRIGGER_URL=http://localhost:8082/api/v1/dags/ingression/dagRuns
+      - AIRFLOW_DAG_ID=ingression
+      - AIRFLOW_AUTH_USERNAME=admin
+      - AIRFLOW_GRACE_PERIOD=PT10M
+      # NATS
+      - NATS_SERVER=nats://localhost:4222
+      - NATS_TOPIC=iot-updates
+      - NATS_KAFKA_TOPIC=iot-kafka-updates
+      # MQTT
+      - MQTT_BROKER_URL=tcp://localhost:1883
+      - MQTT_CLIENT_ID=my-mqtt-client
+      - MQTT_TOPIC=iot-mqtt-updates
+      # CoAP
+      - COAP_SERVER_URL=coap://localhost:5683/sensors
+      - COAP_RESOURCE=sensors
+      # JWT
+      - JWT_EXPIRATION="3600000"
+      - JWT_REFRESH_EXPIRATION="86400000"
+      # Vault
+      - VAULT_HOST=vault-vault.data
+      - VAULT_PORT="8200"
+      - VAULT_SCHEME=http
+      - VAULT_TOKEN=ingression
+      - VAULT_ENABLED="false"
+      # Webhooks
+      - WEBHOOK_BATCH_SIZE="100"
+      - WEBHOOK_BATCH_PROCESSING_INTERVAL="5000"
+      # DLQ
+      - DLQ_BASE_PATH=/data/dlq

@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-data-recovery
+  namespace: data
+spec:
+  containers:
+  - name: kafka-tools
+    image: confluentinc/cp-kafka:latest
+    command: ["/bin/bash", "-c", "sleep 86400"]  # Sleep for 24 hours
+    volumeMounts:
+    - name: kafka-data-0
+      mountPath: /recovery/kafka-0
+      readOnly: true
+    - name: kafka-data-1  
+      mountPath: /recovery/kafka-1
+      readOnly: true
+    - name: kafka-data-2
+      mountPath: /recovery/kafka-2
+      readOnly: true
+    - name: workspace
+      mountPath: /workspace
+    resources:
+      requests:
+        memory: "2Gi"
+        cpu: "500m"
+      limits:
+        memory: "4Gi"
+        cpu: "1000m"
+  volumes:
+  - name: kafka-data-0
+    persistentVolumeClaim:
+      claimName: data-kafka-broker-0
+      readOnly: true
+  - name: kafka-data-1
+    persistentVolumeClaim:
+      claimName: data-kafka-broker-1
+      readOnly: true
+  - name: kafka-data-2
+    persistentVolumeClaim:
+      claimName: data-kafka-broker-2
+      readOnly: true
+  - name: workspace
+    emptyDir: {}
+  restartPolicy: Never

@@ -20,7 +20,7 @@ data:
   INTEGRATION_USER: ISLHTL_SNJALLGOGN
   GRAPHQL_CLIENT_ID: bea04c89-586c-4f18-a9a3-6850818950dc
   KAFKA_ENABLED: "true"
-  KAFKA_HOST: kafka-broker-0.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.data.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.data.svc.cluster.local:9092
+  KAFKA_HOST: c001db1.data.svc.cluster.local:9094,c001db2.data.svc.cluster.local:9094,c001db3.data.svc.cluster.local:9094
   KAFKA_USER: user1
   KAFKA_CLIENT_ID: ohip-shovel
   KAFKA_TOPIC: se2-islandshotel-is

@@ -3,3 +3,5 @@ resources:
   - longhorn-service-monitor.yaml
   - data-layer-prometheus-rule.yaml
   - data-layer-service-monitor.yaml
+  - n8n-service-monitor.yaml
+  - n8n-prometheus-rule.yaml

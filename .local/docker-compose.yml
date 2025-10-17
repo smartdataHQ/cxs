@@ -37,7 +37,14 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-    <<: *default-limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 8G  # Higher limit for database operations with embeddings
+        reservations:
+          cpus: '0.5'
+          memory: 2G
 
   redis:
     image: redis:8.2.1-alpine
@@ -60,11 +67,18 @@ services:
     <<: *default-limits
 
   cxs-anonymization:
-    image: quicklookup/cxs-anonymization:c0ee50d
+    image: quicklookup/cxs-anonymization:1d2334b
     platform: linux/amd64
     restart: unless-stopped
     ports:
       - "8081:8081"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     environment:
       ENV: ${ENVIRONMENT:-onprem}
       DEBUG: ${ANONYMIZATION_DEBUG:-false}
@@ -81,6 +95,9 @@ services:
       PYTHONPATH: ${PYTHONPATH:-/app}
       PYTHONDONTWRITEBYTECODE: ${PYTHONDONTWRITEBYTECODE:-1}
       PYTHONUNBUFFERED: ${PYTHONUNBUFFERED:-1}
+      # GPU Configuration
+      DEVICE: ${DEVICE:-cuda}
+      CUDA_VISIBLE_DEVICES: "0"
     volumes:
       - hf-cache:/tmp/hf_cache
     networks:
@@ -95,7 +112,7 @@ services:
 
   cxs-embeddings:
     # NOTE: First startup downloads ~4GB Qwen3 embedding model, can take 5-15 minutes depending on connection
-    image: quicklookup/cxs-embeddings:c0ee50d
+    image: quicklookup/cxs-embeddings:1d2334b
     platform: linux/amd64
     restart: unless-stopped  # Back to original to prevent rapid restarts
     stop_grace_period: 300s  # Give it 5 minutes to shut down gracefully
@@ -125,6 +142,9 @@ services:
       # Additional settings to help with model loading
       TRANSFORMERS_OFFLINE: "0"
       OMP_NUM_THREADS: "4"
+      # GPU Configuration
+      DEVICE: ${DEVICE:-cuda}
+      CUDA_VISIBLE_DEVICES: "0"
     volumes:
       - hf-cache:/tmp/hf_cache  # IMPORTANT: Persists downloaded models between restarts
       - torch-cache:/tmp/torch_cache
@@ -139,6 +159,10 @@ services:
         reservations:
           cpus: '4.0'   # Reserve more CPUs
           memory: 12G
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     # Not using default limits (*default-limits) to avoid inheriting lower limits
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8082/health')\" || exit 1"]
@@ -148,7 +172,7 @@ services:
       start_period: 1800s  # 30 minute start period
 
   cxsservices:
-    image: quicklookup/cxs-services:3a9bc08
+    image: quicklookup/cxs-services:8f9902f
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088", "--workers", "2"]
@@ -181,7 +205,7 @@ services:
       # AI Services
       ANONYMIZATION_SERVICE_URL: ${ANONYMIZATION_SERVICE_URL:-http://cxs-anonymization:8081}
       EMBEDDINGS_SERVICE_URL: ${EMBEDDINGS_SERVICE_URL:-http://cxs-embeddings:8082}
-      LOCAL_EMBEDDING_SERVICE_URL: ${LOCAL_EMBEDDING_SERVICE_URL:-http://cxs-embeddings:8082}
+      LOCAL_EMBEDDING_SERVICE_URL: ${LOCAL_EMBEDDING_SERVICE_URL:-http://cxs-embeddings:8082/api/embeddings/embed-single}
       # Vector/LLM Configuration
       DEFAULT_VECTOR_PROVIDER: ${DEFAULT_VECTOR_PROVIDER:-Voyage}
       DEFAULT_VECTOR_MODEL: ${DEFAULT_VECTOR_MODEL:-voyage-multilingual-2}
@@ -226,7 +250,7 @@ services:
     <<: *default-limits
 
   mimir-server:
-    image: quicklookup/cxs-mimir-api:cf907a7
+    image: quicklookup/cxs-mimir-api:fb9c11b
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
@@ -277,6 +301,7 @@ services:
       ONPREM_ORGANIZATION: ${ONPREM_ORGANIZATION}
       ONPREM_ORGANIZATION_GID: ${ONPREM_ORGANIZATION_GID}
       ONPREM_PARTITION: ${ONPREM_PARTITION}
+      TAVILY_API_KEY: ${TAVILY_API_KEY}
     networks:
       - app
     logging: *default-logging
@@ -296,7 +321,7 @@ services:
           memory: 1G
 
   mimir-ui:
-    image: quicklookup/mimir-chat:f7502da
+    image: quicklookup/mimir-chat:dd2023d
     platform: linux/amd64
     restart: unless-stopped
     depends_on:

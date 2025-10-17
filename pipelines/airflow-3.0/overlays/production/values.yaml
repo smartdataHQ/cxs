@@ -80,7 +80,7 @@ airflowVersion: "3.0.2"
 images:
   airflow:
     repository: quicklookup/airflow-pipelines-v3
-    tag: 00be7de
+    tag: 2ebd95a
     # Specifying digest takes precedence over tag.
     digest: ~
     pullPolicy: IfNotPresent
@@ -140,15 +140,16 @@ labels: {}
 ingress:
   # Enable all ingress resources
   # (deprecated - use ingress.web.enabled, ingress.apiServer.enabled and ingress.flower.enabled)
-  enabled: ~
+  enabled: true
 
   # Configs for the Ingress of the API Server
   apiServer:
     # Enable API Server ingress resource
-    enabled: false
+    enabled: true
 
     # Annotations for the API Server Ingress
-    annotations: {}
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
 
     # The path for the API Server Ingress
     path: "/"
@@ -157,7 +158,7 @@ ingress:
     pathType: "ImplementationSpecific"
 
     # The hostname for the API Server Ingress (Deprecated - renamed to `ingress.apiServer.hosts`)
-    host: ""
+    host: "airflow-v3.contextsuite.com"
 
     # The hostnames or hosts configuration for the API Server Ingress
     hosts: []
@@ -176,9 +177,9 @@ ingress:
     # configs for API Server Ingress TLS (Deprecated - renamed to `ingress.apiServer.hosts[*].tls`)
     tls:
       # Enable TLS termination for the API Server Ingress
-      enabled: false
+      enabled: true
       # the name of a pre-created Secret containing a TLS private key and certificate
-      secretName: ""
+      secretName: "airflow-v3-contextsuite-com-tls"
 
     # HTTP paths to add to the API Server Ingress before the default path
     precedingPaths: []
@@ -392,10 +393,16 @@ volumes: []
 volumeMounts: []
 
 # Secrets for all airflow containers
-secret: []
-# - envName: ""
-#   secretName: ""
-#   secretKey: ""
+secret:
+ - envName: "AZURE_CLIENT_ID"
+   secretName: "airflow-3.0"
+   secretKey: "azure-client-id"
+ - envName: "AZURE_CLIENT_SECRET"
+   secretName: "airflow-3.0"
+   secretKey: "azure-client-secret"
+ - envName: "AZURE_TENANT_ID"
+   secretName: "airflow-3.0"
+   secretKey: "azure-tenant-id"
 
 # Enables selected built-in secrets that are set via environment variables by default.
 # Those secrets are provided by the Helm Chart secrets by default but in some cases you
@@ -513,7 +520,7 @@ data:
   # secret for result backend but with a db+ scheme prefix.
   # For Airflow >= 2.4.0 it is possible to not specify the secret again,
   # as Airflow will use sql_alchemy_conn with a db+ scheme prefix by default.
-  resultBackendSecretName: airflow-3.0
+  resultBackendSecretName: ~
   brokerUrlSecretName: ~
 
   # Otherwise pass connection values in
@@ -1259,8 +1266,8 @@ createUserJob:
   priorityClassName: ~
   # In case you need to disable the helm hooks that create the jobs after install.
   # Disable this if you are using ArgoCD for example
-  useHelmHooks: true
-  applyCustomEnv: true
+  useHelmHooks: false
+  applyCustomEnv: false
 
   env: []
 
@@ -1362,8 +1369,8 @@ migrateDatabaseJob:
   priorityClassName: ~
   # In case you need to disable the helm hooks that create the jobs after install.
   # Disable this if you are using ArgoCD for example
-  useHelmHooks: true
-  applyCustomEnv: true
+  useHelmHooks: false
+  applyCustomEnv: false
   env: []
 
 apiServer:
@@ -1495,7 +1502,39 @@ apiServer:
   # as a custom webserver_config.py. You can bake a webserver_config.py in to
   # your image instead or specify a configmap containing the
   # webserver_config.py.
-  apiServerConfig: ~
+  apiServerConfig: |
+    import os
+    from airflow import configuration as conf
+    from flask_appbuilder.security.manager import AUTH_OAUTH  
+    
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = None   
+    
+    AUTH_USER_REGISTRATION_ROLE = "Admin"
+    AUTH_USER_REGISTRATION = True
+    
+    AUTH_TYPE = AUTH_OAUTH
+    
+    OAUTH_PROVIDERS = [
+      {
+      "name": "azure",
+      "icon": "fa-windows",
+      "token_key": "access_token",
+      "remote_app": {
+          "client_id": os.environ.get("AZURE_CLIENT_ID"),
+          "client_secret": os.environ.get("AZURE_CLIENT_SECRET"),
+          "api_base_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2",
+          "client_kwargs": {
+              "scope": "User.read name preferred_username email profile upn",
+              "resource": os.environ.get("AZURE_CLIENT_ID"),                
+              "verify_signature": False
+          },
+          "request_token_url": None,
+          "access_token_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2/token",
+          "authorize_url": f"https://login.microsoftonline.com/{os.environ.get('AZURE_TENANT_ID')}/oauth2/authorize",
+          },
+      }
+    ]
   # apiServerConfig: |
   #   from airflow import configuration as conf
 
@@ -1662,7 +1701,7 @@ webserver:
 
   # Create initial user.
   defaultUser:
-    enabled: true
+    enabled: false
     role: Admin
     username: admin
     email: admin@example.com
@@ -1829,7 +1868,7 @@ triggerer:
 
   persistence:
     # Enable persistent volumes
-    enabled: true
+    enabled: false
     # This policy determines whether PVCs should be deleted when StatefulSet is scaled down or removed.
     persistentVolumeClaimRetentionPolicy: ~
     # Volume size for triggerer StatefulSet
@@ -3068,9 +3107,9 @@ dags:
 
 logs:
   # Configuration for empty dir volume (if logs.persistence.enabled == false)
-  # emptyDirConfig:
-  #   sizeLimit: 1Gi
-  #   medium: Memory
+  emptyDirConfig:
+    sizeLimit: 10Gi
+    medium: Memory
 
   persistence:
     # Enable persistent volume for storing logs

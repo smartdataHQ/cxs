@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: inbox
+spec:
+  serviceName: inbox
+  selector:
+    matchLabels:
+      app: inbox
+      tier: api
+  replicas: 2
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      partition: 0
+  template:
+    metadata:
+      labels:
+        app: inbox
+        tier: api
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+      - name: inbox
+        image: quicklookup/inbox
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 9090
+          name: http
+        - containerPort: 2222
+          name: sftp
+        env:
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: POSTGRES_PASSWORD
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: REDIS_PASSWORD_EMM
+          - name: S3_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: S3_ACCESS_KEY
+          - name: S3_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: S3_SECRET_KEY
+          - name: AIRFLOW_AUTH_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: AIRFLOW_AUTH_PASSWORD
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: JWT_SECRET
+          - name: VAULT_KV_BACKEND
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: VAULT_KV_BACKEND
+        envFrom:
+          - configMapRef:
+              name: inbox-config
+        volumeMounts:
+          - mountPath: /tmp
+            name: sftp
+          - mountPath: /data/dlq
+            name: dlq-data
+      imagePullSecrets:
+        - name: dockerlock
+      volumes:
+        - name: sftp
+          hostPath:
+            path: /data/local/sftp
+        - name: dlq-data
+          hostPath:
+            path: /data/local/dlq
+            type: DirectoryOrCreate

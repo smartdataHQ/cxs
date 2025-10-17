@@ -1,0 +1,115 @@
+---
+- name: Deploy dual-port Kafka authentication (PLAINTEXT:9092 + SASL:9093)
+  hosts: data_nodes
+  become: yes
+  vars:
+    kafka_config_dir: /home/kafka/kafka/config
+    kafka_jaas_path: "{{ kafka_config_dir }}/kafka_server_jaas.conf"
+    
+  tasks:
+    - name: Check if Kafka is running
+      systemd:
+        name: kafka
+        state: started
+      check_mode: yes
+      register: kafka_status
+      
+    - name: Stop Kafka service for configuration update
+      systemd:
+        name: kafka
+        state: stopped
+      when: kafka_status.status.ActiveState == "active"
+      
+    - name: Create server.properties.d directory
+      file:
+        path: "{{ kafka_config_dir }}/server.properties.d"
+        state: directory
+        owner: kafka
+        group: kafka
+        mode: '0755'
+        
+    - name: Deploy dual-port authentication config
+      template:
+        src: ../files/server.properties.d/dual-port-auth.conf
+        dest: "{{ kafka_config_dir }}/server.properties.d/dual-port-auth.conf"
+        owner: kafka
+        group: kafka
+        mode: '0644'
+      vars:
+        hostname: "{{ inventory_hostname }}"
+        
+    - name: Replace hostname placeholder in dual-port config
+      replace:
+        path: "{{ kafka_config_dir }}/server.properties.d/dual-port-auth.conf"
+        regexp: 'REPLACE_WITH_HOSTNAME'
+        replace: "{{ inventory_hostname }}"
+        
+    - name: Deploy JAAS configuration file
+      copy:
+        src: ../files/kafka_server_jaas.conf
+        dest: "{{ kafka_jaas_path }}"
+        owner: kafka
+        group: kafka
+        mode: '0600'  # Secure permissions for credentials
+        
+    - name: Update Kafka systemd service to include JAAS config
+      lineinfile:
+        path: /etc/systemd/system/kafka.service
+        regexp: '^Environment="KAFKA_OPTS='
+        line: 'Environment="KAFKA_OPTS=-Djava.security.auth.login.config={{ kafka_jaas_path }}"'
+        insertafter: '^\[Service\]'
+        
+    - name: Include dual-port config in main server.properties
+      lineinfile:
+        path: "{{ kafka_config_dir }}/server.properties"
+        line: "# Include dual-port authentication config"
+        insertbefore: EOF
+        
+    - name: Append dual-port config to server.properties
+      shell: |
+        echo "" >> {{ kafka_config_dir }}/server.properties
+        echo "# Dual-port authentication - added $(date)" >> {{ kafka_config_dir }}/server.properties  
+        cat {{ kafka_config_dir }}/server.properties.d/dual-port-auth.conf >> {{ kafka_config_dir }}/server.properties
+      args:
+        creates: "{{ kafka_config_dir }}/.dual-port-applied"
+        
+    - name: Mark dual-port config as applied
+      file:
+        path: "{{ kafka_config_dir }}/.dual-port-applied"
+        state: touch
+        owner: kafka
+        group: kafka
+        
+    - name: Reload systemd daemon
+      systemd:
+        daemon_reload: yes
+        
+    - name: Start Kafka service with dual-port configuration
+      systemd:
+        name: kafka
+        state: started
+        enabled: yes
+        
+    - name: Wait for Kafka to be ready on PLAINTEXT port (9092)
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 9092
+        timeout: 60
+        
+    - name: Wait for Kafka to be ready on SASL port (9093)
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: 9093
+        timeout: 60
+        
+    - name: Verify dual-port configuration
+      shell: |
+        echo "=== Port 9092 (PLAINTEXT) ==="
+        netstat -tlnp | grep :9092 || ss -tlnp | grep :9092
+        echo "=== Port 9093 (SASL_PLAINTEXT) ==="
+        netstat -tlnp | grep :9093 || ss -tlnp | grep :9093
+      register: port_check
+      
+    - name: Display port verification
+      debug:
+        msg: "{{ port_check.stdout_lines }}"
