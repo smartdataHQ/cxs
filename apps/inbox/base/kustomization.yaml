@@ -80,5 +80,7 @@ configMapGenerator:
       # Webhooks
       - WEBHOOK_BATCH_SIZE="100"
       - WEBHOOK_BATCH_PROCESSING_INTERVAL="5000"
+      # Event validation
+      - MAX_EVENT_SIZE_BYTES="65536"
       # DLQ
       - DLQ_BASE_PATH=/data/dlq

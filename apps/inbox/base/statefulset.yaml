@@ -21,6 +21,13 @@ spec:
     spec:
       securityContext:
         fsGroup: 1000
+      initContainers:
+      - name: fix-dlq-permissions
+        image: busybox:latest
+        command: ['sh', '-c', 'mkdir -p /data/dlq && chown -R 1000:1000 /data/dlq && chmod -R 775 /data/dlq']
+        volumeMounts:
+          - mountPath: /data/dlq
+            name: dlq-data
       containers:
       - name: inbox
         image: quicklookup/inbox
