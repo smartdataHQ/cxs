@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: inbox-in
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # SSE/WebSocket support
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/websocket-services: "inbox"
+    # Session affinity for long-lived connections
+    nginx.ingress.kubernetes.io/affinity: "cookie"
+    nginx.ingress.kubernetes.io/session-cookie-name: "inbox-affinity"
+    nginx.ingress.kubernetes.io/session-cookie-max-age: "86400"
+spec:
+  rules:
+    - host: in.contextsuite.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: inbox
+                port:
+                  number: 9090
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - in.contextsuite.com
+      secretName: in-contextsuite-com-tls

@@ -10,6 +10,7 @@ images:
 
 patches:
   - path: ingress-patch.yaml
+  - path: ingress-in-patch.yaml
   - path: data-credentials.yaml
   - path: configmap-patch.yaml
   - path: autoscaler-patch.yaml

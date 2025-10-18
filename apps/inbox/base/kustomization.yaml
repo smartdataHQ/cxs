@@ -8,6 +8,7 @@ resources:
   - service.yaml
   - autoscaler.yaml
   - ingress.yaml
+  - ingress-in.yaml
 
 configMapGenerator:
   - name: inbox-config
