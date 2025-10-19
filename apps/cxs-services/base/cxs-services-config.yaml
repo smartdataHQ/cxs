@@ -23,6 +23,7 @@ data:
   DEFAULT_VECTOR_MODEL: 'voyage-multilingual-2'
   MOCK_CONFIG_ROOT: 'resources/mock-config'
   ALGORITHM: 'HS256'
+  WORKER_THREADS: 2
 
   SCRAPER_TEMP_DIR: '/tmp'
   ACCESS_TOKEN_EXPIRE_MINUTES: '525600'
