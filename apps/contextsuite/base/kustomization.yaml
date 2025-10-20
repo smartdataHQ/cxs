@@ -14,6 +14,8 @@ configMapGenerator:
       - WKT_FOLDER=/cdn/wkt_cache
       - REACT_APP_MAPBOX_DARK_TILE_URL=https://api.mapbox.com/styles/v1/ingiatlason/cl4eglwhb000614ld9jgxs50r/tiles/256/{z}/{x}/{y}@2x?access_token=
       - REACT_APP_MAPBOX_LIGHT_TILE_URL=https://api.mapbox.com/styles/v1/ingiatlason/cleie5zek005901pvxxblfo6a/tiles/256/{z}/{x}/{y}@2x?access_token=
+      - REACT_APP_FLAGS_ASSETS_ENDPOINT=https://cdn.contextsuite.com/icons/v1/svg-flags
+      - REACT_APP_SOURCE_ASSETS_ENDPOINT=https://cdn.contextsuite.com/icons/v1/sources
       - NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL=https://admin.contextsuite.com
       - NEXTAUTH_URL=https://app.contextsuite.com
       - SENTRY_ENVIRONMENT=contextsuite-prod
