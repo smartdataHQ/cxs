@@ -1,0 +1,26 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cep
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+# Base configuration for cep-router
+configMapGenerator:
+  - name: cep-router-config
+    literals:
+      # Server Configuration
+      - ROUTER_PORT="8080"
+      - SPRING_PROFILES_ACTIVE=prod
+      
+      # Redis Configuration (shared with other services)
+      - REDIS_HOST=redis-master.data.svc.cluster.local
+      - REDIS_PORT="6379"
+      - REDIS_SSL="false"
+      
+      # Router Configuration
+      - ROUTER_HEARTBEAT_INTERVAL="30"
+      - ROUTER_HEARTBEAT_GRACE_MULTIPLIER="3.0"
+      - ROUTER_DIAGNOSTICS_ENABLED="true"

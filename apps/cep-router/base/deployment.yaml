@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cep-router
+  labels:
+    app: cep-router
+    tier: api
+spec:
+  replicas: 2  # Router can be scaled for HA
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: cep-router
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: cep-router
+        tier: api
+    spec:
+      containers:
+      - name: cep-router
+        image: quicklookup/cep-router
+        # Image tag managed in overlays/*/kustomization.yaml
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+        ports:
+        - containerPort: 8080
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        env:
+          # Redis credentials (shared with other CEP components)
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-auth
+                key: password
+          # Router internal token for secure communication
+          - name: ROUTER_SECURITY_INTERNAL_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: cep-router-secrets
+                key: internal-token
+        envFrom:
+          - configMapRef:
+              name: cep-router-config

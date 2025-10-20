@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cep-analyser
+  labels:
+    app: cep-analyser
+    tier: backend
+spec:
+  replicas: 1  # Always 1 - CEP limitations require single-instance per region/cluster
+  strategy:
+    type: Recreate  # Ensure only one instance at a time
+  selector:
+    matchLabels:
+      app: cep-analyser
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: cep-analyser
+        tier: backend
+    spec:
+      containers:
+      - name: cep-analyser
+        image: quicklookup/cep-analyser
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+        ports:
+        - containerPort: 9090
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 9090
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 9090
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        env:
+          # Database credentials
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: cxs-pg-pguser-cep
+                key: password
+          # Redis credentials
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-auth
+                key: password
+          # Vault token
+          - name: VAULT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: cep-analyser-secrets
+                key: vault-token
+          # JWT Secret
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: cep-analyser-secrets
+                key: jwt-secret
+          # Router token (if enabled)
+          - name: ROUTER_CLIENT_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: cep-analyser-secrets
+                key: router-token
+                optional: true
+          # RSA keys for CEP
+          - name: RSA_PRIVATE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cep-analyser-secrets
+                key: rsa-private-key
+          - name: RSA_PUBLIC_KEY
+            valueFrom:
+              secretKeyRef:
+                name: cep-analyser-secrets
+                key: rsa-public-key
+        envFrom:
+          - configMapRef:
+              name: cep-analyser-config
+        volumeMounts:
+          - mountPath: /tmp
+            name: temp-storage
+          - mountPath: /data/avro
+            name: avro-schemas
+      volumes:
+        - name: temp-storage
+          emptyDir: {}
+        - name: avro-schemas
+          emptyDir: {}
