@@ -95,6 +95,8 @@ spec:
             name: temp-storage
           - mountPath: /data/avro
             name: avro-schemas
+      imagePullSecrets:
+        - name: dockerlock
       volumes:
         - name: temp-storage
           emptyDir: {}
