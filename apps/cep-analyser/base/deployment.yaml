@@ -65,23 +65,7 @@ spec:
               secretKeyRef:
                 name: inbox-secrets
                 key: JWT_SECRET
-          # Router token (CEP-specific)
-          - name: ROUTER_CLIENT_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: inbox-secrets
-                key: ROUTER_CLIENT_TOKEN
-          # RSA keys (CEP-specific, stored in shared secret)
-          - name: RSA_PRIVATE_KEY
-            valueFrom:
-              secretKeyRef:
-                name: inbox-secrets
-                key: RSA_PRIVATE_KEY
-          - name: RSA_PUBLIC_KEY
-            valueFrom:
-              secretKeyRef:
-                name: inbox-secrets
-                key: RSA_PUBLIC_KEY
+
         envFrom:
           - configMapRef:
               name: cep-analyser-config
