@@ -9,7 +9,7 @@ resources:
 # Image tag for production
 images:
   - name: quicklookup/cep-router
-    newTag: cb19215
+    newTag: e9cb8ac
 
 # Production-specific configuration
 configMapGenerator:
