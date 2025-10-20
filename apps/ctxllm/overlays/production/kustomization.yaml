@@ -2,6 +2,7 @@ images:
   - name: quicklookup/ctxllm
     newTag: 95a2104
 
+# Production configs reside in the base
 resources:
   - ../../base
 

@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: ctxllm-config
-data:
-  AZURE_OPENAI_API_BASE: '<missing>' # 'https://smartdatagpt4.openai.azure.com/'
