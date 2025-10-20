@@ -58,12 +58,7 @@ spec:
               secretKeyRef:
                 name: inbox-secrets
                 key: REDIS_PASSWORD_EMM
-          # Vault token (shared with inbox)
-          - name: VAULT_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: inbox-secrets
-                key: VAULT_TOKEN
+
           # JWT Secret (shared with inbox)
           - name: JWT_SECRET
             valueFrom:
