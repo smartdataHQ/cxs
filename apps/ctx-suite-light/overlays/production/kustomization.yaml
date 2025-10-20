@@ -1,6 +1,4 @@
-namespace: solutions
-
+# Production configs reside in the base
 resources:
   - ../../base
-  - ctx-suite-light-config.yaml
   - ctx-suite-light-ingress.yml
