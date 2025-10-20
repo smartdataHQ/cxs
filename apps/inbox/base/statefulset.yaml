@@ -8,7 +8,8 @@ spec:
     matchLabels:
       app: inbox
       tier: api
-  replicas: 2
+#  Replica count is controlled via the Horizontal Pod Autoscaler
+#  replicas: <not set here>
   updateStrategy:
     type: RollingUpdate
     rollingUpdate:
