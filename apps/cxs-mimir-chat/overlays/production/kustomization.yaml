@@ -1,9 +1,13 @@
-bases:
-  - ../../base
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
 
 namespace: solutions
 
 images:
   - name: quicklookup/mimir-chat
     newTag: ec08175
+
+# Production configs reside in the base
+resources:
+  - ../../base
 

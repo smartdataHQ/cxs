@@ -1,7 +1,15 @@
 namespace: solutions
+
+configMapGenerator:
+  - name: cxs-mimir-web-config
+    literals:
+      - BROWSER_CHAT_API=https://agents.contextsuite.com
+      - BROWSER_APP_API=https://agents.contextsuite.com
+      - MIMIR_SERVER_API=https://agents.contextsuite.com
+      - BROWSER_CHAT_WSS_API=wss://agents.contextsuite.com
+
 resources:
   - mimir-chat-deployment.yaml
   - mimir-chat-service.yaml
-  - mimir-chat-config.yaml
   - mimir-chat-ingress.yml
   - mimir-chat-logreglan-ingress.yaml

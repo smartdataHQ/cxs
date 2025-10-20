@@ -7,24 +7,15 @@ images:
   - name: quicklookup/mimir-chat
     newTag: ec08175
 
+configMapGenerator:
+  - name: cxs-mimir-web-config
+    behavior: merge
+    literals:
+      - BROWSER_CHAT_API=https://agents.contextsuite.dev
+      - BROWSER_APP_API=https://agents.contextsuite.dev
+      - MIMIR_SERVER_API=https://agents.contextsuite.dev
+      - BROWSER_CHAT_WSS_API=wss://agents.contextsuite.dev
+
 resources:
   - ../../base
-
-patches:
-  - target:
-      kind: ConfigMap
-      name: cxs-mimir-web-config
-    patch: |
-      - op: replace
-        path: /data/BROWSER_CHAT_API
-        value: "https://agents.contextsuite.dev"
-      - op: replace
-        path: /data/BROWSER_APP_API
-        value: "https://agents.contextsuite.dev"
-      - op: replace
-        path: /data/MIMIR_SERVER_API
-        value: "https://agents.contextsuite.dev"
-      - op: replace
-        path: /data/BROWSER_CHAT_WSS_API
-        value: "wss://agents.contextsuite.dev"
 
