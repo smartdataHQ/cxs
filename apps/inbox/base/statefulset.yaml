@@ -19,6 +19,16 @@ spec:
         app: inbox
         tier: api
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - inbox
+            topologyKey: kubernetes.io/hostname
       securityContext:
         fsGroup: 1000
       initContainers:
