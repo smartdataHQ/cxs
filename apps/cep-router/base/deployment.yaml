@@ -53,18 +53,18 @@ spec:
           timeoutSeconds: 5
           failureThreshold: 3
         env:
-          # Redis credentials (shared with other CEP components)
+          # Redis credentials (shared with inbox)
           - name: REDIS_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: redis-auth
-                key: password
+                name: inbox-secrets
+                key: REDIS_PASSWORD_EMM
           # Router internal token for secure communication
           - name: ROUTER_SECURITY_INTERNAL_TOKEN
             valueFrom:
               secretKeyRef:
-                name: cep-router-secrets
-                key: internal-token
+                name: inbox-secrets
+                key: ROUTER_CLIENT_TOKEN
         envFrom:
           - configMapRef:
               name: cep-router-config

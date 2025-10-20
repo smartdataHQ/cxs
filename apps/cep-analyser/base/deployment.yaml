@@ -46,48 +46,47 @@ spec:
           timeoutSeconds: 5
           failureThreshold: 3
         env:
-          # Database credentials
+          # Database credentials (shared with inbox)
           - name: DB_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: cxs-pg-pguser-cep
-                key: password
-          # Redis credentials
+                name: inbox-secrets
+                key: POSTGRES_PASSWORD
+          # Redis credentials (shared with inbox)
           - name: REDIS_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: redis-auth
-                key: password
-          # Vault token
+                name: inbox-secrets
+                key: REDIS_PASSWORD_EMM
+          # Vault token (shared with inbox)
           - name: VAULT_TOKEN
             valueFrom:
               secretKeyRef:
-                name: cep-analyser-secrets
-                key: vault-token
-          # JWT Secret
+                name: inbox-secrets
+                key: VAULT_TOKEN
+          # JWT Secret (shared with inbox)
           - name: JWT_SECRET
             valueFrom:
               secretKeyRef:
-                name: cep-analyser-secrets
-                key: jwt-secret
-          # Router token (if enabled)
+                name: inbox-secrets
+                key: JWT_SECRET
+          # Router token (CEP-specific)
           - name: ROUTER_CLIENT_TOKEN
             valueFrom:
               secretKeyRef:
-                name: cep-analyser-secrets
-                key: router-token
-                optional: true
-          # RSA keys for CEP
+                name: inbox-secrets
+                key: ROUTER_CLIENT_TOKEN
+          # RSA keys (CEP-specific, stored in shared secret)
           - name: RSA_PRIVATE_KEY
             valueFrom:
               secretKeyRef:
-                name: cep-analyser-secrets
-                key: rsa-private-key
+                name: inbox-secrets
+                key: RSA_PRIVATE_KEY
           - name: RSA_PUBLIC_KEY
             valueFrom:
               secretKeyRef:
-                name: cep-analyser-secrets
-                key: rsa-public-key
+                name: inbox-secrets
+                key: RSA_PUBLIC_KEY
         envFrom:
           - configMapRef:
               name: cep-analyser-config
