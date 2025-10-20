@@ -2,10 +2,19 @@ images:
   - name: quicklookup/contextapi
     newTag: b387480
 
+configMapGenerator:
+  - name: contextapi-config
+    behavior: merge
+    literals:
+      - SENTRY_ENVIRONMENT=contextsuite-staging
+      - NEXT_PUBLIC_SENTRY_DSN=""
+      - SENTRY_DSN=""
+      - CLICKHOUSE_CONNECTION=http://clickhouse.data:8123
+
 resources:
   - ../../base
+
 patches:
-  - path: contextapi-config.yaml
   - path: database-migration.yaml
   - target:
       kind: Ingress
