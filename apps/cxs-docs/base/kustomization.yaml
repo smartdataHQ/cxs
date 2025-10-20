@@ -3,6 +3,22 @@ kind: Kustomization
 
 namespace: solutions
 
+configMapGenerator:
+  - name: cxs-docs-config
+    literals:
+      - AIRTABLE_BASE_ID=appG8fjX3LElibBlq
+      - AIRTABLE_EVENTS_TABLE_ID=tblZxw7YVLyvi3JFh
+      - AIRTABLE_ALIASES_TABLE_ID=tblGMNYE7fxVZbwKf
+      - AIRTABLE_RATE_LIMIT_DELAY=0.2
+      - AIRTABLE_MAX_RETRIES=3
+      - AIRTABLE_TIMEOUT_SECONDS=30
+      - EVENT_BIBLE_DATA_DIR=data/event-bible
+      - EVENT_BIBLE_DOCS_DIR=docs/app/docs/semantic-events/bible
+      - EVENT_BIBLE_BACKUP_ENABLED=true
+      - EVENT_BIBLE_BACKUP_COUNT=5
+      - EVENT_BIBLE_DRY_RUN=false
+      - EVENT_BIBLE_VERBOSE=false
+
 resources:
   - cxs-docs-deployment.yaml
   - cxs-docs-service.yaml
