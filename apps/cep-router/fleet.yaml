@@ -1,0 +1,6 @@
+# This file is deprecated - migrating to ArgoCD
+# Will be replaced with ArgoCD Application manifests
+# 
+# Legacy Fleet configuration for reference:
+# - Production: overlays/production
+# - Staging: overlays/staging
