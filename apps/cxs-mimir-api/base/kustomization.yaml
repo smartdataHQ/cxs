@@ -2,4 +2,24 @@ namespace: solutions
 resources:
   - mimir-api-deployment.yaml
   - mimir-api-service.yaml
+  - mimir-api-ingress.yaml
+
+configMapGenerator:
+  - name: cxs-mimir-api-config
+    literals:
+      - AZURE_DEPLOYMENT_NAME=gpt-4o
+      - AZURE_OPENAI_API_BASE=https://snjallgpt-swe.openai.azure.com/
+      - AZURE_OPENAI_API_TYPE=azure
+      - AZURE_OPENAI_API_VERSION=2025-02-01-preview
+      - BACKEND_BASE_URL=https://agents.contextsuite.com
+      - CLICKHOUSE_HOST=10.180.122.32
+      - CLICKHOUSE_PORT=8123
+      - CLICKHOUSE_USER=default
+      - ENV=prod
+      - EVENTS_ENDPOINT=https://in.contextsuite.com/api/s/s2s/track
+      - JWT_ALGORITHM=HS256
+      - REDIS_HOST=redis-master.data
+      - SERVICES_BACKEND_URL=http://cxsservices:8088
+      - SFTP_HOSTNAME=ams.origin.gcdn.co
+      - UNSTRUCTURED_API_URL=https://api.unstructuredapp.io
 
