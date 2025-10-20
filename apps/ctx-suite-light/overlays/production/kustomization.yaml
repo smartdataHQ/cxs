@@ -1,3 +1,5 @@
+namespace: solutions
+
 # Production configs reside in the base
 resources:
   - ../../base
