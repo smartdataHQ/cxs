@@ -68,3 +68,5 @@ spec:
         envFrom:
           - configMapRef:
               name: cep-router-config
+      imagePullSecrets:
+        - name: dockerlock
