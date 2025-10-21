@@ -119,6 +119,39 @@ apiVersion: discovery.k8s.io/v1
 kind: EndpointSlice
 metadata:
   name: c001db3
+  namespace: cep
+  labels:
+    kubernetes.io/service-name: c001db3
+addressType: IPv4
+ports:
+  - name: postgres
+    appProtocol: postgres
+    protocol: TCP
+    port: 5432
+  - name: clickhouse-http
+    appProtocol: clickhouse-http
+    protocol: TCP
+    port: 8123
+  - name: clickhouse-native
+    appProtocol: clickhouse-native
+    protocol: TCP
+    port: 9000
+  - name: port-9092
+    appProtocol: port-9092
+    protocol: TCP
+    port: 9092
+  - name: port-9094
+    appProtocol: port-9094
+    protocol: TCP
+    port: 9094
+endpoints:
+  - addresses:
+      - "10.180.122.3"
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: c001db3
   namespace: api
   labels:
     kubernetes.io/service-name: c001db3
