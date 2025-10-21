@@ -58,7 +58,12 @@ spec:
               secretKeyRef:
                 name: inbox-secrets
                 key: REDIS_PASSWORD_EMM
-
+          # Kafka credentials (shared with inbox)
+          - name: KAFKA_USER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: KAFKA_USER_PASSWORD
           # JWT Secret (shared with inbox)
           - name: JWT_SECRET
             valueFrom:
