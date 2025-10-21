@@ -18,9 +18,9 @@ configMapGenerator:
       # Database Configuration (matching inbox)
       - DB_HOST=cxs-pg-ha.data
       - DB_PORT="5432"
-      - DB_NAME=cep_analyser_db
-      - DB_USERNAME=cep
-      - DB_SSLMODE=prefer
+      - DB_NAME=ssp
+      - DB_USERNAME=cxs-pg
+      - DB_SSLMODE=ALLOW
       
       # Kafka Configuration (matching inbox)
       - KAFKA_BOOTSTRAP_SERVERS=c001db1:9092,c001db2:9092,c001db3:9092
@@ -61,3 +61,6 @@ configMapGenerator:
       - ROUTER_CLIENT_HEARTBEAT_INTERVAL=30s
       - ROUTER_CLIENT_GRACE_MULTIPLIER="3.0"
       - ROUTER_CLIENT_INSTANCES="1"
+      - ROUTER_CLIENT_ACCOUNT_ID=""
+      - ROUTER_CLIENT_IP=""
+      - ROUTER_CLIENT_CAPACITY_HINT=""
