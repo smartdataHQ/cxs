@@ -32,8 +32,11 @@ configMapGenerator:
       - KAFKA_ENABLE_AUTO_COMMIT="false"
       
       # Redis Configuration (matching inbox)
-      - REDIS_HOST=redis-master.data
+      - REDIS_CLUSTER_NODES=c001db1:6379,c001db2:6379,c001db3:6379
       - REDIS_PORT="6379"
+      - REDIS_DB="0"
+      - REDIS_USER=admin
+      - REDIS_TTL="120"
       - REDIS_DB="0"
       
       # Vault Configuration (matching inbox)
