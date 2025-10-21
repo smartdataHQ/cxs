@@ -1,11 +1,24 @@
 images:
   - name: quicklookup/contextsuite
-    newTag: 6adf880
+    newTag: 29e76fe
+
+configMapGenerator:
+  - name: contextsuite-config
+    behavior: merge
+    literals:
+      - SENTRY_ENVIRONMENT=contextsuite-production
+      - NEXT_PUBLIC_SENTRY_DSN=""
+      - SENTRY_DSN=""
+      - NEXTAUTH_URL=https://app.contextsuite.dev
+      - REACT_APP_JITSU_DEPLOY_DOMAIN=events.contextsuite.dev
+      - CONTEXTSUITE_ADMIN_URL=https://admin.contextsuite.dev
+      - NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL=https://admin.contextsuite.dev
+      - NEXT_PUBLIC_CHAT_WSS_ENDPOINT=ws://chat.contextsuite.dev:8088/api/table_chat
 
 resources:
   - ../../base
+
 patches:
-  - path: contextsuite-config.yaml
   - patch: |
       apiVersion: apps/v1
       kind: Deployment

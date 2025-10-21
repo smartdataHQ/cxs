@@ -8,6 +8,7 @@ resources:
   - service.yaml
   - autoscaler.yaml
   - ingress.yaml
+  - ingress-in.yaml
 
 configMapGenerator:
   - name: inbox-config
@@ -79,5 +80,11 @@ configMapGenerator:
       # Webhooks
       - WEBHOOK_BATCH_SIZE="100"
       - WEBHOOK_BATCH_PROCESSING_INTERVAL="5000"
+      # Event validation
+      - MAX_EVENT_SIZE_BYTES="65536"
       # DLQ
       - DLQ_BASE_PATH=/data/dlq
+      # CEP Router Integration
+      - CEP_ROUTER_ENABLED="true"
+      - CEP_ROUTER_BASE_URL=http://cep-router.cep.svc.cluster.local:8080
+      - CEP_ROUTER_API_ENDPOINT=/api/v1/events

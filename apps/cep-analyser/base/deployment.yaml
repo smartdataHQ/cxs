@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cep-analyser
+  labels:
+    app: cep-analyser
+    tier: backend
+spec:
+  replicas: 1  # Always 1 - CEP limitations require single-instance per region/cluster
+  strategy:
+    type: Recreate  # Ensure only one instance at a time
+  selector:
+    matchLabels:
+      app: cep-analyser
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: cep-analyser
+        tier: backend
+    spec:
+      containers:
+      - name: cep-analyser
+        image: quicklookup/cep-analyser
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+        ports:
+        - containerPort: 9090
+          name: http
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 9090
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 9090
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        env:
+          # Database credentials (shared with inbox)
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: POSTGRES_PASSWORD
+          # Redis credentials (shared with inbox)
+          - name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: REDIS_PASSWORD_EMM
+
+          # JWT Secret (shared with inbox)
+          - name: JWT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: JWT_SECRET
+
+        envFrom:
+          - configMapRef:
+              name: cep-analyser-config
+        volumeMounts:
+          - mountPath: /tmp
+            name: temp-storage
+          - mountPath: /data/avro
+            name: avro-schemas
+      imagePullSecrets:
+        - name: dockerlock
+      volumes:
+        - name: temp-storage
+          emptyDir: {}
+        - name: avro-schemas
+          emptyDir: {}

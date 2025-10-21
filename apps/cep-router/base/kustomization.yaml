@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cep
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+# Base configuration for cep-router
+configMapGenerator:
+  - name: cep-router-config
+    literals:
+      # Server Configuration
+      - ROUTER_PORT="8080"
+      - SPRING_PROFILES_ACTIVE=cluster  # Use cluster profile for Redis Cluster
+
+      # Redis Cluster Configuration
+      - REDIS_CLUSTER_NODES=c001db1:6379,c001db2:6379,c001db3:6379
+      - REDIS_CLUSTER_MAX_REDIRECTS="3"
+      - REDIS_USER=admin  # Redis ACL username
+
+      # Note: REDIS_PASSWORD is configured via Secret (see deployment.yaml)
+
+      # Router Configuration
+      - ROUTER_HEARTBEAT_INTERVAL="30"
+      - ROUTER_HEARTBEAT_GRACE_MULTIPLIER="3.0"
+      - ROUTER_DIAGNOSTICS_ENABLED="true"

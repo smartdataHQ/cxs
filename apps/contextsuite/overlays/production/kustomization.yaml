@@ -1,9 +1,7 @@
 images:
   - name: quicklookup/contextsuite
-    newTag: 6adf880
+    newTag: 29e76fe
 
+# Production configs reside in the base
 resources:
   - ../../base
-
-patches:
-  - path: contextsuite-config.yaml

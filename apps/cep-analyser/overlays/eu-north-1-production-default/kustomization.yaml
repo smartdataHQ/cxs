@@ -1,0 +1,42 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cep
+
+resources:
+  - ../../base
+
+# Image tag for this instance
+images:
+  - name: quicklookup/cep-analyser
+    newTag: 79e198b  # Replace with actual image tag
+
+# Instance-specific configuration - REAL PRODUCTION CONFIG
+configMapGenerator:
+  - name: cep-analyser-config
+    behavior: merge
+    literals:
+      # Instance Identity - CRITICAL for CEP customer bucketing
+      - APP_REGION=eu-north-1
+      - APP_CLUSTER=production
+      - APP_INSTANCE=default
+      - APP_TOPIC_PREFIX=se2-
+      
+      # Router Integration - instance-specific backend URL
+      - ROUTER_BACKEND_BASE_URL=http://eu-north-1-production-default-cep-analyser.cep.svc.cluster.local:9090
+      - ROUTER_CLIENT_REGION=eu-north-1
+      - ROUTER_CLIENT_CLUSTER=production
+
+# Patch deployment for production settings
+patchesStrategicMerge:
+  - deployment-patch.yaml
+  - service-patch.yaml
+
+# Ensure unique resource names for this instance
+namePrefix: eu-north-1-production-default-
+
+# Labels for this instance
+commonLabels:
+  instance: eu-north-1-production-default
+  region: eu-north-1
+  cluster: production

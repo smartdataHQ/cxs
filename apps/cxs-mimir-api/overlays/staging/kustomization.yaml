@@ -9,5 +9,28 @@ images:
 
 resources:
   - ../../base
-  - mimir-api-config.yaml
-  - mimir-api-ingress.yml
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /data/BACKEND_BASE_URL
+        value: "https://agents.contextsuite.dev"
+      - op: replace
+        path: /data/EVENTS_ENDPOINT
+        value: "https://in.contextsuite.dev/api/s/s2s/track"
+      - op: replace
+        path: /data/CLICKHOUSE_HOST
+        value: "clickhouse.data.svc.cluster.local"
+    target:
+      kind: ConfigMap
+      name: cxs-mimir-api-config
+  - patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: "agents.contextsuite.dev"
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: "agents.contextsuite.dev"
+    target:
+      kind: Ingress
+      name: cxs-mimir-api

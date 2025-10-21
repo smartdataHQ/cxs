@@ -5,4 +5,4 @@ metadata:
 spec:
   maxReplicas: 3
   minReplicas: 1
-  targetCPUUtilizationPercentage: 70
+  targetCPUUtilizationPercentage: 200

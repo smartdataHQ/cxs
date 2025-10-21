@@ -7,7 +7,7 @@ images:
   - name: quicklookup/cxs-utils
     newTag: ce8f
 
+# Production configs reside in the base
 resources:
   - ../../base
   - cxs-docs-ingress.yaml
-  - cxs-docs-config.yaml

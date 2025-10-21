@@ -1,0 +1,63 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: cep
+
+resources:
+  - deployment.yaml
+  - service.yaml
+
+# Base configuration - environment-specific values set in overlays
+configMapGenerator:
+  - name: cep-analyser-config
+    literals:
+      # Server Configuration
+      - SERVER_PORT="9090"
+      - SPRING_PROFILES_ACTIVE=prod
+      
+      # Database Configuration (matching inbox)
+      - DB_HOST=cxs-pg-ha.data
+      - DB_PORT="5432"
+      - DB_NAME=cep_analyser_db
+      - DB_USERNAME=cep
+      - DB_SSLMODE=prefer
+      
+      # Kafka Configuration (matching inbox)
+      - KAFKA_BOOTSTRAP_SERVERS=c001db1:9092,c001db2:9092,c001db3:9092
+      - SCHEMA_REGISTRY_URL=http://data-kafka-schema-registry:8081
+      - KAFKA_MAX_POLL_RECORDS="100"
+      - KAFKA_FETCH_MAX_WAIT_MS="500"
+      - KAFKA_FETCH_MIN_BYTES="1"
+      - KAFKA_AUTO_OFFSET_RESET=latest
+      - KAFKA_ENABLE_AUTO_COMMIT="false"
+      
+      # Redis Configuration (matching inbox)
+      - REDIS_HOST=redis-master.data
+      - REDIS_PORT="6379"
+      - REDIS_DB="0"
+      
+      # Vault Configuration (matching inbox)
+      - VAULT_HOST=vault-vault.data
+      - VAULT_PORT="8200"
+      - VAULT_SCHEME=http
+      - VAULT_KV_BACKEND=secret
+      
+      # Esper Configuration
+      - ESPER_SERIALIZATION_JSON_ENABLED="true"
+      - ESPER_SERIALIZATION_JSON_TYPE=Jackson
+      - ESPER_SCHEDULE_METRICS_REPORTING_TOPIC=event-type-metrics
+      
+      # Admin Configuration
+      - ADMIN_DEPLOYMENT_FAILURE_THRESHOLD="3"
+      - WRITEKEY_HEADERS=writekey,x-write-key,X-Write-Key
+      - APP_BACKEND_API_KEY_HEADER=x-api-key
+      
+      # Avro Configuration
+      - AVRO_SCHEMA_DIR=/data/avro
+      
+      # Router Integration
+      - ROUTER_CLIENT_ENABLED="true"
+      - ROUTER_BASE_URL=http://cep-router.cep.svc.cluster.local:8080
+      - ROUTER_CLIENT_HEARTBEAT_INTERVAL=30s
+      - ROUTER_CLIENT_GRACE_MULTIPLIER="3.0"
+      - ROUTER_CLIENT_INSTANCES="1"

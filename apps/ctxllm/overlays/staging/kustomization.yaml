@@ -2,10 +2,15 @@ images:
   - name: quicklookup/ctxllm
     newTag: 95a2104
 
+configMapGenerator:
+  - name: ctxllm-config
+    behavior: merge
+    literals:
+      - AZURE_OPENAI_API_BASE=<missing>
+
 resources:
   - ../../base
 patches:
-  - path: ctxllm-config.yaml
   - target:
       kind: Ingress
       name: ctxllm

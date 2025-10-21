@@ -8,7 +8,8 @@ spec:
     matchLabels:
       app: inbox
       tier: api
-  replicas: 2
+#  Replica count is controlled via the Horizontal Pod Autoscaler
+#  replicas: <not set here>
   updateStrategy:
     type: RollingUpdate
     rollingUpdate:
@@ -19,15 +20,34 @@ spec:
         app: inbox
         tier: api
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - inbox
+            topologyKey: kubernetes.io/hostname
       securityContext:
         fsGroup: 1000
+      initContainers:
+      - name: fix-dlq-permissions
+        image: busybox:latest
+        command: ['sh', '-c', 'mkdir -p /data/dlq && chown -R 1000:1000 /data/dlq && chmod -R 775 /data/dlq']
+        volumeMounts:
+          - mountPath: /data/dlq
+            name: dlq-data
       containers:
       - name: inbox
         image: quicklookup/inbox
         resources:
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            memory: 4Gi
         ports:
         - containerPort: 9090
           name: http

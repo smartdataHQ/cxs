@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cep-router
+spec:
+  replicas: 2  # Multiple replicas for HA in production
+  template:
+    spec:
+      containers:
+      - name: cep-router
+        resources:
+          requests:
+            cpu: 500m
+            memory: 512Mi
+          limits:
+            cpu: 2000m
+            memory: 2Gi
