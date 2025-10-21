@@ -39,8 +39,7 @@ configMapGenerator:
       - REDIS_DB="0"
       - REDIS_USER=admin
       - REDIS_TTL="120"
-      - REDIS_DB="0"
-      
+
       # Vault Configuration (matching inbox)
       - VAULT_HOST=vault-vault.data
       - VAULT_PORT="8200"
