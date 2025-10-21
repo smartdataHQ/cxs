@@ -31,7 +31,7 @@ configMapGenerator:
       - KAFKA_AUTO_OFFSET_RESET=latest
       - KAFKA_ENABLE_AUTO_COMMIT="false"
       - KAFKA_USER=""
-      - KAFKA_TOPIC_REPLICATION_FACTOR=2
+      - KAFKA_TOPIC_REPLICATION_FACTOR="2"
 
       # Redis Configuration (matching inbox)
       - REDIS_CLUSTER_NODES=c001db1:6379,c001db2:6379,c001db3:6379
