@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: cep-router
 spec:
-  replicas: 3  # Multiple replicas for HA in production
+  replicas: 2  # Multiple replicas for HA in production
   template:
     spec:
       containers:
