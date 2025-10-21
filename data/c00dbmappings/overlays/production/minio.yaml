@@ -60,3 +60,20 @@ ports:
 endpoints:
   - addresses:
       - "10.180.122.3"
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: c001db3-minio
+  namespace: cep
+  labels:
+    kubernetes.io/service-name: minio
+addressType: IPv4
+ports:
+  - name: minio
+    appProtocol: minio
+    protocol: TCP
+    port: 9025
+endpoints:
+  - addresses:
+      - "10.180.122.3"
