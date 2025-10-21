@@ -16,10 +16,13 @@ configMapGenerator:
       - SPRING_PROFILES_ACTIVE=prod
       
       # Redis Configuration (matching inbox)
+      - REDIS_CLUSTER_NODES=c001db1:6379,c001db2:6379,c001db3:6379
       - REDIS_HOST=redis-master.data
       - REDIS_PORT="6379"
-      - REDIS_SSL="false"
-      
+      - REDIS_DB="0"
+      - REDIS_USER=admin
+      - REDIS_TTL="120"
+
       # Router Configuration
       - ROUTER_HEARTBEAT_INTERVAL="30"
       - ROUTER_HEARTBEAT_GRACE_MULTIPLIER="3.0"
