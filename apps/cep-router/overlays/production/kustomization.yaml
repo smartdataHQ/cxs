@@ -6,10 +6,10 @@ namespace: cep
 resources:
   - ../../base
 
-# Image tag for production
+# Image tag for production (fixed Redis cluster mode)
 images:
   - name: quicklookup/cep-router
-    newTag: 79e198b
+    newTag: 42dfd1e
 
 # Production-specific configuration
 configMapGenerator:
