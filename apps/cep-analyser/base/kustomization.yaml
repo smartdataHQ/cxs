@@ -20,7 +20,7 @@ configMapGenerator:
       - DB_PORT="5432"
       - DB_NAME=ssp
       - DB_USERNAME=cxs-pg
-      - DB_SSLMODE=ALLOW
+      - DB_SSLMODE=REQUIRE
       
       # Kafka Configuration (matching inbox)
       - KAFKA_BOOTSTRAP_SERVERS=c001db1:9092,c001db2:9092,c001db3:9092
