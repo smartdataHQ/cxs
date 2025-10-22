@@ -18,24 +18,28 @@ configMapGenerator:
       # Database Configuration (matching inbox)
       - DB_HOST=cxs-pg-ha.data
       - DB_PORT="5432"
-      - DB_NAME=cep_analyser_db
-      - DB_USERNAME=cep
-      - DB_SSLMODE=prefer
+      - DB_NAME=ssp
+      - DB_USERNAME=cxs-pg
+      - DB_SSLMODE=ALLOW
       
       # Kafka Configuration (matching inbox)
       - KAFKA_BOOTSTRAP_SERVERS=c001db1:9092,c001db2:9092,c001db3:9092
-      - SCHEMA_REGISTRY_URL=http://data-kafka-schema-registry:8081
+      - SCHEMA_REGISTRY_URL=http://kafka-schema-registry.data.svc.cluster.local:8081
       - KAFKA_MAX_POLL_RECORDS="100"
       - KAFKA_FETCH_MAX_WAIT_MS="500"
       - KAFKA_FETCH_MIN_BYTES="1"
       - KAFKA_AUTO_OFFSET_RESET=latest
       - KAFKA_ENABLE_AUTO_COMMIT="false"
-      
+      - KAFKA_USER=""
+      - KAFKA_TOPIC_REPLICATION_FACTOR="2"
+
       # Redis Configuration (matching inbox)
-      - REDIS_HOST=redis-master.data
+      - REDIS_CLUSTER_NODES=c001db1:6379,c001db2:6379,c001db3:6379
       - REDIS_PORT="6379"
       - REDIS_DB="0"
-      
+      - REDIS_USER=admin
+      - REDIS_TTL="120"
+
       # Vault Configuration (matching inbox)
       - VAULT_HOST=vault-vault.data
       - VAULT_PORT="8200"
@@ -61,3 +65,6 @@ configMapGenerator:
       - ROUTER_CLIENT_HEARTBEAT_INTERVAL=30s
       - ROUTER_CLIENT_GRACE_MULTIPLIER="3.0"
       - ROUTER_CLIENT_INSTANCES="1"
+      - ROUTER_CLIENT_ACCOUNT_ID=""
+      - ROUTER_CLIENT_IP=""
+      - ROUTER_CLIENT_CAPACITY_HINT=""

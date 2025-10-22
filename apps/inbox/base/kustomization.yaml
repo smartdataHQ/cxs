@@ -87,4 +87,4 @@ configMapGenerator:
       # CEP Router Integration
       - CEP_ROUTER_ENABLED="true"
       - CEP_ROUTER_BASE_URL=http://cep-router.cep.svc.cluster.local:8080
-      - CEP_ROUTER_API_ENDPOINT=/api/v1/events
+      - CEP_ROUTER_API_ENDPOINT=/api
