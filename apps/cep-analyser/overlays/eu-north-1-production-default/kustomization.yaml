@@ -9,7 +9,7 @@ resources:
 # Image tag for this instance
 images:
   - name: quicklookup/cep-analyser
-    newTag: 72132bf
+    newTag: cbfe039
 
 # Instance-specific configuration - REAL PRODUCTION CONFIG
 configMapGenerator:
@@ -26,6 +26,7 @@ configMapGenerator:
       - ROUTER_BACKEND_BASE_URL=http://eu-north-1-production-default-cep-analyser.cep.svc.cluster.local:9090
       - ROUTER_CLIENT_REGION=eu-north-1
       - ROUTER_CLIENT_CLUSTER=production
+      - ROUTER_CLIENT_INSTANCES=default
 
 # Patch deployment for production settings
 patchesStrategicMerge:
