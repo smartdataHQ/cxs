@@ -24,7 +24,7 @@ configMapGenerator:
       
       # Kafka Configuration (matching inbox)
       - KAFKA_BOOTSTRAP_SERVERS=c001db1:9092,c001db2:9092,c001db3:9092
-      - SCHEMA_REGISTRY_URL=http://data-kafka-schema-registry:8081
+      - SCHEMA_REGISTRY_URL=http://kafka-schema-registry.data.svc.cluster.local:8081
       - KAFKA_MAX_POLL_RECORDS="100"
       - KAFKA_FETCH_MAX_WAIT_MS="500"
       - KAFKA_FETCH_MIN_BYTES="1"
