@@ -4,4 +4,4 @@ metadata:
   name: inbox-config
 data:
   SPRING_PROFILES_ACTIVE: 'production'
-  APP_SERVICES_CEP-PROXY_BASE-URL: 'http://cep-router.cep.svc.cluster.local:8080'
+  APP_SERVICES_CEP_PROXY_BASE_URL: 'http://cep-router.cep.svc.cluster.local:8080'
