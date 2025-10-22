@@ -9,7 +9,7 @@ resources:
 # Image tag for staging
 images:
   - name: quicklookup/cep-router
-    newTag: d2380df
+    newTag: c369fdf
 
 # Staging-specific configuration
 configMapGenerator:
