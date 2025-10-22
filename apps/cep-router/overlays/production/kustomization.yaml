@@ -9,7 +9,7 @@ resources:
 # Image tag for production (fixed Redis cluster mode)
 images:
   - name: quicklookup/cep-router
-    newTag: main-d2380df
+    newTag: d2380df
 
 # Production-specific configuration
 configMapGenerator:
