@@ -53,6 +53,12 @@ spec:
           timeoutSeconds: 5
           failureThreshold: 3
         env:
+          # Database credentials (shared with inbox and analyser)
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: inbox-secrets
+                key: POSTGRES_PASSWORD
           # Redis credentials (shared with inbox)
           - name: REDIS_PASSWORD
             valueFrom:
