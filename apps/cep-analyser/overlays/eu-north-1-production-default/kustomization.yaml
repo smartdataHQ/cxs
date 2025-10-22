@@ -9,7 +9,7 @@ resources:
 # Image tag for this instance
 images:
   - name: quicklookup/cep-analyser
-    newTag: d705674
+    newTag: 98a37e5
 
 # Instance-specific configuration - REAL PRODUCTION CONFIG
 configMapGenerator:
