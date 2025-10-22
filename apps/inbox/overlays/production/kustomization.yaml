@@ -8,4 +8,5 @@ images:
   - name: quicklookup/inbox
     newTag: main-5eb2b29
 
-# Production uses defaults from base - no patches needed
+patches:
+  - path: configmap-patch.yaml
