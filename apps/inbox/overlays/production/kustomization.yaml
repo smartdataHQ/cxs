@@ -6,7 +6,7 @@ resources:
 
 images:
   - name: quicklookup/inbox
-    newTag: main-af4baad
+    newTag: main-3d6612d
 
 patches:
   - path: configmap-patch.yaml
