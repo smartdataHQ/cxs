@@ -22,6 +22,13 @@ configMapGenerator:
 
       # Note: REDIS_PASSWORD is configured via Secret (see deployment.yaml)
 
+      # Database Configuration (matching inbox and analyser)
+      - DB_HOST=cxs-pg-ha.data
+      - DB_PORT="5432"
+      - DB_NAME=ssp
+      - DB_USERNAME=cxs-pg
+      - DB_SSLMODE=ALLOW
+
       # Router Configuration
       - ROUTER_HEARTBEAT_INTERVAL="30"
       - ROUTER_HEARTBEAT_GRACE_MULTIPLIER="3.0"

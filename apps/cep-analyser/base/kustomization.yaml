@@ -64,7 +64,7 @@ configMapGenerator:
       - ROUTER_BASE_URL=http://cep-router.cep.svc.cluster.local:8080
       - ROUTER_CLIENT_HEARTBEAT_INTERVAL=30s
       - ROUTER_CLIENT_GRACE_MULTIPLIER="3.0"
-      - ROUTER_CLIENT_INSTANCES="1"
+      - ROUTER_CLIENT_INSTANCES=default
       - ROUTER_CLIENT_ACCOUNT_ID=""
       - ROUTER_CLIENT_IP=""
       - ROUTER_CLIENT_CAPACITY_HINT=""

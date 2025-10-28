@@ -67,7 +67,7 @@ services:
     <<: *default-limits
 
   cxs-anonymization:
-    image: quicklookup/cxs-anonymization:1d2334b
+    image: quicklookup/cxs-anonymization:e373209
     platform: linux/amd64
     restart: unless-stopped
     ports:
@@ -112,7 +112,7 @@ services:
 
   cxs-embeddings:
     # NOTE: First startup downloads ~4GB Qwen3 embedding model, can take 5-15 minutes depending on connection
-    image: quicklookup/cxs-embeddings:1d2334b
+    image: quicklookup/cxs-embeddings:c521a15
     platform: linux/amd64
     restart: unless-stopped  # Back to original to prevent rapid restarts
     stop_grace_period: 300s  # Give it 5 minutes to shut down gracefully
@@ -172,7 +172,7 @@ services:
       start_period: 1800s  # 30 minute start period
 
   cxsservices:
-    image: quicklookup/cxs-services:8f9902f
+    image: quicklookup/cxs-services:6ad71f6
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8088", "--workers", "2"]
@@ -250,7 +250,7 @@ services:
     <<: *default-limits
 
   mimir-server:
-    image: quicklookup/cxs-mimir-api:fb9c11b
+    image: quicklookup/cxs-mimir-api:2c6f158
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
@@ -321,7 +321,7 @@ services:
           memory: 1G
 
   mimir-ui:
-    image: quicklookup/mimir-chat:dd2023d
+    image: quicklookup/mimir-chat:c40961f
     platform: linux/amd64
     restart: unless-stopped
     depends_on:

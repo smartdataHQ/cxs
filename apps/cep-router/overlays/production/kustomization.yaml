@@ -9,7 +9,7 @@ resources:
 # Image tag for production (fixed Redis cluster mode)
 images:
   - name: quicklookup/cep-router
-    newTag: 42dfd1e
+    newTag: 016e428
 
 # Production-specific configuration
 configMapGenerator:
