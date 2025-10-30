@@ -2,8 +2,10 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 images:
-  - name: quicklookup/synmetrix-cubejs
-    newTag: "1b8790e"
+  - name: quicklookup/synmetrix-cube
+    newTag: "78b6eca"
+  - name: quicklookup/synmetrix-client
+    newTag: "78b6eca"
 
 namespace: synmetrix
 
