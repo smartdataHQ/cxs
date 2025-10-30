@@ -3,7 +3,7 @@ kind: Kustomization
 
 images:
   - name: quicklookup/synmetrix-cubejs
-    newTag: "main-ce50577"
+    newTag: "1b8790e"
 
 namespace: synmetrix
 
