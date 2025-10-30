@@ -1,7 +1,18 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# production images are defined in ../../base/kustomization.yaml
+images:
+  - name: quicklookup/synmetrix-client
+    newTag: "78b6eca"
+  - name: quicklookup/synmetrix-actions
+    newTag: "7270f8d"
+  - name: quicklookup/synmetrix-cube
+    newTag: "1b8790e"
+  - name: quicklookup/hasura-backend-plus
+    newTag: "latest"
+  - name: quicklookup/synmetrix-hasura
+    newTag: "latest"
+
 
 namespace: synmetrix
 

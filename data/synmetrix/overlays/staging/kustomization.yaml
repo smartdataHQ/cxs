@@ -4,8 +4,6 @@ kind: Kustomization
 images:
   - name: quicklookup/synmetrix-cube
     newTag: "78b6eca"
-  - name: quicklookup/synmetrix-client
-    newTag: "78b6eca"
 
 namespace: synmetrix
 

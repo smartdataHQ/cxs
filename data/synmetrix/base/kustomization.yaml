@@ -3,13 +3,7 @@ kind: Kustomization
 
 namespace: synmetrix
 
-images:
-  - name: quicklookup/synmetrix-client
-    newTag: latest
-  - name: quicklookup/synmetrix-actions
-    newTag: 7270f8d
-  - name: quicklookup/synmetrix-cube
-    newTag: "1b8790e"
+
 
 patches:
   - target:
