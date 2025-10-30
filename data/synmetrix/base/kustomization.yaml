@@ -8,7 +8,7 @@ images:
     newTag: latest
   - name: quicklookup/synmetrix-actions
     newTag: 7270f8d
-  - name: quicklookup/synmetrix-cube
+  - name: quicklookup/synmetrix-cubejs
     newTag: "1b8790e"
 
 patches:

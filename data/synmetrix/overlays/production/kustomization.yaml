@@ -1,6 +1,8 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
+# production images are defined in ../../base/kustomization.yaml
+
 namespace: synmetrix
 
 resources:
