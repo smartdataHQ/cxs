@@ -385,7 +385,13 @@ allowPodLaunching: true
 env:
  - name: AIRFLOW__CORE__LOAD_EXAMPLES
    value: "true"
-
+ - name: CLICKHOUSE_USER
+   value: "default"    
+ - name: CLICKHOUSE_PORT
+   value: "8123"
+ - name: CLICKHOUSE_DB
+   value: "default"
+ 
 # Volumes for all airflow containers
 volumes: []
 
@@ -403,6 +409,15 @@ secret:
  - envName: "AZURE_TENANT_ID"
    secretName: "airflow-3.0"
    secretKey: "azure-tenant-id"
+ - envName: "CLICKHOUSE_HOST"
+   secretName: "airflow-3.0"
+   secretKey: "clickhouse-host"  
+ - envName: "CLICKHOUSE_PASSWORD"
+   secretName: "airflow-3.0"
+   secretKey: "clickhouse-password"  
+ - envName: "GITHUB_PAT"
+   secretName: "airflow-3.0"
+   secretKey: "github-pat"  
 
 # Enables selected built-in secrets that are set via environment variables by default.
 # Those secrets are provided by the Helm Chart secrets by default but in some cases you
