@@ -5,7 +5,7 @@ namespace: solutions
 
 images:
   - name: quicklookup/mimir-chat
-    newTag: 5d88861
+    newTag: c88c629
 
 configMapGenerator:
   - name: cxs-mimir-web-config
@@ -15,6 +15,7 @@ configMapGenerator:
       - BROWSER_APP_API=https://agents.contextsuite.dev
       - MIMIR_SERVER_API=https://agents.contextsuite.dev
       - BROWSER_CHAT_WSS_API=wss://agents.contextsuite.dev
+      - NEXT_PUBLIC_APP_URL=https://agents.contextsuite.dev
 
 resources:
   - ../../base
