@@ -80,7 +80,7 @@ airflowVersion: "3.0.2"
 images:
   airflow:
     repository: quicklookup/airflow-pipelines-v3
-    tag: 2ebd95a
+    tag: ed847b4
     # Specifying digest takes precedence over tag.
     digest: ~
     pullPolicy: IfNotPresent
@@ -385,7 +385,13 @@ allowPodLaunching: true
 env:
  - name: AIRFLOW__CORE__LOAD_EXAMPLES
    value: "true"
-
+ - name: CLICKHOUSE_USER
+   value: "default"    
+ - name: CLICKHOUSE_PORT
+   value: "8123"
+ - name: CLICKHOUSE_DB
+   value: "default"
+ 
 # Volumes for all airflow containers
 volumes: []
 
@@ -403,6 +409,15 @@ secret:
  - envName: "AZURE_TENANT_ID"
    secretName: "airflow-3.0"
    secretKey: "azure-tenant-id"
+ - envName: "CLICKHOUSE_HOST"
+   secretName: "airflow-3.0"
+   secretKey: "clickhouse-host"  
+ - envName: "CLICKHOUSE_PASSWORD"
+   secretName: "airflow-3.0"
+   secretKey: "clickhouse-password"  
+ - envName: "GITHUB_PAT"
+   secretName: "airflow-3.0"
+   secretKey: "github-pat"  
 
 # Enables selected built-in secrets that are set via environment variables by default.
 # Those secrets are provided by the Helm Chart secrets by default but in some cases you
@@ -2976,7 +2991,7 @@ podTemplate: ~
 dags:
   # Where dags volume will be mounted. Works for both persistence and gitSync.
   # If not specified, dags mount path will be set to $AIRFLOW_HOME/dags
-  mountPath: ~
+  mountPath: /opt/airflow/dags
   persistence:
     # Annotations for dags PVC
     annotations: {}
@@ -2993,22 +3008,21 @@ dags:
     ## optional subpath for dag volume mount
     subPath: ~
   gitSync:
-    enabled: false
-
+    enabled: true
     # git repo clone url
     # ssh example: git@github.com:apache/airflow.git
     # https example: https://github.com/apache/airflow.git
-    repo: https://github.com/apache/airflow.git
-    branch: v2-2-stable
+    repo: git@github.com:smartdataHQ/pipelines.git
+    branch: main
     rev: HEAD
     # The git revision (branch, tag, or hash) to check out, v4 only
-    ref: v2-2-stable
+    ref: ~
     depth: 1
     # the number of consecutive failures allowed before aborting
     maxFailures: 0
     # subpath within the repo where dags are located
     # should be "" if dags are at repo root
-    subPath: "tests/dags"
+    subPath: "/pipelines/v3/dags"
     # if your repo needs a user name password
     # you can load them to a k8s secret like the one below
     #   ---
@@ -3039,7 +3053,7 @@ dags:
     #     # key needs to be gitSshKey
     #     gitSshKey: <base64_encoded_data>
     # and specify the name of the secret below
-    # sshKeySecret: airflow-ssh-secret
+    sshKeySecret: airflow-ssh-git-secret
     #
     # Or set sshKeySecret with your key
     # sshKey: |-
@@ -3050,7 +3064,8 @@ dags:
     # If you are using an ssh private key, you can additionally
     # specify the content of your known_hosts file, example:
     #
-    # knownHosts: |
+    knownHosts: |
+      github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
     #    <host1>,<ip1> <key1>
     #    <host2>,<ip2> <key2>
 
