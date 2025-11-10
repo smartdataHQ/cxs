@@ -250,7 +250,7 @@ services:
     <<: *default-limits
 
   mimir-server:
-    image: quicklookup/cxs-mimir-api:282d962
+    image: quicklookup/cxs-mimir-api:53fb16c
     platform: linux/amd64
     restart: unless-stopped
     command: ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
@@ -321,7 +321,7 @@ services:
           memory: 1G
 
   mimir-ui:
-    image: quicklookup/mimir-chat:fb9c2fb
+    image: quicklookup/mimir-chat:b4c085f
     platform: linux/amd64
     restart: unless-stopped
     depends_on:
