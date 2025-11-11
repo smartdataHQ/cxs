@@ -5,7 +5,7 @@ namespace: api
 
 images:
   - name: quicklookup/ssp
-    newTag: 028a474
+    newTag: fe274c7
 
 resources:
   - ../../base
