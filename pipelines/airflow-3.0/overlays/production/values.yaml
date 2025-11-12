@@ -569,8 +569,8 @@ data:
 
 # Fernet key settings
 # Note: fernetKey can only be set during install, not upgrade
-fernetKey: FERNET_KEY
-fernetKeySecretName: airflow-3.0
+fernetKey: fernet-key
+fernetKeySecretName: airflow-3.0-webserver-secret
 # Add custom annotations to the fernet key secret
 fernetKeySecretAnnotations: {}
 
@@ -587,10 +587,10 @@ jwtSecretAnnotations: {}
 jwtSecretName: ~
 
 # Flask secret key for Airflow <3 Webserver: `[webserver] secret_key` in airflow.cfg
-webserverSecretKey: WEBSERVER_SECRET
+webserverSecretKey: webserver-secret
 # Add custom annotations to the webserver secret
 webserverSecretAnnotations: {}
-webserverSecretKeySecretName: airflow-3.0
+webserverSecretKeySecretName: airflow-3.0-webserver-secret
 
 # In order to use kerberos you need to create secret containing the keytab file
 # The secret name should follow naming convention of the application where resources are
