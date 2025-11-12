@@ -44,16 +44,6 @@ spec:
                 secretKeyRef:
                   name: llm
                   key: CONTEXT_SUITE_JWT_SECRET_KEY
-            - name: OAUTH_NOVA_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: OAUTH_NOVA_CLIENT_SECRET
-            - name: OAUTH_NOVA_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: llm
-                  key: OAUTH_NOVA_CLIENT_ID
           envFrom:
             - configMapRef:
                 name: cxs-mimir-web-config
