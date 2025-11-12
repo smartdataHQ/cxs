@@ -80,7 +80,7 @@ airflowVersion: "3.0.2"
 images:
   airflow:
     repository: quicklookup/airflow-pipelines-v3
-    tag: ed847b4
+    tag: b8d63de
     # Specifying digest takes precedence over tag.
     digest: ~
     pullPolicy: IfNotPresent
@@ -402,22 +402,22 @@ volumeMounts: []
 secret:
  - envName: "AZURE_CLIENT_ID"
    secretName: "airflow-3.0"
-   secretKey: "azure-client-id"
+   secretKey: "AZURE_CLIENT_ID"
  - envName: "AZURE_CLIENT_SECRET"
    secretName: "airflow-3.0"
-   secretKey: "azure-client-secret"
+   secretKey: "AZURE_CLIENT_SECRET"
  - envName: "AZURE_TENANT_ID"
    secretName: "airflow-3.0"
-   secretKey: "azure-tenant-id"
+   secretKey: "AZURE_TENANT_ID"
  - envName: "CLICKHOUSE_HOST"
    secretName: "airflow-3.0"
-   secretKey: "clickhouse-host"  
+   secretKey: "CLICKHOUSE_HOST"  
  - envName: "CLICKHOUSE_PASSWORD"
    secretName: "airflow-3.0"
-   secretKey: "clickhouse-password"  
+   secretKey: "CLICKHOUSE_PASSWORD"  
  - envName: "GITHUB_PAT"
    secretName: "airflow-3.0"
-   secretKey: "github-pat"  
+   secretKey: "GITHUB_PAT"  
 
 # Enables selected built-in secrets that are set via environment variables by default.
 # Those secrets are provided by the Helm Chart secrets by default but in some cases you
@@ -529,7 +529,7 @@ data:
   # data:
   #   connection: base64_encoded_connection_string
 
-  metadataSecretName: airflow-3.0
+  metadataSecretName: airflow-3.0-metadata-secret
   # When providing secret names and using the same database for metadata and
   # result backend, for Airflow < 2.4.0 it is necessary to create a separate
   # secret for result backend but with a db+ scheme prefix.
@@ -569,7 +569,7 @@ data:
 
 # Fernet key settings
 # Note: fernetKey can only be set during install, not upgrade
-fernetKey: fernet-key
+fernetKey: FERNET_KEY
 fernetKeySecretName: airflow-3.0
 # Add custom annotations to the fernet key secret
 fernetKeySecretAnnotations: {}
@@ -587,7 +587,7 @@ jwtSecretAnnotations: {}
 jwtSecretName: ~
 
 # Flask secret key for Airflow <3 Webserver: `[webserver] secret_key` in airflow.cfg
-webserverSecretKey: webserver-secret
+webserverSecretKey: WEBSERVER_SECRET
 # Add custom annotations to the webserver secret
 webserverSecretAnnotations: {}
 webserverSecretKeySecretName: airflow-3.0
