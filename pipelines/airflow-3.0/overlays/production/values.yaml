@@ -384,7 +384,7 @@ allowPodLaunching: true
 # Environment variables for all airflow containers
 env:
  - name: AIRFLOW__CORE__LOAD_EXAMPLES
-   value: "true"
+   value: "false"
  - name: CLICKHOUSE_USER
    value: "default"    
  - name: CLICKHOUSE_PORT
