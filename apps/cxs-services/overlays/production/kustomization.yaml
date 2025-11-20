@@ -5,7 +5,7 @@ namespace: solutions
 
 images:
   - name: quicklookup/cxs-services
-    newTag: 8b042bd
+    newTag: d74dd30
 
 resources:
   - ../../base
