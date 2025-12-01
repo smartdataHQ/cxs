@@ -5,7 +5,7 @@ namespace: solutions
 
 images:
   - name: quicklookup/cxs-anonymization
-    newTag: d7ec34c
+    newTag: 18dc92f
 
 resources:
   - ../../base
