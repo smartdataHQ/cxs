@@ -1,6 +1,6 @@
 images:
   - name: quicklookup/contextsuite
-    newTag: 5504daf
+    newTag: 3e89a21
 
 # Production configs reside in the base
 resources:
