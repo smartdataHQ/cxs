@@ -67,7 +67,7 @@ services:
     <<: *default-limits
 
   cxs-anonymization:
-    image: quicklookup/cxs-anonymization:18dc92f
+    image: quicklookup/cxs-anonymization:478e6bd
     platform: linux/amd64
     restart: unless-stopped
     ports:
