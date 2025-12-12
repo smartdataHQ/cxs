@@ -5,7 +5,7 @@ namespace: solutions
 
 images:
   - name: quicklookup/translator-api
-    newTag: f709490
+    newTag: 56016dc
 
 resources:
   - ../../base
