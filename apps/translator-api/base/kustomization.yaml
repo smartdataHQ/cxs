@@ -1,5 +1,0 @@
-resources:
-  - translator-api-deployment.yaml
-  - translator-api-service.yaml
-  - translator-api-config.yaml
-  - translator-api-ingress.yml
