@@ -20,17 +20,23 @@ spec:
           image: quicklookup/cxs-services # Image tag managed in overlays/*/kustomization.yaml
           ports:
             - containerPort: 8088
+          startupProbe:
+            httpGet:
+              port: 8088
+              path: /api/status/alive
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 30  # Allow up to 160s for startup (10 + 30*5)
           livenessProbe:
             httpGet:
               port: 8088
               path: /api/status/alive
-            initialDelaySeconds: 6
-            periodSeconds: 6
+            periodSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               port: 8088
               path: /api/status/ready
-            initialDelaySeconds: 5
             periodSeconds: 10
             timeoutSeconds: 3
           env:
