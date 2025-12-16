@@ -182,6 +182,7 @@ kind: Deployment
 metadata:
   name: cxs-services-rag-worker
 spec:
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cxs-services-rag-worker
