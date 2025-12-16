@@ -9,3 +9,7 @@ images:
 
 resources:
   - ../../base
+
+replicas:
+  - name: cxsservices
+    count: 1
