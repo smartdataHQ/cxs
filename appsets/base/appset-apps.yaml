@@ -13,6 +13,8 @@ spec:
         directories:
           - path: apps/*/overlays/production
           - path: apps/*/overlays/*production*
+          - path: apps/cxs-services/overlays/production
+            exclude: true
   template:
     metadata:
       name: "{{index .path.segments 0}}-{{index .path.segments 1}}"
