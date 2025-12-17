@@ -49,7 +49,7 @@ backend:
 
 write:
   persistence:
-    size: 20Gi
+    size: 60Gi
   extraArgs:
     - '-config.expand-env=true'
   extraEnv:
