@@ -7,7 +7,7 @@ images:
   - name: quicklookup/synmetrix-actions
     newTag: "7270f8d"
   - name: quicklookup/synmetrix-cube
-    newTag: "f8fb959"
+    newTag: "8eeb17e"
   - name: quicklookup/hasura-backend-plus
     newTag: "latest"
   - name: quicklookup/synmetrix-hasura
