@@ -2,12 +2,12 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 images:
-  - name: quicklookup/synmetrix-client
-    newTag: "78b6eca"
+  - name: quicklookup/synmetrix-client-v2
+    newTag: "07787d2"
   - name: quicklookup/synmetrix-actions
     newTag: "7270f8d"
   - name: quicklookup/synmetrix-cube
-    newTag: "f8fb959"
+    newTag: "b5c1883"
   - name: quicklookup/hasura-backend-plus
     newTag: "latest"
   - name: quicklookup/synmetrix-hasura
