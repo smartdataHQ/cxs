@@ -3,6 +3,9 @@ kind: Kustomization
 
 namespace: ingestion
 
+resources:
+- meltano-shared-pvc.yaml
+
 helmCharts:
 - name: airflow
   repo: https://airflow.apache.org
