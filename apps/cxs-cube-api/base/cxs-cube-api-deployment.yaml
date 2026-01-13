@@ -40,20 +40,30 @@ spec:
           ports:
             - containerPort: 8000
               name: http
+          startupProbe:
+            httpGet:
+              port: 8000
+              path: /health
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
           livenessProbe:
+            httpGet:
+              port: 8000
+              path: /health
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
             httpGet:
               port: 8000
               path: /health
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-          readinessProbe:
-            httpGet:
-              port: 8000
-              path: /health
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            timeoutSeconds: 2
+            failureThreshold: 3
           env:
             # Database Configuration (ClickHouse)
             - name: CLICKHOUSE_HOST
@@ -99,6 +109,9 @@ spec:
               value: "1"
             - name: PYTHONUNBUFFERED
               value: "1"
+            # Suppress Python warnings (temporary workaround for async client warning)
+            - name: PYTHONWARNINGS
+              value: "ignore::RuntimeWarning"
           envFrom:
             - configMapRef:
                 name: cxs-cube-api-config
@@ -116,7 +129,7 @@ spec:
     kind: Deployment
     name: cxs-cube-api
   minReplicas: 1
-  maxReplicas: 3
+  maxReplicas: 1
   metrics:
     - type: Resource
       resource:
