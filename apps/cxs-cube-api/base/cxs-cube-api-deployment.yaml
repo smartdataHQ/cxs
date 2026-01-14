@@ -1,0 +1,145 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cxs-cube-api
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cxs-cube-api
+      tier: api
+  template:
+    metadata:
+      labels:
+        app: cxs-cube-api
+        tier: api
+    spec:
+      containers:
+        - name: api
+          image: quicklookup/cxs-cube-api # Image tag managed in overlays/*/kustomization.yaml
+          command:
+            - uvicorn
+            - api.app:app
+            - --host
+            - 0.0.0.0
+            - --port
+            - "8000"
+          workingDir: /app/cube
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+          ports:
+            - containerPort: 8000
+              name: http
+          startupProbe:
+            httpGet:
+              port: 8000
+              path: /health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              port: 8000
+              path: /health
+            initialDelaySeconds: 60
+            periodSeconds: 900
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /health
+            initialDelaySeconds: 30
+            periodSeconds: 3600
+            timeoutSeconds: 5
+            failureThreshold: 3
+          env:
+            # Database Configuration (ClickHouse)
+            - name: CLICKHOUSE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: cxs-cube-api
+                  key: CLICKHOUSE_HOST
+            - name: CLICKHOUSE_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: cxs-cube-api
+                  key: CLICKHOUSE_PORT
+            - name: CLICKHOUSE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cxs-cube-api
+                  key: CLICKHOUSE_USER
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cxs-cube-api
+                  key: CLICKHOUSE_PASSWORD
+            # Synmetrix Configuration
+            - name: SYNMETRIX_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: cxs-cube-api
+                  key: SYNMETRIX_BASE_URL
+            - name: SYNMETRIX_LOGIN
+              valueFrom:
+                secretKeyRef:
+                  name: cxs-cube-api
+                  key: SYNMETRIX_LOGIN
+            - name: SYNMETRIX_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cxs-cube-api
+                  key: SYNMETRIX_PASSWORD
+            # Python Environment
+            - name: PYTHONPATH
+              value: "/app/libs/core:/app/cube:"
+            - name: PYTHONDONTWRITEBYTECODE
+              value: "1"
+            - name: PYTHONUNBUFFERED
+              value: "1"
+            # Suppress Python warnings (temporary workaround for async client warning)
+            - name: PYTHONWARNINGS
+              value: "ignore::RuntimeWarning"
+          envFrom:
+            - configMapRef:
+                name: cxs-cube-api-config
+      imagePullSecrets:
+        - name: dockerlock
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cxs-cube-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: cxs-cube-api
+  minReplicas: 1
+  maxReplicas: 1
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
