@@ -50,7 +50,7 @@ spec:
       - name: docker-hub-secret
       containers:
         - name: client
-          image: "quicklookup/synmetrix-client-v2:07787d2"
+          image: "quicklookup/synmetrix-client-v2:d2e5e76"
           imagePullPolicy: IfNotPresent
 
           ports:
