@@ -3,7 +3,7 @@ kind: Kustomization
 
 images:
   - name: quicklookup/synmetrix-client-v2
-    newTag: "07787d2"
+    newTag: "d2e5e76"
   - name: quicklookup/synmetrix-actions
     newTag: "7270f8d"
   - name: quicklookup/synmetrix-cube
