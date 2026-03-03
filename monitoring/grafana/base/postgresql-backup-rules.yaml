@@ -80,7 +80,7 @@ groups:
             severity: critical
           isPaused: false
           notification_settings:
-            receiver: Snjallgogn Teams
+            receiver: Snjallgogn Ops
 
         - uid: pg-backup-repo2-stale
           title: 'PostgreSQL: No successful backup to MinIO (repo2) in 28h'
@@ -157,4 +157,4 @@ groups:
             severity: critical
           isPaused: false
           notification_settings:
-            receiver: Snjallgogn Teams
+            receiver: Snjallgogn Ops
