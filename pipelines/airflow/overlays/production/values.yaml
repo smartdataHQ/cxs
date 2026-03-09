@@ -220,6 +220,16 @@ airflow:
         secretKeyRef:
           name: airflow
           key: blue-car-competitor-pricing-url
+    - name: SIMPLY_TV_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: simply-tv-api-key
+    - name: TIX_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: tix-api-key      
   extraVolumeMounts:
     #- name: airflow-logs      
     #mountPath: /opt/airflow/logs

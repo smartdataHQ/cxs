@@ -5,14 +5,14 @@ groups:
       folder: database
       interval: 5m
       rules:
-        - uid: postgresql-backup-failure
-          title: 'PostgreSQL: Backup job failed'
+        - uid: pg-backup-repo1-stale
+          title: 'PostgreSQL: No successful backup to local storage (repo1) in 28h'
           condition: Threshold
-          for: 5m
+          for: 30m
           data:
-            - refId: jobStatus
+            - refId: staleness
               relativeTimeRange:
-                from: 3600
+                from: 108000
                 to: 0
               datasourceUid: fefbtw5xi6n0gd
               model:
@@ -21,21 +21,26 @@ groups:
                     type: prometheus
                     uid: fefbtw5xi6n0gd
                 editorMode: code
-                expr: kube_job_status_failed{job_name=~"postgres-backup-.*"} == 1
-                instant: false
+                expr: >-
+                    time() - max(
+                      kube_job_status_completion_time{namespace="data", job_name=~"cxs-pg-(full|diff)-backup-[0-9]+"}
+                      and on(job_name, namespace)
+                      (kube_job_status_succeeded{namespace="data", job_name=~"cxs-pg-(full|diff)-backup-[0-9]+"} == 1)
+                    )
+                instant: true
                 interval: ""
                 intervalMs: 300000
                 legendFormat: ""
                 maxDataPoints: 43200
-                range: true
-                refId: jobStatus
+                range: false
+                refId: staleness
             - refId: Threshold
               datasourceUid: __expr__
               model:
                 conditions:
                     - evaluator:
                         params:
-                            - 1
+                            - 100800
                             - 0
                         type: gt
                       operator:
@@ -50,7 +55,7 @@ groups:
                     name: Expression
                     type: __expr__
                     uid: __expr__
-                expression: jobStatus
+                expression: staleness
                 intervalMs: 1000
                 maxDataPoints: 43200
                 refId: Threshold
@@ -58,38 +63,33 @@ groups:
           dashboardUid: ""
           panelId: 0
           noDataState: NoData
-          execErrState: Alerting
+          execErrState: Error
           annotations:
             description: |-
-                A PostgreSQL backup job has failed, which means database backups are not being created properly.
-                - Job name: {{ $labels.job_name }}
-                - Namespace: {{ $labels.namespace }}
-                
+                No successful PostgreSQL backup to local storage (repo1) has completed in the last 28 hours. Daily backups run at 06:00 UTC.
+
                 What should you do?
-                1. Check the backup job logs: kubectl logs -n {{ $labels.namespace }} job/{{ $labels.job_name }}
-                2. Verify pgBackRest configuration and MinIO connectivity
-                3. Ensure backup storage (repo1 and repo2) are accessible
-                4. Check database connectivity and permissions
-                5. Monitor for subsequent backup attempts
-                
-                Critical: Database backups are essential for disaster recovery!
-            summary: PostgreSQL backup job "{{ $labels.job_name }}" failed in namespace {{ $labels.namespace }}
+                1. Check recent backup jobs: kubectl get jobs -n data -l postgres-operator.crunchydata.com/cluster=cxs-pg --sort-by=.metadata.creationTimestamp
+                2. Check logs of the latest backup job: kubectl logs -n data job/<latest-job-name>
+                3. Verify pgBackRest repo1 (local Longhorn PVC) is accessible
+                4. Check CronJob schedule: kubectl get cronjobs -n data | grep cxs-pg
+            summary: No successful repo1 backup in over 28 hours — local storage backups may be failing
           labels:
             app: postgresql
             type: backup
             severity: critical
           isPaused: false
           notification_settings:
-            receiver: Skývafnir Teams
+            receiver: Snjallgogn Ops
 
-        - uid: postgresql-backup-missing
-          title: 'PostgreSQL: No recent backup completed'
+        - uid: pg-backup-repo2-stale
+          title: 'PostgreSQL: No successful backup to MinIO (repo2) in 28h'
           condition: Threshold
           for: 30m
           data:
-            - refId: lastSuccessTime
+            - refId: staleness
               relativeTimeRange:
-                from: 7200
+                from: 108000
                 to: 0
               datasourceUid: fefbtw5xi6n0gd
               model:
@@ -98,21 +98,26 @@ groups:
                     type: prometheus
                     uid: fefbtw5xi6n0gd
                 editorMode: code
-                expr: time() - kube_job_status_completion_time{job_name=~"postgres-backup-.*"}
-                instant: false
+                expr: >-
+                    time() - max(
+                      kube_job_status_completion_time{namespace="data", job_name=~"cxs-pg-(full|diff)-backup-minio-[0-9]+"}
+                      and on(job_name, namespace)
+                      (kube_job_status_succeeded{namespace="data", job_name=~"cxs-pg-(full|diff)-backup-minio-[0-9]+"} == 1)
+                    )
+                instant: true
                 interval: ""
                 intervalMs: 300000
                 legendFormat: ""
                 maxDataPoints: 43200
-                range: true
-                refId: lastSuccessTime
+                range: false
+                refId: staleness
             - refId: Threshold
               datasourceUid: __expr__
               model:
                 conditions:
                     - evaluator:
                         params:
-                            - 7200
+                            - 100800
                             - 0
                         type: gt
                       operator:
@@ -127,84 +132,7 @@ groups:
                     name: Expression
                     type: __expr__
                     uid: __expr__
-                expression: lastSuccessTime
-                intervalMs: 1000
-                maxDataPoints: 43200
-                refId: Threshold
-                type: threshold
-          dashboardUid: ""
-          panelId: 0
-          noDataState: Alerting
-          execErrState: Alerting
-          annotations:
-            description: |-
-                No PostgreSQL backup has completed successfully in the last 2 hours, indicating potential backup scheduling or execution issues.
-                - Job name pattern: {{ $labels.job_name }}
-                - Time since last success: {{ $value }}s
-                
-                What should you do?
-                1. Check if backup CronJobs are running: kubectl get cronjobs -n postgres
-                2. Verify recent job execution: kubectl get jobs -n postgres --sort-by=.metadata.creationTimestamp
-                3. Check for failed jobs: kubectl get jobs -n postgres --field-selector status.successful!=1
-                4. Review backup schedule configuration
-                5. Ensure cluster resources are sufficient for backup execution
-                
-                Note: PostgreSQL backups run every 2 hours - this alert fires if no completion in last 2 hours.
-            summary: No PostgreSQL backup completed in {{ $value }}s (> 2 hours)
-          labels:
-            app: postgresql
-            type: backup
-            severity: warning
-          isPaused: false
-          notification_settings:
-            receiver: Skývafnir Teams
-
-        - uid: postgresql-backup-duration-high
-          title: 'PostgreSQL: Backup taking unusually long'
-          condition: Threshold
-          for: 10m
-          data:
-            - refId: jobDuration
-              relativeTimeRange:
-                from: 3600
-                to: 0
-              datasourceUid: fefbtw5xi6n0gd
-              model:
-                adhocFilters: []
-                datasource:
-                    type: prometheus
-                    uid: fefbtw5xi6n0gd
-                editorMode: code
-                expr: time() - kube_job_status_start_time{job_name=~"postgres-backup-.*"} and on(job_name) kube_job_status_active{job_name=~"postgres-backup-.*"} == 1
-                instant: false
-                interval: ""
-                intervalMs: 300000
-                legendFormat: ""
-                maxDataPoints: 43200
-                range: true
-                refId: jobDuration
-            - refId: Threshold
-              datasourceUid: __expr__
-              model:
-                conditions:
-                    - evaluator:
-                        params:
-                            - 2700
-                            - 0
-                        type: gt
-                      operator:
-                        type: and
-                      query:
-                        params: []
-                      reducer:
-                        params: []
-                        type: avg
-                      type: query
-                datasource:
-                    name: Expression
-                    type: __expr__
-                    uid: __expr__
-                expression: jobDuration
+                expression: staleness
                 intervalMs: 1000
                 maxDataPoints: 43200
                 refId: Threshold
@@ -212,27 +140,21 @@ groups:
           dashboardUid: ""
           panelId: 0
           noDataState: NoData
-          execErrState: NoData
+          execErrState: Error
           annotations:
             description: |-
-                A PostgreSQL backup job has been running for over 45 minutes, which is significantly longer than the typical 18-minute duration.
-                - Job name: {{ $labels.job_name }}
-                - Duration: {{ $value }}s ({{ $value | humanizeDuration }})
-                - Namespace: {{ $labels.namespace }}
-                
+                No successful PostgreSQL backup to MinIO (repo2) has completed in the last 28 hours. Daily backups run at 07:00 UTC.
+
                 What should you do?
-                1. Check backup job logs for performance issues: kubectl logs -n {{ $labels.namespace }} job/{{ $labels.job_name }} -f
-                2. Monitor MinIO storage performance (repo2 backups are slower)
-                3. Check database size growth - larger databases take longer
-                4. Verify network connectivity to backup repositories
-                5. Consider if this is expected due to data growth
-                
-                Normal backup duration: ~18 minutes. Alert threshold: 45 minutes.
-            summary: PostgreSQL backup "{{ $labels.job_name }}" running for {{ $value }}s (> 45min)
+                1. Check recent MinIO backup jobs: kubectl get jobs -n data -l postgres-operator.crunchydata.com/cluster=cxs-pg --sort-by=.metadata.creationTimestamp | grep minio
+                2. Check logs of the latest MinIO backup job: kubectl logs -n data job/<latest-minio-job-name>
+                3. Verify MinIO connectivity and bucket access from the data namespace
+                4. Check CronJob schedule: kubectl get cronjobs -n data | grep minio
+            summary: No successful repo2 backup in over 28 hours — MinIO backups may be failing
           labels:
             app: postgresql
             type: backup
-            severity: warning
+            severity: critical
           isPaused: false
           notification_settings:
-            receiver: Skývafnir Teams
+            receiver: Snjallgogn Ops

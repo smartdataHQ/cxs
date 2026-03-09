@@ -50,6 +50,11 @@ extraConfigmapMounts:
     subPath: longhorn-rules.yaml
     configMap: grafana-longhorn-alerts
     readOnly: true
+  - name: grafana-postgresql-backup-alerts
+    mountPath: /etc/grafana/provisioning/alerting/postgresql-backup-rules.yaml
+    subPath: postgresql-backup-rules.yaml
+    configMap: grafana-postgresql-backup-alerts
+    readOnly: true
 
 testFramework:
   enabled: false

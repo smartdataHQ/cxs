@@ -41,6 +41,15 @@ spec:
         app.kubernetes.io/instance: synmetrix
     spec:
       serviceAccountName: synmetrix
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - growing-mouse
       containers:
         - name: cubestore
           image: "cubejs/cubestore:v0.35.33"
