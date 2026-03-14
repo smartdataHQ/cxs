@@ -3,7 +3,7 @@ kind: Kustomization
 
 images:
   - name: quicklookup/synmetrix-cube
-    newTag: "b5c1883"
+    newTag: "7d54f27"
 
 namespace: synmetrix
 
