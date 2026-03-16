@@ -7,10 +7,7 @@ resources:
 configMapGenerator:
   - name: cxs-mimir-api-config
     literals:
-      - AZURE_DEPLOYMENT_NAME=gpt-4o
-      - AZURE_OPENAI_API_BASE=https://snjallgpt-swe.openai.azure.com/
       - AZURE_OPENAI_API_TYPE=azure
-      - AZURE_OPENAI_API_VERSION=2025-02-01-preview
       - BACKEND_BASE_URL=https://agents.contextsuite.com
       - CLICKHOUSE_HOST=10.180.122.32
       - CLICKHOUSE_PORT=8123
