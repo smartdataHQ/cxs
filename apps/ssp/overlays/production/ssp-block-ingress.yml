@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ssp-block
+  annotations:
+    nginx.ingress.kubernetes.io/server-snippet: |
+      return 444;
+spec:
+  rules:
+    - host: admin.contextsuite.com
+  tls:
+    - hosts:
+        - admin.contextsuite.com
+      secretName: admin-contextsuite-com-tls

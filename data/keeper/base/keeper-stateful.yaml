@@ -62,9 +62,7 @@ spec:
         image: clickhouse/clickhouse-keeper:24.3.2.23-alpine
         ports:
         - containerPort: 9181
-          hostPort: 9181
         - containerPort: 9234
-          hostPort: 9234
         command: [ "/bin/bash", "-c"]
         args: [ "IFS=- read -r var1 var2 <<< $HOSTNAME ; echo 'Custom Entrypoint' ; echo $var2 ; declare -x PODNR=$var2 ; /entrypoint.sh" ]
         volumeMounts:
