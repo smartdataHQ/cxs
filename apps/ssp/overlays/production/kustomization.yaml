@@ -10,4 +10,3 @@ images:
 resources:
   - ../../base
   - ssp-config.yaml
-  - ssp-ingress.yml
