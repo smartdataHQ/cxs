@@ -5,6 +5,9 @@ metadata:
   labels:
     app: ssp
     tier: api
+  annotations:
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: apps-ssp
 spec:
   type: ClusterIP
   sessionAffinity: ClientIP
