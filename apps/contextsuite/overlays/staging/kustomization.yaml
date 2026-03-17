@@ -1,6 +1,6 @@
 images:
   - name: quicklookup/contextsuite
-    newTag: "3659ee1"
+    newTag: "2129e3a"
 
 configMapGenerator:
   - name: contextsuite-config
