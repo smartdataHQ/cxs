@@ -1,6 +1,6 @@
 images:
   - name: quicklookup/contextsuite
-    newTag: "b693075"
+    newTag: 4f677cd
 
 configMapGenerator:
   - name: contextsuite-config
@@ -14,6 +14,8 @@ configMapGenerator:
       - CONTEXTSUITE_ADMIN_URL=https://admin.contextsuite.dev
       - NEXT_PUBLIC_CONTEXTSUITE_ADMIN_URL=https://admin.contextsuite.dev
       - NEXT_PUBLIC_CHAT_WSS_ENDPOINT=ws://chat.contextsuite.dev:8088/api/table_chat
+      - WORKOS_REDIRECT_URI=https://app.contextsuite.dev/auth/callback
+      - NEXT_PUBLIC_WORKOS_REDIRECT_URI=https://app.contextsuite.dev/auth/callback
 
 resources:
   - ../../base
