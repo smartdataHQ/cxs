@@ -57,9 +57,7 @@ spec:
           image: neo4j:5-enterprise
           ports:
             - containerPort: 7474
-              hostPort: 7474
             - containerPort: 7687
-              hostPort: 7687
           volumeMounts:
             - name: neo4j
               mountPath: /data
