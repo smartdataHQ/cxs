@@ -6,9 +6,6 @@ metadata:
     ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/whitelist-source-range: "194.144.179.29/32,172.23.128.1/32"
-    nginx.ingress.kubernetes.io/custom-http-errors: "403"
-    nginx.ingress.kubernetes.io/server-snippet: |
-      error_page 403 =444 /;
 spec:
   rules:
     - host: admin.contextsuite.com
