@@ -229,7 +229,22 @@ airflow:
       valueFrom:
         secretKeyRef:
           name: airflow
-          key: tix-api-key      
+          key: tix-api-key    
+    - name: BONUS_STOCKOUT_HITL_TOKEN_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: bonus-stockout-hitl-token-secret
+    - name: BONUS_STOCKOUT_HITL_ORGANIZATION_ID
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: bonus-stockout-hitl-organization-id
+    - name: BONUS_STOCKOUT_HITL_CREATED_BY_ID
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: bonus-stockout-hitl-created-by-id      
   extraVolumeMounts:
     #- name: airflow-logs      
     #mountPath: /opt/airflow/logs
