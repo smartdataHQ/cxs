@@ -83,13 +83,13 @@ groups:
             receiver: Snjallgogn Ops
 
         - uid: pg-backup-repo2-stale
-          title: 'PostgreSQL: No successful backup to MinIO (repo2) in 28h'
+          title: 'PostgreSQL: No successful backup to MinIO (repo2) in 50h'
           condition: Threshold
           for: 30m
           data:
             - refId: staleness
               relativeTimeRange:
-                from: 108000
+                from: 190000
                 to: 0
               datasourceUid: fefbtw5xi6n0gd
               model:
@@ -117,7 +117,7 @@ groups:
                 conditions:
                     - evaluator:
                         params:
-                            - 100800
+                            - 180000
                             - 0
                         type: gt
                       operator:
@@ -143,14 +143,14 @@ groups:
           execErrState: Error
           annotations:
             description: |-
-                No successful PostgreSQL backup to MinIO (repo2) has completed in the last 28 hours. Daily backups run at 07:00 UTC.
+                No successful PostgreSQL backup to MinIO (repo2) has completed in the last 50 hours. MinIO backups run Mon-Sat at 07:00 UTC (no Sunday run).
 
                 What should you do?
                 1. Check recent MinIO backup jobs: kubectl get jobs -n data -l postgres-operator.crunchydata.com/cluster=cxs-pg --sort-by=.metadata.creationTimestamp | grep minio
                 2. Check logs of the latest MinIO backup job: kubectl logs -n data job/<latest-minio-job-name>
                 3. Verify MinIO connectivity and bucket access from the data namespace
                 4. Check CronJob schedule: kubectl get cronjobs -n data | grep minio
-            summary: No successful repo2 backup in over 28 hours — MinIO backups may be failing
+            summary: No successful repo2 backup in over 50 hours — MinIO backups may be failing
           labels:
             app: postgresql
             type: backup
