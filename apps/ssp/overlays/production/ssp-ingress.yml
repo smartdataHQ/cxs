@@ -6,6 +6,10 @@ metadata:
     ingress.kubernetes.io/ssl-redirect: "true"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/whitelist-source-range: "194.144.179.29/32,82.221.53.180/32"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://zenobia.skattur.is,https://chat.skattur.is,https://huginn.skattur.is"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type"
 spec:
   rules:
     - host: admin.contextsuite.com
