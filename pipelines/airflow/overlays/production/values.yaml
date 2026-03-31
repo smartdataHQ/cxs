@@ -244,7 +244,22 @@ airflow:
       valueFrom:
         secretKeyRef:
           name: airflow
-          key: bonus-stockout-hitl-created-by-id      
+          key: bonus-stockout-hitl-created-by-id    
+    - name: GCORE_S3_HOST
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: gcore-s3-host  
+    - name: GCORE_S3_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: gcore-s3-access-key     
+    - name: GCORE_S3_SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: gcore-secret-key      
   extraVolumeMounts:
     #- name: airflow-logs      
     #mountPath: /opt/airflow/logs
