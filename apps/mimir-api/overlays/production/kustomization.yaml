@@ -5,7 +5,7 @@ namespace: solutions
 
 images:
   - name: quicklookup/mimir-api
-    newTag: 6709a50
+    newTag: 85b065a
 
 resources:
   - ../../base
