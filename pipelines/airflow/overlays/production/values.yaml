@@ -229,7 +229,7 @@ airflow:
       valueFrom:
         secretKeyRef:
           name: airflow
-          key: tix-api-key    
+          key: tix-api-key
     - name: BONUS_STOCKOUT_HITL_TOKEN_SECRET
       valueFrom:
         secretKeyRef:
@@ -244,7 +244,7 @@ airflow:
       valueFrom:
         secretKeyRef:
           name: airflow
-          key: bonus-stockout-hitl-created-by-id      
+          key: bonus-stockout-hitl-created-by-id
   extraVolumeMounts:
     #- name: airflow-logs      
     #mountPath: /opt/airflow/logs
@@ -272,8 +272,13 @@ airflow:
     stringOverride: ""
     resources: {}
     extraPipPackages: []
-    extraVolumeMounts: []
-    extraVolumes: []
+    extraVolumeMounts:
+      - name: airflow-checkpoints
+        mountPath: /opt/airflow/checkpoints
+    extraVolumes:
+      - name: airflow-checkpoints
+        persistentVolumeClaim:
+          claimName: airflow-checkpoints-pvc
 scheduler:
   replicas: 1
   resources: {}
@@ -371,7 +376,17 @@ serviceAccount:
   create: true
   name: ""
   annotations: {}
-extraManifests: []
+extraManifests:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: airflow-checkpoints-pvc
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
 pgbouncer:
   enabled: false
   resources: {}
