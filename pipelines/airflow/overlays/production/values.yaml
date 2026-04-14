@@ -383,7 +383,7 @@ extraManifests:
       name: airflow-checkpoints-pvc
     spec:
       accessModes:
-        - ReadWriteOnce
+        - ReadWriteMany
       resources:
         requests:
           storage: 1Gi
