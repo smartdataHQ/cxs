@@ -44,6 +44,16 @@ spec:
             timeoutSeconds: 9
             failureThreshold: 6
           env:
+            - name: FRAIOS_CONVEX_URL
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: FRAIOS_CONVEX_URL
+            - name: FRAIOS_CONVEX_SERVICE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: llm
+                  key: FRAIOS_CONVEX_SERVICE_TOKEN
             - name: WORKOS_CLIENT_ID
               valueFrom:
                 secretKeyRef:
