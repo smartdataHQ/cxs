@@ -10,10 +10,10 @@ spec:
             name: postgres-minio-backup-credentials
       global:
         # Configuration for "repo2" (MinIO S3)
-        repo2-retention-full: "8"       # Keep more backups offsite
+        repo2-retention-full: "4"       # 4 weekly fulls (Apr 21: reduced from 8 after MinIO-full incident)
         repo2-retention-full-type: count
-        repo2-retention-archive: "4"
-        repo2-retention-diff: "14"
+        repo2-retention-archive: "2"
+        repo2-retention-diff: "7"
         repo2-s3-uri-style: path         # Required for MinIO
         repo2-storage-verify-tls: "n"      # Use HTTP instead of HTTPS
       repos:
@@ -27,7 +27,7 @@ spec:
                 - ReadWriteOnce
               resources:
                 requests:
-                  storage: 300Gi
+                  storage: 1000Gi  # Apr 21: bumped from 300Gi (live was 500Gi via manual expand) to absorb WAL growth
         - name: repo2
           schedules:
             full: "0 2 * * 6"      # Saturday 02:00 (offset from repo1)
