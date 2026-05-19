@@ -272,13 +272,8 @@ airflow:
     stringOverride: ""
     resources: {}
     extraPipPackages: []
-    extraVolumeMounts:
-      - name: airflow-checkpoints
-        mountPath: /opt/airflow/checkpoints
-    extraVolumes:
-      - name: airflow-checkpoints
-        persistentVolumeClaim:
-          claimName: airflow-checkpoints-pvc
+    extraVolumeMounts: []
+    extraVolumes: []
 scheduler:
   replicas: 1
   resources: {}
