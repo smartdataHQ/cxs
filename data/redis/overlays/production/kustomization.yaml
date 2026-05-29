@@ -1,2 +1,123 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
   - ../../base
+
+# Production data set is ~4.8GB / 1.4M keys. With the chart defaults this cluster
+# fell into a replica resync death spiral:
+#   1. A replica restart forces a full diskless resync (~90s) from the master.
+#   2. The chart's liveness probe (ping_liveness_local_AND_master, 20s / 5x5s)
+#      pings the MASTER. During resync the master is busy forking/streaming the
+#      4.8GB RDB to every replica (and its headless DNS blips on restart), so the
+#      probe times out and the replica is SIGTERMed mid-transfer.
+#   3. The dropped socket aborts the master's shared diskless fork -> all replicas
+#      re-request a full resync -> self-sustaining storm that also flapped the master.
+#
+# Fix, scoped to production (staging has small data + smaller nodes):
+#   - liveness -> LOCAL-ONLY on both master and replicas. A node's liveness must
+#     never depend on the master being responsive; replica readiness still pings the
+#     master so an unsynced replica stays out of rotation without being killed.
+#   - relax startup/liveness/readiness timing to cover AOF load + full resync.
+#   - requests sized to observed usage (~4.8GB / ~1 core). Requests only, no hard
+#     memory limit or maxmemory: the data set grows and a hard cap would trade this
+#     crash loop for OOMKill / silent eviction of session+conversation keys. That
+#     ceiling is a separate decision.
+#
+# Probes are spelled out in full (not partial merges) so the rendered manifests
+# equal the running, validated cluster config exactly.
+patches:
+  - target:
+      kind: StatefulSet
+      name: redis-replicas
+    patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: redis-replicas
+      spec:
+        template:
+          spec:
+            containers:
+              - name: redis
+                startupProbe:
+                  tcpSocket:
+                    port: redis
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  successThreshold: 1
+                  failureThreshold: 60
+                livenessProbe:
+                  exec:
+                    command:
+                      - sh
+                      - -c
+                      - /health/ping_liveness_local.sh 5
+                  initialDelaySeconds: 120
+                  periodSeconds: 10
+                  timeoutSeconds: 6
+                  successThreshold: 1
+                  failureThreshold: 10
+                readinessProbe:
+                  exec:
+                    command:
+                      - sh
+                      - -c
+                      - /health/ping_readiness_local_and_master.sh 1
+                  initialDelaySeconds: 30
+                  periodSeconds: 5
+                  timeoutSeconds: 2
+                  successThreshold: 1
+                  failureThreshold: 10
+                resources:
+                  requests:
+                    memory: 6Gi
+                    cpu: "1"
+  - target:
+      kind: StatefulSet
+      name: redis-master
+    patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: redis-master
+      spec:
+        template:
+          spec:
+            containers:
+              - name: redis
+                startupProbe:
+                  tcpSocket:
+                    port: redis
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                  timeoutSeconds: 5
+                  successThreshold: 1
+                  failureThreshold: 60
+                livenessProbe:
+                  exec:
+                    command:
+                      - sh
+                      - -c
+                      - /health/ping_liveness_local.sh 5
+                  initialDelaySeconds: 120
+                  periodSeconds: 10
+                  timeoutSeconds: 6
+                  successThreshold: 1
+                  failureThreshold: 10
+                readinessProbe:
+                  exec:
+                    command:
+                      - sh
+                      - -c
+                      - /health/ping_readiness_local.sh 1
+                  initialDelaySeconds: 30
+                  periodSeconds: 5
+                  timeoutSeconds: 2
+                  successThreshold: 1
+                  failureThreshold: 10
+                resources:
+                  requests:
+                    memory: 6Gi
+                    cpu: "1"
