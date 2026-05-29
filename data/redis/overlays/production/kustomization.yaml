@@ -1,2 +1,55 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
 resources:
   - ../../base
+
+# Production data set is ~4.8GB / 1.4M keys. A replica restart triggers a full
+# diskless resync that, with the chart's default probes, gets SIGTERMed mid-sync
+# (liveness initialDelay 20s / 5x5s, and it pings the master too) -> CrashLoopBackOff.
+# Relax the replica probes to cover AOF load + full resync, and right-size requests
+# to observed usage so the scheduler stops under-counting Redis.
+patches:
+  - target:
+      kind: StatefulSet
+      name: redis-replicas
+    patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: redis-replicas
+      spec:
+        template:
+          spec:
+            containers:
+              - name: redis
+                startupProbe:
+                  failureThreshold: 60
+                livenessProbe:
+                  initialDelaySeconds: 120
+                  periodSeconds: 10
+                  failureThreshold: 10
+                readinessProbe:
+                  initialDelaySeconds: 30
+                  failureThreshold: 10
+                resources:
+                  requests:
+                    memory: 6Gi
+                    cpu: "1"
+  - target:
+      kind: StatefulSet
+      name: redis-master
+    patch: |-
+      apiVersion: apps/v1
+      kind: StatefulSet
+      metadata:
+        name: redis-master
+      spec:
+        template:
+          spec:
+            containers:
+              - name: redis
+                resources:
+                  requests:
+                    memory: 6Gi
+                    cpu: "1"
