@@ -375,10 +375,13 @@ extraManifests:
   - apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
-      name: airflow-checkpoints-pvc
+      name: bonus-stockout-checkpoint-pvc
+      labels:
+        app: bonus-stockout
+        component: checkpoint
     spec:
       accessModes:
-        - ReadWriteMany
+        - ReadWriteOnce
       resources:
         requests:
           storage: 1Gi
