@@ -283,7 +283,7 @@ scheduler:
   livenessProbe:
     enabled: true
     taskCreationCheck:
-      enabled: true
+      enabled: false
       thresholdSeconds: 300
       schedulerAgeBeforeCheck: 180
 web:
