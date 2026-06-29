@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cxsservices
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/whitelist-source-range: "18.185.231.228/32,3.77.48.46/32,3.74.172.161/32,52.56.244.97/32,3.11.48.73/32,18.135.73.241/32,52.22.119.215/32,3.225.94.137/32,52.87.43.241/32,54.165.179.173/32,34.226.81.206/32,52.6.81.143/32,3.20.212.11/32,3.131.146.218/32,3.17.34.135/32"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: cxs-utils.contextsuite.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cxsservices
+                port:
+                  number: 8088
+  tls:
+    - hosts:
+        - cxs-utils.contextsuite.com
+      secretName: cxs-utils-contextsuite-com-tls

@@ -17,7 +17,7 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: 2
-      activeDeadlineSeconds: 3600  # 1 hour timeout
+      activeDeadlineSeconds: 7200  # 2 hour timeout (full ~45min observed)
       template:
         metadata:
           labels:
@@ -76,7 +76,7 @@ spec:
   jobTemplate:
     spec:
       backoffLimit: 2
-      activeDeadlineSeconds: 1800  # 30 minutes timeout
+      activeDeadlineSeconds: 5400  # 90 min timeout (diff ~30min observed)
       template:
         metadata:
           labels:

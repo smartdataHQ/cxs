@@ -229,7 +229,7 @@ airflow:
       valueFrom:
         secretKeyRef:
           name: airflow
-          key: tix-api-key    
+          key: tix-api-key
     - name: BONUS_STOCKOUT_HITL_TOKEN_SECRET
       valueFrom:
         secretKeyRef:
@@ -298,7 +298,7 @@ scheduler:
   livenessProbe:
     enabled: true
     taskCreationCheck:
-      enabled: true
+      enabled: false
       thresholdSeconds: 300
       schedulerAgeBeforeCheck: 180
 web:
@@ -386,7 +386,20 @@ serviceAccount:
   create: true
   name: ""
   annotations: {}
-extraManifests: []
+extraManifests:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: bonus-stockout-checkpoint-pvc
+      labels:
+        app: bonus-stockout
+        component: checkpoint
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 1Gi
 pgbouncer:
   enabled: false
   resources: {}
