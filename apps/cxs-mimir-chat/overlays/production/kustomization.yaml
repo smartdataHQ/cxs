@@ -5,7 +5,7 @@ namespace: solutions
 
 images:
   - name: quicklookup/mimir-chat
-    newTag: ca646ef
+    newTag: 233a0fb
 
 # Production configs reside in the base
 resources:
