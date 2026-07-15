@@ -245,6 +245,11 @@ airflow:
         secretKeyRef:
           name: airflow
           key: bonus-stockout-hitl-created-by-id
+    - name: AIRFLOW_CONN_ALERTS
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: airflow-conn-fraios-alerts
   extraVolumeMounts:
     #- name: airflow-logs      
     #mountPath: /opt/airflow/logs
