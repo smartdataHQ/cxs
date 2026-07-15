@@ -244,6 +244,12 @@ airflow:
       valueFrom:
         secretKeyRef:
           name: airflow
+          key: bonus-stockout-hitl-created-by-id
+    - name: AIRFLOW_CONN_ALERTS
+      valueFrom:
+        secretKeyRef:
+          name: airflow
+          key: airflow-conn-fraios-alerts
           key: bonus-stockout-hitl-created-by-id    
     - name: GCORE_S3_HOST
       valueFrom:
