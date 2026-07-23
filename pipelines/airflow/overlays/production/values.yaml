@@ -259,6 +259,8 @@ airflow:
         secretKeyRef:
           name: airflow
           key: airflow-conn-alerts
+    - name: AIRFLOW__WEBSERVER__BASE_URL
+      value: "https://airflow.contextsuite.com"
     - name: GCORE_S3_HOST
       valueFrom:
         secretKeyRef:
