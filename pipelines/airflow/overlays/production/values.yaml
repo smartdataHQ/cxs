@@ -65,7 +65,12 @@ airflow:
       extra: |-
         { 
           "timeout": 10000
-        }  
+        }
+    - id: alerts
+      type: apprise
+      description: "MS Teams Adaptive Card alerts (Power Automate)"
+      extra: |-
+        ${ALERTS_CONNECTION_EXTRA}
   connectionsTemplates:
     BLUE_CAR_AZURE_SQL_PASSWORD:
       kind: secret
@@ -83,6 +88,10 @@ airflow:
       kind: secret
       name: airflow
       key: icelandic-toursit-board-azure-sql-password
+    ALERTS_CONNECTION_EXTRA:
+      kind: secret
+      name: airflow
+      key: airflow-conn-alerts-extra
   connectionsUpdate: false
   variables: []
   pools: []
@@ -249,8 +258,7 @@ airflow:
       valueFrom:
         secretKeyRef:
           name: airflow
-          key: airflow-conn-fraios-alerts
-          key: bonus-stockout-hitl-created-by-id    
+          key: airflow-conn-alerts
     - name: GCORE_S3_HOST
       valueFrom:
         secretKeyRef:
