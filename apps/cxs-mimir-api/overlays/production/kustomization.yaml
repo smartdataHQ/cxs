@@ -5,7 +5,7 @@ namespace: solutions
 
 images:
   - name: quicklookup/cxs-mimir-api
-    newTag: "db6326d"
+    newTag: "960fa66"
 
 resources:
   - ../../base
