@@ -5,4 +5,7 @@ bases:
 resources:
   - isl-hotel-streaming-client-pv.yaml
 
+patchesStrategicMerge:
+  - scale-to-zero.yaml
+
 
