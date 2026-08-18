@@ -1,0 +1,9 @@
+# isl-hotel-streaming-client is retired — it has never run (RWO volume multi-attach
+# deadlock, stuck ContainerCreating ~201d). Scaled to 0 to stop it and release the
+# volume. Reversible: remove this patch (and its kustomization entry) to restore.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: isl-hotel-streaming-client
+spec:
+  replicas: 0
