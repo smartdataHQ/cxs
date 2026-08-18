@@ -9,6 +9,9 @@ spec:
       service: n8n-worker
   strategy:
     type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
   template:
     metadata:
       labels:
@@ -20,6 +23,11 @@ spec:
           image: n8nio/n8n:1.84.3
           args: ["worker", "--concurrency=6"]
           env:
+            # Raise the V8 old-space ceiling above the ~4GB default so heavy
+            # workflows don't abort the worker with SIGABRT (JS heap OOM).
+            # Kept below the 8Gi container limit to leave non-heap headroom.
+            - name: NODE_OPTIONS
+              value: "--max-old-space-size=6144"
             - name: DB_POSTGRESDB_USER
               valueFrom:
                 secretKeyRef:
@@ -43,3 +51,11 @@ spec:
           envFrom:
             - configMapRef:
                 name: n8n-config
+          resources:
+            requests:
+              cpu: 250m
+              memory: 2Gi
+            limits:
+              # No CPU limit (avoids throttling). Memory limit = heap (6Gi) +
+              # non-heap headroom; a runaway hits the raised V8 ceiling first.
+              memory: 8Gi
