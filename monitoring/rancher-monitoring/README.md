@@ -34,21 +34,17 @@ namespace).
 
 ## CRDs
 
-`base/crds.yaml` vendors the 10 prometheus-operator v0.85.0 CRDs verbatim from
-chart `rancher-monitoring-crd 108.0.1+up77.9.1-rancher.10`. The crd-chart
-itself wraps them in a bz2 ConfigMap + helm-hook Job, which ArgoCD orders
-wrongly (PostSync — after the CRs that need them); plain CRDs sync first.
-They carry `argocd.argoproj.io/sync-options: ServerSideApply=true` (added by a
-kustomize patch) because they exceed the client-side-apply annotation limit.
+`base/kustomization.yaml` references the 10 prometheus-operator v0.85.0 CRDs
+as kustomize remote resources — the exact immutable upstream tag URLs that
+chart `rancher-monitoring-crd 108.0.1+up77.9.1-rancher.10` vendors from
+(verified byte-identical to the chart's payload). The crd-chart itself wraps
+them in a bz2 ConfigMap + helm-hook Job, which ArgoCD orders wrongly
+(PostSync — after the CRs that need them); plain CRDs sync first. They carry
+`argocd.argoproj.io/sync-options: ServerSideApply=true` (added by a kustomize
+patch) because they exceed the client-side-apply annotation limit.
 
-Re-vendor when bumping the chart version:
-
-```bash
-helm template rancher-monitoring-crd --repo https://charts.rancher.io \
-  --version <ver> --namespace cattle-monitoring-system \
-  | yq 'select(.metadata.name == "rancher-monitoring-crd-manifest") | .data."crds.bz2.b64"' \
-  | base64 -d | bunzip2 > base/crds.yaml
-```
+When bumping the chart version, point the URLs at the operator version the new
+chart pins (visible in the rendered operator Deployment's image tag).
 
 ## Chart quirks handled in the overlay
 
