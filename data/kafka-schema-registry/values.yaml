@@ -2,10 +2,12 @@ kafka:
   # Kafka runs on the c001db* nodes (:9094 SASL_PLAINTEXT), same endpoint the
   # working producers/consumers use (KAFKA_HOST=c001db1:9094,c001db2:9094,c001db3:9094).
   # The old kafka.data.svc.cluster.local:9092 does not resolve -> crashloop.
+  # Mechanism is PLAIN: the broker rejects SCRAM ("enabled mechanisms are [PLAIN]",
+  # observed live 2026-08-20); JAAS creds in secret data/kafka-schema-registry.
   bootstrapServers: SASL_PLAINTEXT://c001db1:9094,c001db2:9094,c001db3:9094
 configurationOverrides:
   kafkastore_security_protocol: SASL_PLAINTEXT
-  kafkaStore_sasl_mechanism: SCRAM-SHA-256
+  kafkaStore_sasl_mechanism: PLAIN
 
 fullnameOverride: kafka-schema-registry
 
