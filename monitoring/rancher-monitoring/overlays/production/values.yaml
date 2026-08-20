@@ -1,0 +1,84 @@
+# Prod cxs-eu1: metrics pipeline only.
+#
+# Grafana already runs in the `grafana` namespace (grafana.contextsuite.com,
+# app monitoring-grafana) and owns alerting; its default Prometheus datasource
+# points at http://rancher-monitoring-prometheus.cattle-monitoring-system:9090,
+# which this chart provides. The provisioned alert rules
+# (grafana-postgresql-backup-alerts, grafana-longhorn-alerts) query
+# kube_job_status_* / Longhorn metrics — kube-state-metrics and the
+# ServiceMonitor pipeline here are what feed them.
+grafana:
+  enabled: false
+
+# Alerting lives in Grafana (receiver "Snjallgogn Ops"); no Alertmanager here.
+alertmanager:
+  enabled: false
+
+# rke2-metrics-server already serves the resource-metrics API on this cluster.
+prometheus-adapter:
+  enabled: false
+
+prometheus:
+  prometheusSpec:
+    retention: 15d
+    retentionSize: 45GB
+    resources:
+      requests:
+        cpu: 250m
+        memory: 1Gi
+      limits:
+        cpu: "2"
+        memory: 3Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: longhorn
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
+    # famous-stork sits at ~85% actual memory use; prefer the other nodes.
+    affinity:
+      nodeAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            preference:
+              matchExpressions:
+                - key: kubernetes.io/hostname
+                  operator: NotIn
+                  values:
+                    - famous-stork
+    # Pick up ServiceMonitors/PrometheusRules from every namespace regardless
+    # of helm-release labels (the monitoring-service-monitors app ships them).
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    probeSelectorNilUsesHelmValues: false
+
+# Keep the scrape surface lean on a memory-tight cluster: kubelet/cadvisor,
+# kube-state-metrics and node-exporter carry the dashboards and alert rules
+# in use; control-plane component scraping is not.
+kubeApiServer:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+
+# Chart nil-pointer workarounds (same keys the fraios dev cluster carries).
+rke2IngressNginx:
+  networkPolicy:
+    enabled: false
+loggingMonitors:
+  fluentd:
+    enabled: false
+  fluentbit:
+    enabled: false
+rancherBackupMonitoring:
+  dashboards:
+    enabled: false
