@@ -1,0 +1,147 @@
+---
+# Source: cp-schema-registry/templates/jmx-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-schema-registry-jmx-configmap
+  labels:
+    app: cp-schema-registry
+    chart: cp-schema-registry-0.1.0
+    release: kafka-schema-registry
+    heritage: Helm
+data:
+  jmx-schema-registry-prometheus.yml: |+
+    jmxUrl: service:jmx:rmi:///jndi/rmi://localhost:5555/jmxrmi
+    lowercaseOutputName: true
+    lowercaseOutputLabelNames: true
+    ssl: false
+    whitelistObjectNames:
+    - kafka.schema.registry:type=jetty-metrics
+    - kafka.schema.registry:type=master-slave-role
+    - kafka.schema.registry:type=jersey-metrics
+    rules:
+    - pattern : 'kafka.schema.registry<type=jetty-metrics>([^:]+):'
+      name: "cp_kafka_schema_registry_jetty_metrics_$1"
+    - pattern : 'kafka.schema.registry<type=master-slave-role>([^:]+):'
+      name: "cp_kafka_schema_registry_master_slave_role"
+    - pattern : 'kafka.schema.registry<type=jersey-metrics>([^:]+):'
+      name: "cp_kafka_schema_registry_jersey_metrics_$1"
+---
+# Source: cp-schema-registry/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-schema-registry
+  labels:
+    app: cp-schema-registry
+    chart: cp-schema-registry-0.1.0
+    release: kafka-schema-registry
+    heritage: Helm
+  annotations:
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: data-cp-schema-registry-dev
+spec:
+  ports:
+    - name: schema-registry
+      port: 8081
+    - name: metrics
+      port: 5556
+  selector:
+    app: cp-schema-registry
+    release: kafka-schema-registry
+---
+# Source: cp-schema-registry/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-schema-registry
+  labels:
+    app: cp-schema-registry
+    chart: cp-schema-registry-0.1.0
+    release: kafka-schema-registry
+    heritage: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cp-schema-registry
+      release: kafka-schema-registry
+  template:
+    metadata:
+      labels:
+        app: cp-schema-registry
+        release: kafka-schema-registry
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "5556"
+    spec:
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+      containers:
+        - name: prometheus-jmx-exporter
+          image: "solsson/kafka-prometheus-jmx-exporter@sha256:6f82e2b0464f50da8104acd7363fb9b995001ddff77d248379f8788e78946143"
+          imagePullPolicy: "IfNotPresent"
+          command:
+          - java
+          - -XX:+UnlockExperimentalVMOptions
+          - -XX:+UseCGroupMemoryLimitForHeap
+          - -XX:MaxRAMFraction=1
+          - -XshowSettings:vm
+          - -jar
+          - jmx_prometheus_httpserver.jar
+          - "5556"
+          - /etc/jmx-schema-registry/jmx-schema-registry-prometheus.yml
+          ports:
+          - containerPort: 5556
+          resources:
+            {}
+          volumeMounts:
+          - name: jmx-config
+            mountPath: /etc/jmx-schema-registry
+        - name: cp-schema-registry-server
+          image: "confluentinc/cp-schema-registry:6.1.0"
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - name: schema-registry
+              containerPort: 8081
+              protocol: TCP
+            - containerPort: 5555
+              name: jmx
+          resources:
+            {}
+          env:
+          - name: SCHEMA_REGISTRY_HOST_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: SCHEMA_REGISTRY_LISTENERS
+            value: http://0.0.0.0:8081
+          - name: SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
+            value: SASL_PLAINTEXT://c001db1:9094,c001db2:9094,c001db3:9094
+          - name: SCHEMA_REGISTRY_KAFKASTORE_GROUP_ID
+            value: kafka-schema-registry
+          - name: SCHEMA_REGISTRY_MASTER_ELIGIBILITY
+            value: "true"
+          - name: SCHEMA_REGISTRY_HEAP_OPTS
+            value: "-Xms512M -Xmx512M"
+          
+          - name: SCHEMA_REGISTRY_KAFKASTORE_SASL_MECHANISM
+            value: "SCRAM-SHA-256"
+          
+          - name: SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL
+            value: "SASL_PLAINTEXT"
+          
+          - name: JMX_PORT
+            value: "5555"
+          - name: SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG
+            valueFrom:
+              secretKeyRef:
+                key: SCHEMA_REGISTRY_KAFKASTORE_SASL_JAAS_CONFIG
+                name: kafka-schema-registry
+      volumes:
+      - name: jmx-config
+        configMap:
+          name: kafka-schema-registry-jmx-configmap
