@@ -1,0 +1,15 @@
+# Picked up by appset-data as app `data-kafka-schema-registry`.
+#
+# manifests.yaml is the local chart rendered with ../../values.yaml:
+#   helm template kafka-schema-registry ./cp-schema-registry -f values.yaml -n data
+# (run from data/kafka-schema-registry/; re-render after changing values.yaml).
+#
+# History: this dir was deployed by Rancher Fleet (fleet.yaml), but the cluster
+# has no fleet GitRepos anymore — the 2026-08-18 bootstrap fix in values.yaml
+# never reached the cluster and the pod kept crashlooping on the long-gone
+# kafka.data.svc.cluster.local. This overlay puts it under ArgoCD like the
+# rest of data/*.
+namespace: data
+
+resources:
+  - manifests.yaml
