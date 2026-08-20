@@ -1,9 +1,18 @@
 resources:
   - namespace.yaml
-  # prometheus-operator CRDs, vendored verbatim from chart
-  # rancher-monitoring-crd 108.0.1+up77.9.1-rancher.10 (the chart wraps them in
-  # a bz2 ConfigMap + hook Job, which ArgoCD orders wrongly — plain CRDs sync
-  # before the CRs that need them). Re-vendor when bumping the chart version:
-  #   helm template rancher-monitoring-crd --repo https://charts.rancher.io \
-  #     --version <ver> | <extract data."crds.bz2.b64"> | base64 -d | bunzip2
-  - crds.yaml
+  # prometheus-operator v0.85.0 CRDs — the exact immutable upstream files that
+  # chart rancher-monitoring-crd 108.0.1+up77.9.1-rancher.10 vendors (the
+  # chart wraps them in a bz2 ConfigMap + helm-hook Job, which ArgoCD orders
+  # wrongly — plain CRDs sync before the CRs that need them). When bumping the
+  # rancher-monitoring chart, update the tag to the operator version the new
+  # chart pins (see the operator Deployment image tag in a rendered manifest).
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+  - https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.85.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml
