@@ -18,3 +18,4 @@
 /.codex/history.jsonl
 /.codex/log/
 /.codex/sessions/
+.DS_Store
