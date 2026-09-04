@@ -3,6 +3,27 @@ kind: Ingress
 metadata:
   annotations:
     nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    # An agent turn can outlast nginx's DEFAULT proxy-read-timeout of 60s, and this
+    # ingress never set one — so 60s silently became the binding constraint on the
+    # whole chain, even though every layer above waits far longer:
+    #
+    #   ai-service AGENT_GATEWAY_TIMEOUT_S = 110s
+    #   orchestrator MIMIR_TURN_TIMEOUT_S  = 300s
+    #   this ingress (unset -> nginx default) =  60s   <-- cut here
+    #
+    # Mimir's own turn contribution measures ~27s p50 / ~42s p95, so almost every
+    # turn finishes comfortably and only the tail past 60s was killed — 2 of 45
+    # auto-answers on 2026-09-04, plus an isolated one on 2026-09-01. Each one
+    # surfaces to Cyclr as "Agent Service returned an error - 504" and the customer
+    # gets no answer at all.
+    #
+    # 100s, not higher: it sits just under ai-service's 110s, so the proxy still
+    # returns a clean, attributable 504 rather than letting ai-service hang into an
+    # opaque ReadTimeout. Anything >=110s is equivalent, because ai-service cuts
+    # there regardless. Other long-running ingresses in this cluster (inbox,
+    # synmetrix) already set this annotation; cxs-mimir-api was simply missed.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "100"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "100"
     cert-manager.io/cluster-issuer: letsencrypt-prod
   name: cxs-mimir-api
   namespace: solutions
