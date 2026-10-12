@@ -67,8 +67,9 @@ metadata:
     type: differential
     repo: minio
 spec:
-  # Run Wednesday through Monday at 07:00 (offset from repo1 diff backups)
-  schedule: "0 7 * * 1,3-6"
+  # Sunday, Monday, and Wednesday through Saturday at 07:00.
+  # Tuesday is the full MinIO backup. Offset from the repo1 diff backups.
+  schedule: "0 7 * * 0,1,3-6"
   timeZone: "UTC"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 7

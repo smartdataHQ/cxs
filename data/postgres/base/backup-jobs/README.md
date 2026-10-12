@@ -96,7 +96,7 @@ The backup script accepts a repository parameter:
 
 **Repo2 (MinIO):**
 - **Full backups**: `"0 7 * * 2"` (Tuesday 07:00 UTC)
-- **Differential backups**: `"0 7 * * 1,3-6"` (Monday, Wednesday-Saturday 07:00 UTC)
+- **Differential backups**: `"0 7 * * 0,1,3-6"` (Sunday, Monday, Wednesday-Saturday 07:00 UTC)
 
 To change schedules, modify the `schedule` field in the respective CronJob files.
 
