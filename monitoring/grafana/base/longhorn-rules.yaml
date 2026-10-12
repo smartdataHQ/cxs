@@ -12,23 +12,20 @@ groups:
           data:
             - refId: usageBytes
               relativeTimeRange:
-                from: 1800
+                from: 600
                 to: 0
               datasourceUid: fefbtw5xi6n0gd
               model:
-                adhocFilters: []
                 datasource:
                     type: prometheus
                     uid: fefbtw5xi6n0gd
                 editorMode: code
-                exemplar: true
                 expr: max by (volume) (longhorn_volume_actual_size_bytes)
-                instant: false
-                interval: ""
-                intervalMs: 600000
-                legendFormat: ""
+                instant: true
+                intervalMs: 60000
+                legendFormat: __auto
                 maxDataPoints: 43200
-                range: true
+                range: false
                 refId: usageBytes
             - refId: capacityBytes
               relativeTimeRange:
