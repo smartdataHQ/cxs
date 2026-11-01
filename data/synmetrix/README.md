@@ -37,12 +37,12 @@ Current example:
    HASURA_GRAPHQL_JWT_SECRET={"type":"HS256","key":"<JWT Secret key>","claims_namespace":"hasura"}
    
    # Generate with `openssl rand -hex 48 | tr -dc 'A-Za-z0-9' | head -c 32`
-   HASURA_GRAPHQL_ADMIN_SECRET=f873ff9a59810597d4436990ff74058c
+   HASURA_GRAPHQL_ADMIN_SECRET=<generated admin secret>
    # Generate with `openssl rand -hex 48 | tr -dc 'A-Za-z0-9' | head -c 32`
-   CUBEJS_SECRET=ef3c1104e930cf977ae99561869a1b2f
+   CUBEJS_SECRET=<generated Cube.js secret>
 
    # Sourced from cxs-pg-pguser-cxs-pg Secret in data namespace
-   SSP_DB_URL=postgresql://cxs-pg:L%2F6B%40%3F%7Db%5BQT_iM.nG5s5I%7Cht@cxs-pg-primary.data.svc:5432/ssp
+   SSP_DB_URL=postgresql://cxs-pg:<url-encoded password from cxs-pg-pguser-cxs-pg>@cxs-pg-primary.data.svc:5432/ssp
 
    POSTGRES_HOST=cxs-pg-primary.data.svc
    POSTGRES_PORT=5432
