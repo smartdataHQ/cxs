@@ -6,7 +6,7 @@ Provides a native graph database management system, used for applications that r
 ## Configuration
 - **Primary Configuration:** Managed via Helm values files, specifically `neo4j.prod.values.yaml` for the production environment. This file defines overrides for the Helm chart.
 - **Secrets Management:**
-    - The original README notes `password: "qldevpass"` and warns about storing passwords in plain text, recommending `neo4j.passwordFromSecret`.
+    - The original README notes `password: "<redacted>"` and warns about storing passwords in plain text, recommending `neo4j.passwordFromSecret`.
     - **Standard Practice:** All secrets, including Neo4j passwords, must be managed in Rancher and injected securely at deployment time. Refer to the main project `README.md` for general guidance on secret management.
 - **Neo4j Edition:** Configured for "enterprise" edition, which requires a valid license (`acceptLicenseAgreement: "yes"`).
 - **APOC Plugins:** APOC (Awesome Procedures On Cypher) triggers are enabled (`apoc.trigger.enabled: "true"`). Custom setup for APOC and APOC extended libraries is detailed in the "Special Considerations" section.
@@ -23,7 +23,7 @@ Provides a native graph database management system, used for applications that r
 
 Prod:
 - `name: "neo4j"`
-- `password: "qldevpass"` # We need a much better way to handle this
+- `password: "<redacted>"` # We need a much better way to handle this
 - `edition: "enterprise"` # to match the license
 - `acceptLicenseAgreement: "yes"` # to accept the license
 - `volumns: "dynamic"` # many changes and cleanup of alternative storage configs
@@ -90,7 +90,7 @@ Thank you for installing neo4j.
 
 Your release "neo4j" has been installed  in namespace "data".
 
-The neo4j user's password has been set to "rMUo39i9bymvxp".To view the progress of the rollout try:
+The neo4j user's password has been set to "<redacted>".To view the progress of the rollout try:
 
 $ kubectl --namespace "data" rollout status --watch --timeout=600s statefulset/neo4j
 
