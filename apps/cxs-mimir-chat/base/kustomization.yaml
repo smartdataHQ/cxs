@@ -3,13 +3,10 @@ namespace: solutions
 configMapGenerator:
   - name: cxs-mimir-web-config
     literals:
-      # The agents API (agent config, chat stream, file routes) is served by
-      # the Fraios agents host. BROWSER_APP_API and NEXT_PUBLIC_APP_URL are
-      # this app's own origin and stay on agents.contextsuite.com.
-      - BROWSER_CHAT_API=https://agents.fraios.dev
+      - BROWSER_CHAT_API=https://agents.contextsuite.com
       - BROWSER_APP_API=https://agents.contextsuite.com
-      - MIMIR_SERVER_API=https://agents.fraios.dev
-      - BROWSER_CHAT_WSS_API=wss://agents.fraios.dev
+      - MIMIR_SERVER_API=https://agents.contextsuite.com
+      - BROWSER_CHAT_WSS_API=wss://agents.contextsuite.com
       - NEXT_PUBLIC_APP_URL=https://agents.contextsuite.com
 
 resources:
