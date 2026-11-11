@@ -3,9 +3,9 @@ namespace: solutions
 configMapGenerator:
   - name: cxs-mimir-web-config
     literals:
-      - BROWSER_CHAT_API=https://agents.contextsuite.com
+      - BROWSER_CHAT_API=https://agents.fraios.dev
       - BROWSER_APP_API=https://agents.contextsuite.com
-      - MIMIR_SERVER_API=https://agents.contextsuite.com
+      - MIMIR_SERVER_API=https://agents.fraios.dev
       - BROWSER_CHAT_WSS_API=wss://agents.contextsuite.com
       - NEXT_PUBLIC_APP_URL=https://agents.contextsuite.com
 
