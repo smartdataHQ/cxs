@@ -11,3 +11,47 @@ images:
 resources:
   - ../../base
 
+# Sign-in for agents that require it (WorkOS, with dialogues read from cxs2).
+# Public agents never read a session, so this changes nothing for them.
+configMapGenerator:
+  - name: cxs-mimir-web-config
+    behavior: merge
+    literals:
+      - CXS2_API=https://app.fraios.dev
+      - WORKOS_REDIRECT_URI=https://agents.contextsuite.com/auth/callback
+
+patches:
+  - target:
+      kind: Deployment
+      name: cxs-mimir-web
+    patch: |-
+      # WorkOS settings come from the `mimir-workos` secret in Rancher, shared
+      # with mimir.contextsuite.com. Optional, so a missing secret leaves the
+      # app running without sign-in rather than failing to start.
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: WORKOS_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: mimir-workos
+              key: WORKOS_CLIENT_ID
+              optional: true
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: WORKOS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: mimir-workos
+              key: WORKOS_API_KEY
+              optional: true
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: WORKOS_COOKIE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mimir-workos
+              key: WORKOS_COOKIE_PASSWORD
+              optional: true
