@@ -9,10 +9,13 @@ images:
 
 resources:
   - ../../base
-  - mimir-chat-config.yaml
-  - mimir-chat-ingress.yml
 
+# The staging config and ingress change the base's objects of the same name.
+# Listed as resources they collide with the base ("already registered id") and
+# the overlay does not build; as patches they are merged over it.
 patches:
+  - path: mimir-chat-config.yaml
+  - path: mimir-chat-ingress.yml
   - target:
       kind: Deployment
       name: mimir-chat-web
