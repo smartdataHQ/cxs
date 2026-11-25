@@ -2,7 +2,67 @@ namespace: solutions
 
 images:
   - name: quicklookup/mimir-chat
-    newTag: 4f81a6b
+    newTag: "d4b64e2"
 
 resources:
   - ../../base
+
+# mimir.contextsuite.com is the playground for signing in with WorkOS and
+# reading dialogues from cxs2 (smartdataHQ/mimir#160). It runs a build of that
+# branch, not of mimir main.
+patches:
+  - target:
+      kind: ConfigMap
+      name: mimir-chat-config
+    patch: |-
+      - op: add
+        path: /data/BOT_IDENTIFIER
+        value: "experiment_session"
+      - op: add
+        path: /data/CXS2_API
+        value: "https://app.fraios.dev"
+      - op: add
+        path: /data/WORKOS_REDIRECT_URI
+        value: "https://mimir.contextsuite.com/auth/callback"
+      # The agent lives in cxs2, so its mapping and chat come from the fraios
+      # agents host, as they do for agents.contextsuite.com (apps/cxs-mimir-chat).
+      - op: replace
+        path: /data/MIMIR_SERVER_API
+        value: "https://agents.fraios.dev"
+      - op: replace
+        path: /data/BROWSER_CHAT_API
+        value: "https://agents.fraios.dev"
+  - target:
+      kind: Deployment
+      name: mimir-chat-web
+    patch: |-
+      # WorkOS settings come from the `mimir-workos` secret in Rancher. They are
+      # optional so a missing secret leaves the app running signed-out rather
+      # than failing to start.
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: WORKOS_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: mimir-workos
+              key: WORKOS_CLIENT_ID
+              optional: true
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: WORKOS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: mimir-workos
+              key: WORKOS_API_KEY
+              optional: true
+      - op: add
+        path: /spec/template/spec/containers/0/env/-
+        value:
+          name: WORKOS_COOKIE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mimir-workos
+              key: WORKOS_COOKIE_PASSWORD
+              optional: true
