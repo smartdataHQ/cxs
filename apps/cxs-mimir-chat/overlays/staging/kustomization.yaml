@@ -5,7 +5,7 @@ namespace: solutions
 
 images:
   - name: quicklookup/mimir-chat
-    newTag: "faddfb3"
+    newTag: "9a79f5d"
 
 configMapGenerator:
   - name: cxs-mimir-web-config
