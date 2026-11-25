@@ -2,14 +2,13 @@ namespace: solutions
 
 images:
   - name: quicklookup/mimir-chat
-    newTag: "5e7b981"
+    newTag: "9585ef1"
 
 resources:
   - ../../base
 
 # mimir.contextsuite.com is the playground for signing in with WorkOS and
-# reading dialogues from cxs2 (smartdataHQ/mimir#160). It runs a build of that
-# branch, not of mimir main.
+# reading dialogues from cxs2 (smartdataHQ/mimir#160, now on mimir main).
 patches:
   - target:
       kind: ConfigMap
